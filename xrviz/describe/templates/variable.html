@@ -1,0 +1,36 @@
+<body>
+    <h2>Variables</h2> 
+
+    {% if variable_attributes %}
+    <table>
+        <tr>
+            <th>Variable</th>
+            <th>Attribute</th> 
+        </tr>
+        
+        {% for k,v in variable_attributes %} 
+        <tr>
+            <td>{{ k }}</td><td> {{ v }} </td>
+        </tr>
+        {% endfor %} 
+    {% endif %}
+    </table>
+</body>
+
+<style>
+        table {
+          border-collapse: collapse;
+          border-spacing: 0;
+          width: 100%;
+          border: 1px solid #ddd;
+        }
+        
+        th, td {
+          text-align: left;
+          padding: 6px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #f2f2f2
+        }
+</style>
