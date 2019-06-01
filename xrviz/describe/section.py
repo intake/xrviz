@@ -33,7 +33,6 @@ class Describe(SigSlot):
         self._attribute_template  = self._template_env.get_template('attribute.html')
     
     def variable_pane(self,var):
-        print(var)
         if var != None:
             variable_attributes = [(k,v) for k,v in self.data[var].attrs.items()]
             return self._variable_template.render(variable_attributes = variable_attributes,

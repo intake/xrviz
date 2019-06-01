@@ -1,7 +1,39 @@
-<body>
-    <h2>Attributes</h2> 
+<body> 
     {% if attribute %}
-    <p>Attribute  : {{attribute}}</p>
-    <p>Description: {{attribute_description}}</p>
+    <table>
+            <tr>
+                <th>Attribute</th>
+                <th>Description</th> 
+            </tr>
+            <tr>
+                <td>{{ attribute }}</td><td> {{ attribute_description }} </td>
+            </tr>
+    </table>
+    {% else %}
+        <h3>Attributes</h3>
     {% endif %}
 </body>
+
+<style>
+        table {
+          border-collapse: collapse;
+          border-spacing: 0;
+          width: 400px;
+          border: 1px solid #ddd;
+        }
+        
+        th, td {
+          text-align: left;
+          padding: 5px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #f2f2f2
+        }
+
+        div.div1 {
+            max-height: 140px;
+            max-width: 400px;
+            overflow: auto;
+        }
+</style>
