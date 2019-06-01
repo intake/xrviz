@@ -1,3 +1,4 @@
+# Source: https://github.com/martindurant/dfviz/blob/master/dfviz/widget.py
 class SigSlot(object):
     """Signal-slot mixin, for Panel event passing"""
 
@@ -42,12 +43,22 @@ class SigSlot(object):
         self._sigs[name]['callbacks'].append(callback)
 
     def _signal(self, event):
+        """This is called by a an action on a widget
+
+        Tests can execute this method by directly changing the values of
+        widget components.
+        """
         wn = "-".join([event.obj.name, event.name])
 #         print(wn, event)
         if wn in self._map and self._map[wn] in self._sigs:
             self._emit(self._map[wn], event.new)
 
     def _emit(self, sig, value=None):
+        """An event happened, call its callbacks
+
+        This method can be used in tests to simulate message passing without
+        directly changing visual elements.
+        """
         for callback in self._sigs[sig]['callbacks']:
             if callback(value) is False:
                 break
