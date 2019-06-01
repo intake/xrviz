@@ -23,7 +23,7 @@ class Describe(SigSlot):
     def __init__(self,data):
         super().__init__()
         self.data = data
-        self.panel = pn.pane.HTML(style={'font-size': '12pt'},width = 400) 
+        self.panel = pn.pane.HTML(style={'font-size': '12pt'},width = 400,height = 100) 
         self.panel.object = "Description Area"
         self._template_load_path = os.path.join(os.path.dirname(__file__),"templates")
         self._template_env = Environment(loader=FileSystemLoader(self._template_load_path))
@@ -33,47 +33,45 @@ class Describe(SigSlot):
         self._attribute_template  = self._template_env.get_template('attribute.html')
     
     def variable_pane(self,var):
-        variable_attributes = [(k,v) for k,v in self.data[var].attrs.items()]
-        output = self._variable_template.render(variable_attributes = variable_attributes)
-        return output
+        print(var)
+        if var != None:
+            variable_attributes = [(k,v) for k,v in self.data[var].attrs.items()]
+            return self._variable_template.render(variable_attributes = variable_attributes,
+                                                  var = var)
+        else:
+            return self._variable_template.render(var = None)
     
     def attribute_pane(self,attr):
-        attribute_description = self.data.attrs[attr]
-        output = self._attribute_template.render(attribute = attr,attribute_description = attribute_description)
-        return output
+        if attr != None:
+            attribute_description = self.data.attrs[attr]
+            return self._attribute_template.render(attribute = attr,attribute_description = attribute_description)
+        else:
+            return self._attribute_template.render()
     
     def coordinate_pane(self,coord):
-        output = self._coordinate_template.render(coordinate = coord)
-        return output
+        if coord != None:
+            return self._coordinate_template.render(coordinate = coord)
+        else:
+            return self._coordinate_template.render()
     
     def dimension_pane(self,dim):
-        output = self._dimension_template.render(dimension = dim,count = self.data.dims[dim] )
-        return output
+        if dim != None:
+            return self._dimension_template.render(dimension = dim,count = self.data.dims[dim] )
+        else:
+            return self._dimension_template.render()
     
     def setup(self,selected_property,sub_property):
         if selected_property == 'Attributes':
-            if sub_property != None:
                 self.panel.object = self.attribute_pane(sub_property)
-            else:
-                self.panel.object = self._attribute_template.render()
-        
+
         elif selected_property == 'Coordinates':
-            if sub_property != None:
                 self.panel.object = self.coordinate_pane(sub_property)
-            else:
-                self.panel.object = self._coordinate_template.render()
-                
+
         elif selected_property == 'Dimensions':
-            if sub_property != None:
                 self.panel.object = self.dimension_pane(sub_property)
-            else:
-                self.panel.object = self._dimension_template.render()
-        
-        elif selected_property == 'Variables':
-            if sub_property != None:
-                self.panel.object = self.variable_pane(sub_property)
-            else:
-                self.panel.object = self._variable_template.render()
                 
+        elif selected_property == 'Variables':
+                self.panel.object = self.variable_pane(sub_property)
+
         else:
              self.panel.object = str(selected_property) + " : " + str(sub_property)

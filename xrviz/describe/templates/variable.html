@@ -1,6 +1,8 @@
-<body>
-    <h2>Variables</h2> 
 
+  <div class="div1"> 
+    {% if var == None %}
+      <h4>Variables</h4> 
+    {% endif %}
     {% if variable_attributes %}
     <table>
         <tr>
@@ -12,16 +14,22 @@
         <tr>
             <td>{{ k }}</td><td> {{ v }} </td>
         </tr>
-        {% endfor %} 
+        {% endfor %}
+    
+    {% else %}
+        {% if var != None %}
+        <p>No attributes asscociated with this variable.</p>
+        {% endif %}
     {% endif %}
     </table>
-</body>
+  </div>
+
 
 <style>
         table {
           border-collapse: collapse;
           border-spacing: 0;
-          width: 100%;
+          width: 400px;
           border: 1px solid #ddd;
         }
         
@@ -32,5 +40,11 @@
         
         tr:nth-child(even) {
           background-color: #f2f2f2
+        }
+
+        div.div1 {
+            max-height: 150px;
+            max-width: 400px;
+            overflow: auto;
         }
 </style>
