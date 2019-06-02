@@ -1,67 +1,85 @@
-  <div class="div1"> 
+<div style="display: flex;">
+  
+  <!-- Table 1 -->
+
     {% if var == None %}
       <h3>Variables</h3> 
     {% endif %}
 
-    {% if var%}
-    <table>
-        <tr>
-            <th>Property</th>
-            <th>Value</th> 
-        </tr>
-        <tr>
-            <td>Name</td>
-            <td>{{ var_name }}</td>
-          </tr>
-        <tr>
-          <td>Dtype</td>
-          <td>{{ var_dtype }}</td>
-        </tr>
-        <tr>
-          <td>Points</td>
-          <td>{{ var_size }}</td>
-        </tr>
-        <tr>
-          <td>Bytes</td>
-          <td>{{ var_nbytes }}</td>
-        </tr>
-    </table>
-    <p>Dims:
-      {% for var in var_dims %} 
-      {{ var }},
-      {% endfor %}    
-    </p>
-    <p>Coordinates: 
-      {% if var_coords|length >0 %}
-        {% for coord in var_coords %}
-          {{ coord }},
-        {% endfor %}
-      {% else %}
-          Empty
-      {% endif %}
-    </p>
+    {% if var %}
+      <div class="table_div">
+        <table>
+            <tr>
+                <th>Property</th>
+                <th>Value</th> 
+            </tr>
+            <tr>
+                <td>Name</td>
+                <td>{{ var_name }}</td>
+              </tr>
+            <tr>
+                <td>Dims</td>
+                <td>
+                  {% for var in var_dims %} 
+                    {{ var }},
+                  {% endfor %}  
+                </td>
+            </tr>
+            <tr>
+                <td>Coords</td>
+                <td>
+                  {% if var_coords|length >0 %}
+                      {% for coord in var_coords %}
+                        {{ coord }},
+                      {% endfor %}
+                  {% else %}
+                      Empty
+                  {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Dtype</td>
+                <td>{{ var_dtype }}</td>
+              </tr>
+            <tr>
+              <td>Points</td>
+              <td>{{ var_size }}</td>
+            </tr>
+            <tr>
+              <td>Bytes</td>
+              <td>{{ var_nbytes }}</td>
+            </tr>
 
+        </table>
+      </div>
     {% endif %}
+
+  <!-- Table 2  -->
+
     {% if var_attrs %}
-    <table>
-        <tr>
-            <th>Variable</th>
-            <th>Attribute</th> 
-        </tr>
-        
-        {% for k,v in var_attrs %} 
-        <tr>
-            <td>{{ k }}</td><td> {{ v }} </td>
-        </tr>
-        {% endfor %}
-    
+      <div class="table_div">
+          <table>
+              <tr>
+                  <th>Attribute</th>
+                  <th>Description</th> 
+              </tr>
+              
+              {% for k,v in var_attrs %} 
+              <tr>
+                  <td>{{ k }}</td><td> {{ v }} </td>
+              </tr>
+              {% endfor %}
+          </table>
+      </div>
     {% else %}
-        {% if var != None %}
-        <p>No attributes asscociated with this variable.</p>
-        {% endif %}
+      <div style="width: 300px;">
+            {% if var != None %}
+              <p align= "center" ><b>Attribute:</b> None</p>
+            {% endif %}
+      </div>
     {% endif %}
-    </table>
-  </div>
+
+</div>
 
 
 <style>
@@ -81,9 +99,8 @@
           background-color: #f2f2f2
         }
 
-        div.div1 {
-            /* max-height: 140px; */
-            max-width: 400px;
-            overflow: auto;
+        div.table_div {
+          overflow: scroll; 
+          height: 140px;
         }
 </style>

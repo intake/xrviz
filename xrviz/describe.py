@@ -78,4 +78,4 @@ class Describe(SigSlot):
         elif selected_property == 'Variables':
             self.panel.object = self.variable_pane(sub_property)
         else:
-            self.panel.object = str(selected_property) + " : " + str(sub_property)
+            self.panel.object = str(selected_property)
