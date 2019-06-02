@@ -36,10 +36,23 @@ class Describe(SigSlot):
 
     def variable_pane(self, var):
         if var is not None:
-            variable_attributes = [(k, v)
-                                   for k, v in self.data[var].attrs.items()]
-            return self._variable_template.render(variable_attributes=variable_attributes,
-                                                  var=var)
+            self.var_name = self.data[var].name
+            var_dtype = str(self.data[var].dtype)
+            var_size = self.data[var].size
+            var_nbytes = self.data[var].nbytes
+            var_dims = self.data[var].dims
+            var_coords = [coord for coord in self.data[var].coords]
+            var_attrs = [(k, v) for k, v in self.data[var].attrs.items()]
+
+            return self._variable_template.render(var=var,
+                                                  var_name=self.var_name,
+                                                  var_dtype=var_dtype,
+                                                  var_size=var_size,
+                                                  var_nbytes=var_nbytes,
+                                                  var_dims=var_dims,
+                                                  var_coords=var_coords,
+                                                  var_attrs=var_attrs,
+                                                  )
         else:
             return self._variable_template.render(var=None)
 
@@ -61,7 +74,7 @@ class Describe(SigSlot):
         elif selected_property == 'Coordinates':
             self.panel.object = self.coordinate_pane()
         elif selected_property == 'Dimensions':
-            self.panel.object = self.dimension_pane()               
+            self.panel.object = self.dimension_pane()
         elif selected_property == 'Variables':
             self.panel.object = self.variable_pane(sub_property)
         else:

@@ -1,16 +1,55 @@
-
   <div class="div1"> 
     {% if var == None %}
       <h3>Variables</h3> 
     {% endif %}
-    {% if variable_attributes %}
+
+    {% if var%}
+    <table>
+        <tr>
+            <th>Property</th>
+            <th>Value</th> 
+        </tr>
+        <tr>
+            <td>Name</td>
+            <td>{{ var_name }}</td>
+          </tr>
+        <tr>
+          <td>Dtype</td>
+          <td>{{ var_dtype }}</td>
+        </tr>
+        <tr>
+          <td>Points</td>
+          <td>{{ var_size }}</td>
+        </tr>
+        <tr>
+          <td>Bytes</td>
+          <td>{{ var_nbytes }}</td>
+        </tr>
+    </table>
+    <p>Dims:
+      {% for var in var_dims %} 
+      {{ var }},
+      {% endfor %}    
+    </p>
+    <p>Coordinates: 
+      {% if var_coords|length >0 %}
+        {% for coord in var_coords %}
+          {{ coord }},
+        {% endfor %}
+      {% else %}
+          Empty
+      {% endif %}
+    </p>
+
+    {% endif %}
+    {% if var_attrs %}
     <table>
         <tr>
             <th>Variable</th>
             <th>Attribute</th> 
         </tr>
         
-        {% for k,v in variable_attributes %} 
+        {% for k,v in var_attrs %} 
         <tr>
             <td>{{ k }}</td><td> {{ v }} </td>
         </tr>
@@ -43,7 +82,7 @@
         }
 
         div.div1 {
-            max-height: 140px;
+            /* max-height: 140px; */
             max-width: 400px;
             overflow: auto;
         }
