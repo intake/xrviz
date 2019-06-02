@@ -101,7 +101,7 @@ class Display(SigSlot):
         def get_children(prop):
             ds_prop = self.properties[prop]
             if ds_prop == "data_vars":
-                return ['v' + " : " + child for child in getattr(self.data, str(ds_prop)).keys()] 
+                return ['v' + " : " + child for child in getattr(self.data, str(ds_prop)).keys()]
             else:
                 return [ds_prop[0] + " : " + child for child in getattr(self.data, str(ds_prop)).keys()]                 
 
@@ -115,12 +115,15 @@ class Display(SigSlot):
         self.selected_property, self.selected_subproperty = find_prop_and_subprop(value)
 
         if self._property in list(self.properties):
-            old = list(self.select.options)
-            index, name = next((i, self.selected_property) for i, v in enumerate(old) if self.selected_property in v)
-
-            if has_expanded(self.selected_property, index):
-                old = collapse(old, index)
-                self.select.options = list(old)
+            if self.selected_property == 'Attributes':
+                pass
             else:
-                old = expand(old, name, index)
-                self.select.options = list(old)
+                old = list(self.select.options)
+                index, name = next((i, self.selected_property) for i, v in enumerate(old) if self.selected_property in v)
+
+                if has_expanded(self.selected_property, index):
+                    old = collapse(old, index)
+                    self.select.options = list(old)
+                else:
+                    old = expand(old, name, index)
+                    self.select.options = list(old)

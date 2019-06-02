@@ -1,39 +1,41 @@
-<body> 
-    {% if attribute %}
+<div class="div1"> 
+    {% if attrs %}
     <table>
-            <tr>
-                <th>Attribute</th>
-                <th>Description</th> 
-            </tr>
-            <tr>
-                <td>{{ attribute }}</td><td> {{ attribute_description }} </td>
-            </tr>
+        <tr>
+            <th>Attribute</th>
+            <th>Description</th> 
+        </tr>
+      {% for attr,desc in attrs %} 
+        <tr>
+            <td>{{ attr }}</td><td> {{ desc }} </td>
+        </tr>
+      {% endfor %}
     </table>
     {% else %}
-        <h3>Attributes</h3>
+       <p>No attributes associated.</p>
     {% endif %}
-</body>
+</div>
 
 <style>
-        table {
-          border-collapse: collapse;
-          border-spacing: 0;
-          width: 400px;
-          border: 1px solid #ddd;
-        }
-        
-        th, td {
-          text-align: left;
-          padding: 5px;
-        }
-        
-        tr:nth-child(even) {
-          background-color: #f2f2f2
-        }
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 400px;
+    border: 1px solid #ddd;
+  }
+  
+  th, td {
+    text-align: left;
+    padding: 5px;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f2f2f2
+  }
 
-        div.div1 {
-            max-height: 140px;
-            max-width: 400px;
-            overflow: auto;
-        }
+  div.div1 {
+      max-height: 140px;
+      max-width: 400px;
+      overflow: auto;
+  }
 </style>
