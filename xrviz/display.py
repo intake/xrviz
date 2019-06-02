@@ -12,12 +12,12 @@ class Display(SigSlot):
     occurs to show the arrtibutes associated with it.
 
     It of these individual property could be expanded accordingly.
- 
+
     Parameters
     ----------
     data: `xarray` instance: `DataSet` or `DataArray`
         datset is used to initialize the DataSelector
-        
+
     Attributes
     ----------
     selected_property: property which has been  selected in multiselect
@@ -26,7 +26,7 @@ class Display(SigSlot):
         An attribute of its property.
         Example: `nx`,`ny`,`time` for property `Dimensions`.
     panel: Displays the generated Multiselect object
-          
+
     Reason for adding initial letter in front of a sub_property:
         It will act as option separator for the multiSelect.
         Ex: Variable 'time' could be present in both `Dimensions` and
@@ -115,11 +115,13 @@ class Display(SigSlot):
         self.selected_property, self.selected_subproperty = find_prop_and_subprop(value)
 
         if self._property in list(self.properties):
-            if self.selected_property == 'Attributes' or self.selected_property == 'Coordinates':
+            if self.selected_property == 'Attributes' or self.selected_property == 'Coordinates' or self.selected_property == 'Dimensions':
                 pass
             else:
                 old = list(self.select.options)
-                index, name = next((i, self.selected_property) for i, v in enumerate(old) if self.selected_property in v)
+                index, name = next((i, self.selected_property)
+                                   for i, v in enumerate(old)
+                                   if self.selected_property in v)
 
                 if has_expanded(self.selected_property, index):
                     old = collapse(old, index)

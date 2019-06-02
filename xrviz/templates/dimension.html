@@ -1,39 +1,41 @@
-<body>
-    {% if dimension %}
-    <table>
-            <tr>
-                <th>Dimension</th>
-                <th>Count</th> 
-            </tr>
-            <tr>
-                <td>{{ dimension }}</td><td> {{ count }} </td>
-            </tr>
-    </table>
-    {% else %}
-        <h3>Dimensions</h3>
-    {% endif %}
-</body>
+<div class="div1"> 
+  {% if dims %}
+  <table>
+      <tr>
+          <th>Dimension</th>
+          <th>Dimensionality</th> 
+      </tr>
+    {% for dim,count in dims %} 
+      <tr>
+          <td>{{ dim }}</td><td> {{ count }} </td>
+      </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+     <p>No dimension associated.</p>
+  {% endif %}
+</div>
 
 <style>
-        table {
-          border-collapse: collapse;
-          border-spacing: 0;
-          width: 400px;
-          border: 1px solid #ddd;
-        }
-        
-        th, td {
-          text-align: left;
-          padding: 5px;
-        }
-        
-        tr:nth-child(even) {
-          background-color: #f2f2f2
-        }
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 400px;
+  border: 1px solid #ddd;
+}
 
-        div.div1 {
-            max-height: 140px;
-            max-width: 400px;
-            overflow: auto;
-        }
+th, td {
+  text-align: left;
+  padding: 5px;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2
+}
+
+div.div1 {
+    max-height: 140px;
+    max-width: 400px;
+    overflow: auto;
+}
 </style>
