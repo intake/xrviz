@@ -60,9 +60,15 @@ class Display(SigSlot):
         self.fill_items(self.select.options)
 
         self._register(self.select, "property_selector")
-        self.connect("property_selector", self.expand_or_collapse_nested)
+        self.connect("property_selector", self.handle_data)
 
         self.panel = pn.Row(self.select)
+
+    def handle_data(self, value):
+        if isinstance(self.data, xr.Dataset):
+            self.expand_or_collapse_nested(value)
+        else:
+            self.selected_property = 'Variables'
 
     def fill_items(self, items):
         if isinstance(self.data, xr.Dataset):
@@ -70,7 +76,8 @@ class Display(SigSlot):
             for prop in list(self.properties):
                 items.append(f'{self.right} {prop}')
         else:
-            items.append('# DataArray')
+            if isinstance(self.data, xr.DataArray):
+                items.append(f'DataArray : {self.data.name}')
 
     def expand_or_collapse_nested(self, value):
         self._property = value[0].split()[-1]

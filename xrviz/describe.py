@@ -34,7 +34,7 @@ class Describe(SigSlot):
         self._dimension_template = self._template_env.get_template('dimension.html')
         self._attribute_template = self._template_env.get_template('attribute.html')
 
-    def variable_pane(self, var):
+    def variable_pane_for_dataset(self, var):
         if var is not None:
             var_attrs = [(k, v) for k, v in self.data[var].attrs.items()]
             var_coords = [coord for coord in self.data[var].coords]
@@ -57,6 +57,27 @@ class Describe(SigSlot):
                                                   )
         else:
             return self._variable_template.render(var=None)
+
+    def variable_pane_for_dataarray(self):
+        var_attrs = [(k, v) for k, v in self.data.attrs.items()]
+        var_coords = [coord for coord in self.data.coords]
+        var_dims = self.data.dims
+        var_dtype = str(self.data.dtype)
+        var_name = self.data.name
+        var_nbytes = self.data.nbytes
+        var_shape = self.data.shape
+        var_size = self.data.size
+
+        return self._variable_template.render(var='var',  # to check condition in template
+                                              var_attrs=var_attrs,
+                                              var_coords=var_coords,
+                                              var_dims=var_dims,
+                                              var_dtype=var_dtype,
+                                              var_name=var_name,
+                                              var_nbytes=var_nbytes,
+                                              var_shape=var_shape,
+                                              var_size=var_size,
+                                              )
 
     def attribute_pane(self):
         attrs = [(k, v) for k, v in self.data.attrs.items()]
@@ -98,6 +119,9 @@ class Describe(SigSlot):
         elif selected_property == 'Dimensions':
             self.panel.object = self.dimension_pane()
         elif selected_property == 'Variables':
-            self.panel.object = self.variable_pane(sub_property)
+            if isinstance(self.data, xr.Dataset):
+                self.panel.object = self.variable_pane_for_dataset(sub_property)
+            else:
+                self.panel.object = self.variable_pane_for_dataarray()
         else:
             self.panel.object = str(selected_property)
