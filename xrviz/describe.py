@@ -62,9 +62,27 @@ class Describe(SigSlot):
         attrs = [(k, v) for k, v in self.data.attrs.items()]
         return self._attribute_template.render(attrs=attrs)
 
-    def coordinate_pane(self):
-        coords = [coord for coord in self.data.coords.keys()]
-        return self._coordinate_template.render(coords=coords)
+    def coordinate_pane(self, coord):
+        if coord is not None:
+            coord_info = self.data.coords.get(coord)
+            coord_name = coord_info.name
+            coord_shape = coord_info.shape
+            coord_size = coord_info.size
+            coord_nbytes = coord_info.nbytes
+            coord_dtype = str(coord_info.encoding.get('dtype'))
+            coord_units = coord_info.encoding.get('units')
+            coord_attrs = [(k, v) for k, v in coord_info.attrs.items()]
+            return self._coordinate_template.render(coord=coord,
+                                                    coord_name=coord_name,
+                                                    coord_nbytes=coord_nbytes,
+                                                    coord_shape=coord_shape,
+                                                    coord_dtype=coord_dtype,
+                                                    coord_units=coord_units,
+                                                    coord_attrs=coord_attrs,
+                                                    coord_size=coord_size,
+                                                    coord_info=coord_info)
+        else:
+            return self._coordinate_template.render(coord=None)
 
     def dimension_pane(self):
         dims = [(k, v) for k, v in self.data.dims.items()]
@@ -74,7 +92,7 @@ class Describe(SigSlot):
         if selected_property == 'Attributes':
             self.panel.object = self.attribute_pane()
         elif selected_property == 'Coordinates':
-            self.panel.object = self.coordinate_pane()
+            self.panel.object = self.coordinate_pane(sub_property)
         elif selected_property == 'Dimensions':
             self.panel.object = self.dimension_pane()
         elif selected_property == 'Variables':

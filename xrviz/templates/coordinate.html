@@ -1,17 +1,23 @@
 <div class="div1"> 
-    {% if coords %}
-    <table>
-        <tr>
-            <th>Coordinate</th>
-        </tr>
-      {% for coord in coords %} 
-        <tr>
-            <td>{{ coord }}</td>
-        </tr>
-      {% endfor %}
-    </table>
-    {% else %}
-       <p>No attributes associated.</p>
+    <h2>Coordinates</h2> 
+    {% if coord %}
+      <p>Name  : {{coord_name}}</p>
+      <p>Shape  : {{coord_shape}}</p>
+      <p>Bytes  : {{coord_nbytes}}</p>
+      <p>Points  : {{coord_size}}</p>
+
+      {% if coord_units %}
+        <p>Units: {{coord_units}}</p>
+      {% endif %}
+
+      {% if coord_dtype %}
+        <p>Dtype: {{coord_dtype}}</p>
+      {% endif %}
+
+      {% if coord_attrs %}
+        <p>Attrs: {{coord_attrs}}</p>
+      {% endif %}
+    
     {% endif %}
 </div>
 

@@ -115,7 +115,7 @@ class Display(SigSlot):
         self.selected_property, self.selected_subproperty = find_prop_and_subprop(value)
 
         if self._property in list(self.properties):
-            if self.selected_property == 'Attributes' or self.selected_property == 'Coordinates' or self.selected_property == 'Dimensions':
+            if self.selected_property == 'Attributes' or self.selected_property == 'Dimensions':
                 pass
             else:
                 old = list(self.select.options)
