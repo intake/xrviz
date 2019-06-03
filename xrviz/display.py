@@ -64,6 +64,9 @@ class Display(SigSlot):
 
         self.panel = pn.Row(self.select)
 
+        if isinstance(self.data, xr.DataArray):
+            self.select.value = [self.select.options[0]]
+
     def handle_data(self, value):
         if isinstance(self.data, xr.Dataset):
             self.expand_or_collapse_nested(value)

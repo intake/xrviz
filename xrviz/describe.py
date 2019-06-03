@@ -34,6 +34,9 @@ class Describe(SigSlot):
         self._dimension_template = self._template_env.get_template('dimension.html')
         self._attribute_template = self._template_env.get_template('attribute.html')
 
+        if isinstance(self.data, xr.DataArray):
+            self.panel.object = self.panel.object = self.variable_pane_for_dataarray()
+
     def variable_pane_for_dataset(self, var):
         if var is not None:
             var_attrs = [(k, v) for k, v in self.data[var].attrs.items()]
@@ -121,7 +124,5 @@ class Describe(SigSlot):
         elif selected_property == 'Variables':
             if isinstance(self.data, xr.Dataset):
                 self.panel.object = self.variable_pane_for_dataset(sub_property)
-            else:
-                self.panel.object = self.variable_pane_for_dataarray()
         else:
             self.panel.object = str(selected_property)
