@@ -36,24 +36,24 @@ class Describe(SigSlot):
 
     def variable_pane(self, var):
         if var is not None:
-            var_name = self.data[var].name
+            var_attrs = [(k, v) for k, v in self.data[var].attrs.items()]
+            var_coords = [coord for coord in self.data[var].coords]
+            var_dims = self.data[var].dims
             var_dtype = str(self.data[var].dtype)
+            var_name = self.data[var].name
+            var_nbytes = self.data[var].nbytes
             var_shape = self.data[var].shape
             var_size = self.data[var].size
-            var_nbytes = self.data[var].nbytes
-            var_dims = self.data[var].dims
-            var_coords = [coord for coord in self.data[var].coords]
-            var_attrs = [(k, v) for k, v in self.data[var].attrs.items()]
 
             return self._variable_template.render(var=var,
-                                                  var_name=var_name,
-                                                  var_shape=var_shape,
-                                                  var_dtype=var_dtype,
-                                                  var_size=var_size,
-                                                  var_nbytes=var_nbytes,
-                                                  var_dims=var_dims,
-                                                  var_coords=var_coords,
                                                   var_attrs=var_attrs,
+                                                  var_coords=var_coords,
+                                                  var_dims=var_dims,
+                                                  var_dtype=var_dtype,
+                                                  var_name=var_name,
+                                                  var_nbytes=var_nbytes,
+                                                  var_shape=var_shape,
+                                                  var_size=var_size,
                                                   )
         else:
             return self._variable_template.render(var=None)
@@ -65,22 +65,24 @@ class Describe(SigSlot):
     def coordinate_pane(self, coord):
         if coord is not None:
             coord_info = self.data.coords.get(coord)
+            coord_attrs = [(k, v) for k, v in coord_info.attrs.items()]
+            coord_dtype = str(coord_info.encoding.get('dtype'))
             coord_name = coord_info.name
+            coord_nbytes = coord_info.nbytes
             coord_shape = coord_info.shape
             coord_size = coord_info.size
-            coord_nbytes = coord_info.nbytes
-            coord_dtype = str(coord_info.encoding.get('dtype'))
             coord_units = coord_info.encoding.get('units')
-            coord_attrs = [(k, v) for k, v in coord_info.attrs.items()]
+
             return self._coordinate_template.render(coord=coord,
+                                                    coord_attrs=coord_attrs,
+                                                    coord_dtype=coord_dtype,
+                                                    coord_info=coord_info,
                                                     coord_name=coord_name,
                                                     coord_nbytes=coord_nbytes,
                                                     coord_shape=coord_shape,
-                                                    coord_dtype=coord_dtype,
-                                                    coord_units=coord_units,
-                                                    coord_attrs=coord_attrs,
                                                     coord_size=coord_size,
-                                                    coord_info=coord_info)
+                                                    coord_units=coord_units,
+                                                    )
         else:
             return self._coordinate_template.render(coord=None)
 
