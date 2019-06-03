@@ -1,46 +1,97 @@
-<div class="div1"> 
-    <h2>Coordinates</h2> 
-    {% if coord %}
-      <p>Name  : {{coord_name}}</p>
-      <p>Shape  : {{coord_shape}}</p>
-      <p>Bytes  : {{coord_nbytes}}</p>
-      <p>Points  : {{coord_size}}</p>
-
-      {% if coord_units %}
-        <p>Units: {{coord_units}}</p>
+<div style="display: flex;">
+  
+    <!-- Table 1 -->
+  
+      {% if coord == None %}
+        <h3>Coordinates</h3> 
       {% endif %}
-
-      {% if coord_dtype %}
-        <p>Dtype: {{coord_dtype}}</p>
+  
+      {% if coord %}
+        <div class="table_div">
+          <table>
+              <tr>
+                  <th>Property</th>
+                  <th>Value</th> 
+              </tr>
+              <tr>
+                  <td>Name</td>
+                  <td>{{ coord_name }}</td>
+              </tr>
+              <tr>
+                  <td>Shape</td>
+                  <td>{{ coord_shape }}</td>
+              </tr>
+            {% if coord_dtype %}  
+              <tr>
+                  <td>Dtype</td>
+                  <td>{{ coord_dtype }}</td>
+              </tr>
+            {% endif %}
+              <tr>
+                <td>Points</td>
+                <td>{{ coord_size }}</td>
+              </tr>
+              <tr>
+                <td>Bytes</td>
+                <td>{{ coord_nbytes }}</td>
+              </tr>
+            {% if coord_units %}  
+              <tr>
+                  <td>Units</td>
+                  <td>{{ coord_units }}</td>
+              </tr>
+            {% endif %}
+  
+          </table>
+        </div>
       {% endif %}
-
+  
+    <!-- Table 2  -->
+  
       {% if coord_attrs %}
-        <p>Attrs: {{coord_attrs}}</p>
+        <div class="table_div">
+            <table>
+                <tr>
+                    <th>Attribute</th>
+                    <th>Description</th> 
+                </tr>
+                
+                {% for k,v in coord_attrs %} 
+                <tr>
+                    <td>{{ k }}</td><td> {{ v }} </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+      {% else %}
+        <div style="width: 300px;">
+              {% if coord != None %}
+                <p align= "center" ><b>Attribute:</b> None</p>
+              {% endif %}
+        </div>
       {% endif %}
-    
-    {% endif %}
+  
 </div>
-
+  
 <style>
-  table {
-    border-collapse: collapse;
-    border-spacing: 0;
-    width: 400px;
-    border: 1px solid #ddd;
-  }
-  
-  th, td {
-    text-align: left;
-    padding: 5px;
-  }
-  
-  tr:nth-child(even) {
-    background-color: #f2f2f2
-  }
+    table {
+      border-collapse: collapse;
+      border-spacing: 0;
+      width: 400px;
+      border: 1px solid #ddd;
+    }
+    
+    th, td {
+      text-align: left;
+      padding: 5px;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f2f2f2
+    }
 
-  div.div1 {
-      max-height: 140px;
-      max-width: 400px;
-      overflow: auto;
-  }
+    div.table_div {
+      overflow: scroll; 
+      height: 140px;
+    }
 </style>
