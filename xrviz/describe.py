@@ -36,8 +36,9 @@ class Describe(SigSlot):
 
     def variable_pane(self, var):
         if var is not None:
-            self.var_name = self.data[var].name
+            var_name = self.data[var].name
             var_dtype = str(self.data[var].dtype)
+            var_shape = self.data[var].shape
             var_size = self.data[var].size
             var_nbytes = self.data[var].nbytes
             var_dims = self.data[var].dims
@@ -45,7 +46,8 @@ class Describe(SigSlot):
             var_attrs = [(k, v) for k, v in self.data[var].attrs.items()]
 
             return self._variable_template.render(var=var,
-                                                  var_name=self.var_name,
+                                                  var_name=var_name,
+                                                  var_shape=var_shape,
                                                   var_dtype=var_dtype,
                                                   var_size=var_size,
                                                   var_nbytes=var_nbytes,
