@@ -52,7 +52,18 @@ class Display(SigSlot):
 
     def set_selection(self, data):
         if isinstance(data, xr.Dataset):
-            self.select.options = list(self.data.variables)
+            self.select.options = {self._isgeo(name): name for name in list(self.data.variables)}
         else:
-            self.select.options = [self.data.name]
-            self.select.value = [self.select.options[0]]
+            self.select.options = {self._isgeo(self.data.name): self.data.name}
+            self.select.value = [self.data.name]
+
+    def _isgeo(self, name):
+        if isinstance(self.data, xr.Dataset):
+            var = self.data[name]
+        else:
+            var = self.data
+
+        if getattr(var, 'standard_name', "") in ['latitude', 'longitude', 'time']:
+            return name + " " + '\U0001f30d'
+        else:
+            return name
