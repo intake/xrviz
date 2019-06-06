@@ -54,8 +54,14 @@ class Describe(SigSlot):
             var_size = self.data[var].size
             var_dim_shape = [(dim, shape) for dim, shape in zip(var_dims, var_shape)]
             data_attrs = [(k, v) for k, v in self.data.attrs.items()]
+            data_coords = [coord for coord in self.data.coords.keys()]
+            data_dims = [(k, v) for k, v in self.data.dims.items()]
 
-            return self._variable_template.render(var=var,
+            return self._variable_template.render(is_dataset=True,
+                                                  data_attrs=data_attrs,
+                                                  data_coords=data_coords,
+                                                  data_dims=data_dims,
+                                                  var=var,
                                                   var_attrs=var_attrs,
                                                   var_coords=var_coords,
                                                   var_dim_shape=var_dim_shape,
@@ -63,7 +69,6 @@ class Describe(SigSlot):
                                                   var_name=var_name,
                                                   var_nbytes=var_nbytes,
                                                   var_size=var_size,
-                                                  data_attrs=data_attrs,
                                                   )
         else:
             return self._variable_template.render(var=None)
@@ -79,7 +84,7 @@ class Describe(SigSlot):
         var_size = self.data.size
         var_dim_shape = [(dim, shape) for dim, shape in zip(var_dims, var_shape)]
 
-        return self._variable_template.render(var='var',  # to check condition in template
+        return self._variable_template.render(is_dataset=False,  # to check condition in template
                                               var_attrs=var_attrs,
                                               var_coords=var_coords,
                                               var_dim_shape=var_dim_shape,

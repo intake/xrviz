@@ -1,12 +1,6 @@
 <div style="display: flex;">
   
   <!-- Table 1 -->
-
-    {% if var == None %}
-      <h3>Variables</h3> 
-    {% endif %}
-
-    {% if var %}
       <div class="table_div">
         <table>
             <tr>
@@ -57,23 +51,48 @@
             
         </table>
       </div>
-    {% endif %}
 
-  <!-- Table 2  -->
+  
+ <!-- Table 2  -->
+{% if is_dataset %}
+  <div class="table_div">
+    
+      <table>
+        {% if data_dims %}            
+          <tr>
+              <td>Data Dims</td>
+              <td>
+                {% for var,dim in data_dims %} 
+                  {{ var }}: {{ dim }},
+                {% endfor %}  
+              </td>
+          </tr>
+        {% endif %}
 
-    {% if data_attrs %}
-      <div class="table_div">
-          <table>              
-              {% for attr,desc in data_attrs %} 
-                <tr>
-                    <td>{{ attr }}</td><td> {{ desc }} </td>
-                </tr>
-              {% endfor %}
-          </table>
-      </div>
-    {% endif %}
+        {% if data_coords|length >0 %}
+        <tr>
+            <td>Data Coords</td>
+            <td>
+              
+                  {% for coord in data_coords %}
+                    {{ coord }},
+                  {% endfor %}
+            </td>
+        </tr>
+        {% endif %}
 
-</div>
+        
+        {% if data_attrs %}
+          {% for attr,desc in data_attrs %} 
+            <tr>
+                <td>{{ attr }}</td><td> {{ desc }} </td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+
+      </table>
+  </div>
+{% endif %}
 
 
 <style>
