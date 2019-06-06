@@ -52,15 +52,15 @@ class Describe(SigSlot):
             var_nbytes = self.data[var].nbytes
             var_shape = self.data[var].shape
             var_size = self.data[var].size
+            var_dim_shape = [(dim, shape) for dim, shape in zip(var_dims, var_shape)]
 
             return self._variable_template.render(var=var,
                                                   var_attrs=var_attrs,
                                                   var_coords=var_coords,
-                                                  var_dims=var_dims,
+                                                  var_dim_shape=var_dim_shape,
                                                   var_dtype=var_dtype,
                                                   var_name=var_name,
                                                   var_nbytes=var_nbytes,
-                                                  var_shape=var_shape,
                                                   var_size=var_size,
                                                   )
         else:
@@ -75,14 +75,14 @@ class Describe(SigSlot):
         var_nbytes = self.data.nbytes
         var_shape = self.data.shape
         var_size = self.data.size
+        var_dim_shape = [(dim, shape) for dim, shape in zip(var_dims, var_shape)]
 
         return self._variable_template.render(var='var',  # to check condition in template
                                               var_attrs=var_attrs,
                                               var_coords=var_coords,
-                                              var_dims=var_dims,
+                                              var_dim_shape=var_dim_shape,
                                               var_dtype=var_dtype,
                                               var_name=var_name,
                                               var_nbytes=var_nbytes,
-                                              var_shape=var_shape,
                                               var_size=var_size,
                                               )

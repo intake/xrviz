@@ -10,22 +10,14 @@
       <div class="table_div">
         <table>
             <tr>
-                <th>Property</th>
-                <th>Value</th> 
-            </tr>
-            <tr>
                 <td>Name</td>
                 <td>{{ var_name }}</td>
             </tr>
             <tr>
-                <td>Shape</td>
-                <td>{{ var_shape }}</td>
-            </tr>
-            <tr>
                 <td>Dims</td>
                 <td>
-                  {% for var in var_dims %} 
-                    {{ var }},
+                  {% for var,dim in var_dim_shape %} 
+                    {{ var }}: {{ dim }},
                   {% endfor %}  
                 </td>
             </tr>
@@ -62,12 +54,7 @@
 
     {% if var_attrs %}
       <div class="table_div">
-          <table>
-              <tr>
-                  <th>Attribute</th>
-                  <th>Description</th> 
-              </tr>
-              
+          <table>              
               {% for k,v in var_attrs %} 
               <tr>
                   <td>{{ k }}</td><td> {{ v }} </td>
@@ -104,6 +91,7 @@
         }
 
         div.table_div {
+          font-size: 13px;
           overflow: scroll; 
           height: 140px;
         }
