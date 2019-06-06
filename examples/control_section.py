@@ -1,7 +1,8 @@
 import xarray as xr
+import xrviz
 from xrviz.control import Control
 
-ds = xr.open_dataset("../xrviz/sample_data/great_lakes.nc")
+ds = xrviz.sample_data.great_lakes
 
 control = Control(ds)
 control.show()
