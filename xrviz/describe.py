@@ -31,9 +31,8 @@ class Describe(SigSlot):
         self._template_env = Environment(loader=FileSystemLoader(self._template_load_path))
         self._variable_template = self._template_env.get_template('variable.html')
 
-
         if isinstance(self.data, xr.DataArray):
-            self.panel.object =  self.variable_pane_for_dataarray()
+            self.panel.object = self.variable_pane_for_dataarray()
 
     def setup(self, var):
         if isinstance(self.data, xr.Dataset):
