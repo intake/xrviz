@@ -1,0 +1,126 @@
+<div style="display: flex;">
+  
+  <!-- Table 1 -->
+      <div class="table_div">
+        <table>
+            <tr>
+                <td>Name</td>
+                <td>{{ var_name }}</td>
+            </tr>
+            <tr>
+                <td>Dims</td>
+                <td>
+                  {% for var,dim in var_dim_shape %} 
+                    {{ var }}: {{ dim }},
+                  {% endfor %}  
+                </td>
+            </tr>
+            <tr>
+                <td>Coords</td>
+                <td>
+                  {% if var_coords|length >0 %}
+                      {% for coord in var_coords %}
+                        {{ coord }},
+                      {% endfor %}
+                  {% else %}
+                      Empty
+                  {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Dtype</td>
+                <td>{{ var_dtype }}</td>
+            </tr>
+            <tr>
+              <td>Points</td>
+              <td>{{ var_size }}</td>
+            </tr>
+            <tr>
+              <td>Bytes</td>
+              <td>{{ var_nbytes }}</td>
+            </tr>
+
+            {% if var_attrs %}            
+              {% for k,v in var_attrs %} 
+                <tr>
+                    <td>{{ k }}</td>
+                    <td>{{ v }}</td>
+                </tr>
+              {% endfor %}
+            {% endif %}
+            
+        </table>
+      </div>
+
+  
+ <!-- Table 2  -->
+{% if is_dataset %}
+  <div class="table_div">
+    
+      <table>
+        {% if data_dims %}            
+          <tr>
+              <td>Data Dims</td>
+              <td>
+                {% for var,dim in data_dims %} 
+                  {{ var }}: {{ dim }},
+                {% endfor %}  
+              </td>
+          </tr>
+        {% endif %}
+
+        {% if data_coords|length >0 %}
+        <tr>
+            <td>Data Coords</td>
+            <td>
+              
+                  {% for coord in data_coords %}
+                    {{ coord }},
+                  {% endfor %}
+            </td>
+        </tr>
+        {% endif %}
+
+        
+        {% if data_attrs %}
+          {% for attr,desc in data_attrs %} 
+            <tr>
+                <td>{{ attr }}</td><td> {{ desc }} </td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+
+      </table>
+  </div>
+{% endif %}
+
+
+<style>
+        table {
+          border-collapse: collapse;
+          border-spacing: 0;
+          width: 400px;
+          border: 1px solid #ddd;
+        }
+        
+        th, td {
+          text-align: left;
+          padding: 4px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #f2f2f2
+        }
+
+        div.table_div {
+          font-size: 13px;
+          overflow: scroll; 
+          height: 140px;
+        }
+</style>
+
+
+
+
+
+
