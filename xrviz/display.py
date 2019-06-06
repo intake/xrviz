@@ -28,7 +28,7 @@ class Display(SigSlot):
         self.select = pn.widgets.MultiSelect(size=8, min_width=300,
                                              width_policy='min',)
         # self.set_selection(self.data)
-        self.set_variables(variables=None)
+        self.set_variables()
 
         self._register(self.select, "variable_selected")
 
@@ -38,7 +38,7 @@ class Display(SigSlot):
         if isinstance(data, xr.Dataset) or isinstance(data, xr.DataArray):
             self.data = data
 
-    def set_variables(self, variables):
+    def set_variables(self,):
         if isinstance(self.data, xr.Dataset):
             self.select.options = {self._isgeo(name): name for name in list(self.data.variables)}
         else:
