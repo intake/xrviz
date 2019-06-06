@@ -53,6 +53,7 @@ class Describe(SigSlot):
             var_shape = self.data[var].shape
             var_size = self.data[var].size
             var_dim_shape = [(dim, shape) for dim, shape in zip(var_dims, var_shape)]
+            data_attrs = [(k, v) for k, v in self.data.attrs.items()]
 
             return self._variable_template.render(var=var,
                                                   var_attrs=var_attrs,
@@ -62,6 +63,7 @@ class Describe(SigSlot):
                                                   var_name=var_name,
                                                   var_nbytes=var_nbytes,
                                                   var_size=var_size,
+                                                  data_attrs=data_attrs,
                                                   )
         else:
             return self._variable_template.render(var=None)

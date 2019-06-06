@@ -46,27 +46,30 @@
               <td>{{ var_nbytes }}</td>
             </tr>
 
+            {% if var_attrs %}            
+              {% for k,v in var_attrs %} 
+                <tr>
+                    <td>{{ k }}</td>
+                    <td>{{ v }}</td>
+                </tr>
+              {% endfor %}
+            {% endif %}
+            
         </table>
       </div>
     {% endif %}
 
   <!-- Table 2  -->
 
-    {% if var_attrs %}
+    {% if data_attrs %}
       <div class="table_div">
           <table>              
-              {% for k,v in var_attrs %} 
-              <tr>
-                  <td>{{ k }}</td><td> {{ v }} </td>
-              </tr>
+              {% for attr,desc in data_attrs %} 
+                <tr>
+                    <td>{{ attr }}</td><td> {{ desc }} </td>
+                </tr>
               {% endfor %}
           </table>
-      </div>
-    {% else %}
-      <div style="width: 300px;">
-            {% if var != None %}
-              <p align= "center" ><b>Attribute:</b> None</p>
-            {% endif %}
       </div>
     {% endif %}
 
@@ -83,7 +86,7 @@
         
         th, td {
           text-align: left;
-          padding: 5px;
+          padding: 4px;
         }
         
         tr:nth-child(even) {
@@ -96,3 +99,9 @@
           height: 140px;
         }
 </style>
+
+
+
+
+
+
