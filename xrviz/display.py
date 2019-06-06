@@ -8,6 +8,7 @@ class Display(SigSlot):
     This widget takes input as a xarray instance. For each Dataset,
     its variables are displayed. In case a   DataArray  has been
     provided only a single variable of that particular array is shown.
+    Variables which are coordinates are annotated with '📈'.
 
     Parameters
     ----------
@@ -40,9 +41,9 @@ class Display(SigSlot):
 
     def set_variables(self,):
         if isinstance(self.data, xr.Dataset):
-            self.select.options = {self._isgeo(name): name for name in list(self.data.variables)}
+            self.select.options = {self._is_coord(name): name for name in list(self.data.variables)}
         else:
-            self.select.options = {self._isgeo(self.data.name): self.data.name}
+            self.select.options = {self._is_coord(self.data.name): self.data.name}
             self.select.value = [self.data.name]
 
     def select_variable(self, variable):
@@ -55,13 +56,8 @@ class Display(SigSlot):
         else:
             print('DataArray has a single variable.')
 
-    def _isgeo(self, name):
-        if isinstance(self.data, xr.Dataset):
-            var = self.data[name]
-        else:
-            var = self.data
-
-        if getattr(var, 'standard_name', "") in ['latitude', 'longitude', 'time']:
-            return name + " " + '\U0001f30d'
+    def _is_coord(self, name):
+        if name in list(self.data.coords):
+            return name + " " + '\U0001F4C8'
         else:
             return name
