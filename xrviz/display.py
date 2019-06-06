@@ -5,30 +5,19 @@ from .sigslot import SigSlot
 
 class Display(SigSlot):
     """
-    This widget takes input as a xarray instance. or each dataset the
-    properties:
-    'Dimensions','Coordinates','Variables','Attributes'
-    are dislpayed. On selecting one of these,the expansion
-    occurs to show the arrtibutes associated with it.
-
-    It of these individual property could be expanded accordingly.
+    This widget takes input as a xarray instance. For each Dataset,
+    its variables are displayed. In case a   DataArray  has been
+    provided only a single variable of that particular array is shown.
 
     Parameters
     ----------
     data: `xarray` instance: `DataSet` or `DataArray`
-        datset is used to initialize the DataSelector
+           data is used to initialize the DataSelector
 
     Attributes
     ----------
     panel: Displays the generated Multiselect object
 
-    Reason for adding initial letter in front of a sub_property:
-        It will act as option separator for the multiSelect.
-        Ex: Variable 'time' could be present in both `Dimensions` and
-           and `Coordinates`. Upon selection of any one, both are
-           automatically selected. However in presence of `letter`
-           `d :time` belongs to dimensions while `c : time` belongs
-           to `Coordinates`.
     """
 
     def __init__(self, data):
@@ -49,29 +38,10 @@ class Display(SigSlot):
         if isinstance(data, xr.Dataset) or isinstance(data, xr.DataArray):
             self.data = data
 
-    def set_variables(self, variables=None):
-        """
-        Method for selection of variables present in `xr.DataSet`.
-        This is not applicable for `xr.DataArray` since it has only one
-        variable.
-
-        Parameters
-        ----------
-        `variables`: A list constiting of variables present in Dataset.
-        """
+    def set_variables(self, variables):
         if isinstance(self.data, xr.Dataset):
-            if variables is None:  # place all variables in options
-                self.select.options = {self._isgeo(name): name for name in list(self.data.variables)}
-            else:
-                if isinstance(variables, list):
-                    _opts = {}
-                    for name in variables:
-                        if name in list(self.data.variables):
-                            _opts[self._isgeo(name)] = name
-                        else:
-                            print(f'Variable {name} not in data.variables')
-                    self.select.options = _opts
-        else:  # DataArray has only single variable
+            self.select.options = {self._isgeo(name): name for name in list(self.data.variables)}
+        else:
             self.select.options = {self._isgeo(self.data.name): self.data.name}
             self.select.value = [self.data.name]
 
