@@ -3,6 +3,7 @@ import xarray as xr
 from .sigslot import SigSlot
 from .display import Display
 from .describe import Describe
+from .fields import Fields
 
 
 class Control(SigSlot):
@@ -11,7 +12,12 @@ class Control(SigSlot):
         self.data = data
         self.displayer = Display(self.data)
         self.describer = Describe(self.data)
+        self.fields = Fields(self.data)
 
         self.displayer.connect("variable_selected", self.describer.setup)
+        self.displayer.connect("variable_selected", self.fields.setup)
 
-        self.panel = pn.Row(self.displayer.panel, self.describer.panel)
+        self.panel = pn.Column(
+                               pn.Row(self.displayer.panel,
+                                      self.describer.panel),
+                               pn.Row(self.fields.panel))
