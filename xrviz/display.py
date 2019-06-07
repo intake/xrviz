@@ -27,7 +27,7 @@ class Display(SigSlot):
             self.set_data(data)
 
         self.select = pn.widgets.MultiSelect(size=8, min_width=300,
-                                             width_policy='min',)
+                                             width_policy='min', name='var')
         # self.set_selection(self.data)
         self.set_variables()
 
@@ -61,3 +61,8 @@ class Display(SigSlot):
             return name + " " + '\U0001F4C8'
         else:
             return name
+
+    @property
+    def kwargs(self):
+        out = {self.panel.select()[0][0].name: self.panel.select()[0][0].value[0]}
+        return out

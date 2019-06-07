@@ -1,9 +1,9 @@
 import xarray as xr
 import xrviz
-from xrviz.control import Control
+from xrviz.dashboard import Dashboard
 
 ds = xrviz.sample_data.great_lakes
 ds = ds.set_coords(['lat', 'lon'])
 
-control = Control(ds)
-control.show()
+dash = Dashboard(ds)
+dash.show()

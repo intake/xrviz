@@ -7,6 +7,7 @@ from .fields import Fields
 
 
 class Control(SigSlot):
+
     def __init__(self, data):
         super().__init__()
         self.data = data
@@ -21,3 +22,9 @@ class Control(SigSlot):
                                pn.Row(self.displayer.panel,
                                       self.describer.panel),
                                pn.Row(self.fields.panel))
+
+    @property
+    def kwargs(self):
+        out = self.displayer.kwargs
+        out.update(self.fields.kwargs)
+        return out
