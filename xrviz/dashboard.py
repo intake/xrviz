@@ -14,8 +14,8 @@ class Dashboard(SigSlot):
         self.data = data
         self.control = Control(self.data)
         self.plot = pn.widgets.Button(name='Plot', width=200)
-        self.index_selectors = pn.Column()
-        self.output = pn.Row(pn.Spacer(name='Graph'), self.index_selectors)
+        self.index_selectors = self.control.fields.index_selectors
+        self.output = pn.Row(pn.Spacer(name='Graph'))
 
         self._register(self.plot, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)

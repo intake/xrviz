@@ -10,12 +10,15 @@ class Fields(SigSlot):
         self.set_data(data)
         self.x = pn.widgets.Select(name='x')
         self.y = pn.widgets.Select(name='y')
+        self.index_selectors = pn.Column()
 
         self._register(self.x, 'x')
 
         self.connect('x', self.change_y)
 
-        self.panel = pn.Column(self.x, self.y, name='fields',)
+        self.panel = pn.Row(pn.Column(self.x, self.y),
+                            pn.Spacer(width=200),
+                            self.index_selectors, name='fields',)
 
         if isinstance(data, xr.DataArray):
             self.setup(data)
@@ -51,5 +54,5 @@ class Fields(SigSlot):
 
     @property
     def kwargs(self):
-        out = {p.name: p.value for p in self.panel}
+        out = {p.name: p.value for p in self.panel[0]}
         return out
