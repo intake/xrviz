@@ -4,6 +4,7 @@ import hvplot.xarray
 from cartopy import crs as ccrs
 from .sigslot import SigSlot
 from .control import Control
+from .utils import convert_widget
 
 
 class Dashboard(SigSlot):
@@ -13,7 +14,8 @@ class Dashboard(SigSlot):
         self.data = data
         self.control = Control(self.data)
         self.plot = pn.widgets.Button(name='Plot', width=200)
-        self.output = pn.Row(pn.Spacer(name='Plot'),)
+        self.index_selectors = pn.Column()
+        self.output = pn.Row(pn.Spacer(name='Graph'), self.index_selectors)
 
         self._register(self.plot, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
@@ -28,20 +30,33 @@ class Dashboard(SigSlot):
         var = kwargs['']
         crs = ccrs.PlateCarree()
         if isinstance(self.data, xr.Dataset):
-            self.output[0] = self.data[var][:, :, :].hvplot.quadmesh(x=kwargs['x'],
-                                                                     y=kwargs['y'],
-                                                                     title=var,
-                                                                     rasterize=True,
-                                                                     width=600,
-                                                                     height=400,
-                                                                     crs=crs,
-                                                                     cmap='jet')
+            self.graph = pn.Row(self.data[var][:, :, :].hvplot.quadmesh(x=kwargs['x'],
+                                                                        y=kwargs['y'],
+                                                                        title=var,
+                                                                        rasterize=True,
+                                                                        width=600,
+                                                                        height=400,
+                                                                        crs=crs,
+                                                                        cmap='jet'))
+            self.output[0] = self.graph[0][0]
+            self.fill_index_selectors()
+
         else:
-            self.output[0] = self.data[:, :, :].hvplot.quadmesh(x=kwargs['x'],
-                                                                y=kwargs['y'],
-                                                                title=self.data.name,
-                                                                rasterize=True,
-                                                                width=600,
-                                                                height=400,
-                                                                crs=crs,
-                                                                cmap='jet')
+            self.graph = pn.Row(self.data[:, :, :].hvplot.quadmesh(x=kwargs['x'],
+                                                                   y=kwargs['y'],
+                                                                   title=self.data.name,
+                                                                   rasterize=True,
+                                                                   width=600,
+                                                                   height=400,
+                                                                   crs=crs,
+                                                                   cmap='jet'))
+            self.output[0] = self.graph[0][0]
+            self.fill_index_selectors()
+
+    def fill_index_selectors(self):
+        self.index_selectors.clear()
+        for widget in self.graph[0][1]:
+            selector = convert_widget(widget, pn.widgets.Select())
+            player = convert_widget(selector, pn.widgets.DiscretePlayer())
+            combined = pn.Column(selector, player)
+            self.index_selectors.append(combined)
