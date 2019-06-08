@@ -17,13 +17,19 @@ class Fields(SigSlot):
 
         self.panel = pn.Column(self.x, self.y, name='fields',)
 
+        if isinstance(data, xr.DataArray):
+            self.setup(data)
+
     def set_data(self, data):
         if isinstance(data, xr.Dataset) or isinstance(data, xr.DataArray):
             self.data = data
 
     def setup(self, var):
-        self.var = var[0]
-        self.var_coords = [coord for coord in self.data[var].coords.keys()]
+        if isinstance(self.data, xr.Dataset):
+            self.var = var[0]
+            self.var_coords = [coord for coord in self.data[var].coords.keys()]
+        else:
+            self.var_coords = [coord for coord in self.data.coords.keys()]
         x_opts = self.var_coords.copy()
         self.x.options = x_opts
         self.x.value = x_opts[0]
