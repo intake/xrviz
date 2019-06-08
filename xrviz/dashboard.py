@@ -25,7 +25,7 @@ class Dashboard(SigSlot):
 
     def create_plot(self, *args):
         kwargs = self.control.kwargs
-        var = kwargs['var']
+        var = kwargs['']
         crs = ccrs.PlateCarree()
         if isinstance(self.data, xr.Dataset):
             self.output[0] = self.data[var][:, :, :].hvplot.quadmesh(x=kwargs['x'],
