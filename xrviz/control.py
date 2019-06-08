@@ -21,7 +21,8 @@ class Control(SigSlot):
         self.panel = pn.Column(
                                pn.Row(self.displayer.panel,
                                       self.describer.panel),
-                               pn.Row(self.fields.panel))
+                               pn.Tabs(self.fields.panel,
+                                       background=(230, 230, 230), width=1160))
 
     @property
     def kwargs(self):

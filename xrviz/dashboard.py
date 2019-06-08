@@ -28,8 +28,20 @@ class Dashboard(SigSlot):
         var = kwargs['var']
         crs = ccrs.PlateCarree()
         if isinstance(self.data, xr.Dataset):
-            self.output[0] = self.data[var][:, :, :].hvplot.quadmesh(x=kwargs['x'], y=kwargs['y'], rasterize=True,
-                                                                   width=600, height=400, crs=crs, cmap='jet')
+            self.output[0] = self.data[var][:, :, :].hvplot.quadmesh(x=kwargs['x'],
+                                                                     y=kwargs['y'],
+                                                                     title=var,
+                                                                     rasterize=True,
+                                                                     width=600,
+                                                                     height=400,
+                                                                     crs=crs,
+                                                                     cmap='jet')
         else:
-            self.output[0] = self.data[:, :, :].hvplot.quadmesh(x=kwargs['x'], y=kwargs['y'], rasterize=True,
-                                                                   width=600, height=400, crs=crs, cmap='jet')
+            self.output[0] = self.data[:, :, :].hvplot.quadmesh(x=kwargs['x'],
+                                                                y=kwargs['y'],
+                                                                title=self.data.name,
+                                                                rasterize=True,
+                                                                width=600,
+                                                                height=400,
+                                                                crs=crs,
+                                                                cmap='jet')
