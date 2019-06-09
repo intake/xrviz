@@ -4,6 +4,22 @@ from .sigslot import SigSlot
 
 
 class Fields(SigSlot):
+    """
+    This section provides the user with a fields selection panel.
+    Upon selection of a variable in `Display` panel, its data_coords
+    are available as options in `x` and `y` Select widget.
+
+    Parameters
+    ----------
+    data: `xarray` instance: `DataSet` or `DataArray`
+           datset is used to initialize.
+
+    Attributes
+    ----------
+    x: `panel.widget.Select` for selection of coords along x-axis.
+    y: `panel.widget.Select` for selection of coords along y-axis.
+    kwargs: provides access to coords selected by `x` and `y`.
+    """
 
     def __init__(self, data):
         super().__init__()

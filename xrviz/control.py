@@ -7,6 +7,23 @@ from .fields import Fields
 
 
 class Control(SigSlot):
+    """
+    This section allows the user to control the other subsections,
+    such as displayer, fields.
+
+    Parameters
+    ----------
+    data: `xarray` instance: `DataSet` or `DataArray`
+           datset is used to initialize.
+
+    Attributes
+    ----------
+    panel: Displays the generated template.
+    displayer: Provides access to `Display` sub-section.
+    describer: Provides access to `Describe` sub-section.
+    fields: Provides access to `Fields` sub-section.
+    kwargs: Provides access to kwargs selected in different subsections.
+    """
 
     def __init__(self, data):
         super().__init__()

@@ -8,6 +8,24 @@ from .utils import convert_widget
 
 
 class Dashboard(SigSlot):
+    """
+    This section provides access to the complete generated dashboard,
+    consisting of all subsections.
+
+    Parameters
+    ----------
+    data: `xarray` instance: `DataSet` or `DataArray`
+           datset is used to initialize.
+
+    Attributes
+    ----------
+    panel: Displays the generated dashboard.
+    control: Provides access to the generated control panel.
+    index_selectors: Provides access to generated index_selectors.
+    plot: Plot button, upon click generates graph according to
+          kwargs selected in other sub-sections.
+    output: Provides access to generated graph.
+    """
 
     def __init__(self, data):
         super().__init__()
@@ -54,6 +72,10 @@ class Dashboard(SigSlot):
             self.fill_index_selectors()
 
     def fill_index_selectors(self):
+        """
+        To convert the auto-generated slider, into Select and Player
+        widget.
+        """
         self.index_selectors.clear()
         for widget in self.graph[0][1]:
             selector = convert_widget(widget, pn.widgets.Select())
