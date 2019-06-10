@@ -34,7 +34,7 @@ class Fields(SigSlot):
 
         self.panel = pn.Row(pn.Column(self.x, self.y),
                             pn.Spacer(width=200),
-                            self.index_selectors, name='fields',)
+                            self.index_selectors, name='Fields',)
 
         if isinstance(data, xr.DataArray):
             self.setup(data)
@@ -50,14 +50,15 @@ class Fields(SigSlot):
         else:
             self.var_coords = [coord for coord in self.data.coords.keys()]
         x_opts = self.var_coords.copy()
-        self.x.options = x_opts
-        self.x.value = x_opts[0]
-        y_opts = x_opts.copy()
-        del y_opts[0]
-        if y_opts is None:
-            self.y.options = []
-        else:
-            self.y.options = y_opts
+        if len(x_opts) > 0:  # to check that data has coords
+            self.x.options = x_opts
+            self.x.value = x_opts[0]
+            y_opts = x_opts.copy()
+            del y_opts[0]
+            if y_opts is None:
+                self.y.options = []
+            else:
+                self.y.options = y_opts
 
     def change_y(self, value):
         _opts = self.var_coords.copy()

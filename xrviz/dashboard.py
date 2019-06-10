@@ -37,11 +37,17 @@ class Dashboard(SigSlot):
 
         self._register(self.plot, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
+        self.control.displayer.connect('variable_selected', self.check_is_plottable)
 
         self.panel = pn.Column(self.control.panel,
                                self.plot,
                                self.output
                                )
+        if isinstance(self.data, xr.Dataset):
+            self.plot.disabled = True
+        else:
+            if self.data.name in self.data.coords or len(self.data.dims) <= 1:
+                self.plot.disabled = True
 
     def create_plot(self, *args):
         kwargs = self.control.kwargs
@@ -78,3 +84,10 @@ class Dashboard(SigSlot):
                 self.index_selectors.append(combined)
         except IndexError as e:
             pass
+
+    def check_is_plottable(self, var):
+        var = var[0]
+        self.plot.disabled = False
+        if isinstance(self.data, xr.Dataset):
+            if var in list(self.data.coords) or len(list(self.data[var].dims)) <= 1:
+                self.plot.disabled = True
