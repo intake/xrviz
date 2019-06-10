@@ -48,26 +48,26 @@ class Dashboard(SigSlot):
         var = kwargs['']
         crs = ccrs.PlateCarree()
         if isinstance(self.data, xr.Dataset):
-            self.graph = pn.Row(self.data[var][:, :, :].hvplot.quadmesh(x=kwargs['x'],
-                                                                        y=kwargs['y'],
-                                                                        title=var,
-                                                                        rasterize=True,
-                                                                        width=600,
-                                                                        height=400,
-                                                                        crs=crs,
-                                                                        cmap='jet'))
+            self.graph = pn.Row(self.data[var].hvplot.quadmesh(x=kwargs['x'],
+                                                               y=kwargs['y'],
+                                                               title=var,
+                                                               rasterize=True,
+                                                               width=600,
+                                                               height=400,
+                                                               crs=crs,
+                                                               cmap='jet'))
             self.output[0] = self.graph[0][0]
             self.fill_index_selectors()
 
         else:
-            self.graph = pn.Row(self.data[:, :, :].hvplot.quadmesh(x=kwargs['x'],
-                                                                   y=kwargs['y'],
-                                                                   title=self.data.name,
-                                                                   rasterize=True,
-                                                                   width=600,
-                                                                   height=400,
-                                                                   crs=crs,
-                                                                   cmap='jet'))
+            self.graph = pn.Row(self.data.hvplot.quadmesh(x=kwargs['x'],
+                                                          y=kwargs['y'],
+                                                          title=self.data.name,
+                                                          rasterize=True,
+                                                          width=600,
+                                                          height=400,
+                                                          crs=crs,
+                                                          cmap='jet'))
             self.output[0] = self.graph[0][0]
             self.fill_index_selectors()
 
@@ -77,8 +77,11 @@ class Dashboard(SigSlot):
         widget.
         """
         self.index_selectors.clear()
-        for widget in self.graph[0][1]:
-            selector = convert_widget(widget, pn.widgets.Select())
-            player = convert_widget(selector, pn.widgets.DiscretePlayer())
-            combined = pn.Column(selector, player)
-            self.index_selectors.append(combined)
+        try:
+            for widget in self.graph[0][1]:
+                selector = convert_widget(widget, pn.widgets.Select())
+                player = convert_widget(selector, pn.widgets.DiscretePlayer())
+                combined = pn.Column(selector, player)
+                self.index_selectors.append(combined)
+        except IndexError as e:
+            pass
