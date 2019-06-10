@@ -46,30 +46,23 @@ class Dashboard(SigSlot):
     def create_plot(self, *args):
         kwargs = self.control.kwargs
         var = kwargs['']
-        crs = ccrs.PlateCarree()
-        if isinstance(self.data, xr.Dataset):
-            self.graph = pn.Row(self.data[var].hvplot.quadmesh(x=kwargs['x'],
-                                                               y=kwargs['y'],
-                                                               title=var,
-                                                               rasterize=True,
-                                                               width=600,
-                                                               height=400,
-                                                               crs=crs,
-                                                               cmap='jet'))
-            self.output[0] = self.graph[0][0]
-            self.fill_index_selectors()
+        graph_opts = {}
+        graph_opts['x'] = kwargs['x']
+        graph_opts['y'] = kwargs['y']
+        graph_opts['rasterize'] = True
+        graph_opts['width'] = 600
+        graph_opts['height'] = 400
+        graph_opts['crs'] = ccrs.PlateCarree()
 
+        if isinstance(self.data, xr.Dataset):
+            graph_opts['title'] = var
+            self.graph = pn.Row(self.data[var].hvplot.quadmesh(**graph_opts))
         else:
-            self.graph = pn.Row(self.data.hvplot.quadmesh(x=kwargs['x'],
-                                                          y=kwargs['y'],
-                                                          title=self.data.name,
-                                                          rasterize=True,
-                                                          width=600,
-                                                          height=400,
-                                                          crs=crs,
-                                                          cmap='jet'))
-            self.output[0] = self.graph[0][0]
-            self.fill_index_selectors()
+            graph_opts['title'] = self.data.name
+            self.graph = pn.Row(self.data.hvplot.quadmesh(**graph_opts))
+
+        self.output[0] = self.graph[0][0]
+        self.fill_index_selectors()
 
     def fill_index_selectors(self):
         """
