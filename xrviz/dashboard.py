@@ -80,6 +80,10 @@ class Dashboard(SigSlot):
                 combined = pn.Column(selector, player)
                 self.index_selectors.append(combined)
         except IndexError as e:
+            # To handle the case when there is only a single QuadMesh
+            # object in the row i.e default sliders have not been generated.
+            # Here self.graph[0][1] object would not be present so for loop 
+            # will generate IndexError.
             pass
 
     def check_is_plottable(self, var):
