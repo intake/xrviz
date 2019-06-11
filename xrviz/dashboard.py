@@ -50,13 +50,12 @@ class Dashboard(SigSlot):
     def create_plot(self, *args):
         kwargs = self.control.kwargs
         var = kwargs['Variables']
-        graph_opts = {}
-        graph_opts['x'] = kwargs['x']
-        graph_opts['y'] = kwargs['y']
-        graph_opts['rasterize'] = True
-        graph_opts['width'] = 600
-        graph_opts['height'] = 400
-        graph_opts['crs'] = ccrs.PlateCarree()
+        graph_opts = {'x': kwargs['x'],
+                      'y': kwargs['y'],
+                      'rasterize': True,
+                      'width': 600,
+                      'height': 400,
+                      'crs': ccrs.PlateCarree()}
 
         if isinstance(self.data, xr.Dataset):
             graph_opts['title'] = var
