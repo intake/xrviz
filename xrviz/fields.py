@@ -23,7 +23,7 @@ class Fields(SigSlot):
 
     def __init__(self, data):
         super().__init__()
-        self.set_data(data)
+        self.data = data
         self.x = pn.widgets.Select(name='x')
         self.y = pn.widgets.Select(name='y')
         self.index_selectors = pn.Column()
@@ -38,10 +38,6 @@ class Fields(SigSlot):
 
         if isinstance(data, xr.DataArray):
             self.setup(data)
-
-    def set_data(self, data):
-        if isinstance(data, xr.Dataset) or isinstance(data, xr.DataArray):
-            self.data = data
 
     def setup(self, var):
         if isinstance(self.data, xr.Dataset):

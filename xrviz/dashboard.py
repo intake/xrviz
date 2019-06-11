@@ -29,7 +29,7 @@ class Dashboard(SigSlot):
 
     def __init__(self, data):
         super().__init__()
-        self.data = data
+        self.set_data(data)
         self.control = Control(self.data)
         self.plot = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = self.control.fields.index_selectors
@@ -46,6 +46,10 @@ class Dashboard(SigSlot):
 
         if isinstance(self.data, xr.DataArray):
             self.check_is_plottable(var=None)
+
+    def set_data(self, data):
+        if isinstance(data, xr.Dataset) or isinstance(data, xr.DataArray):
+            self.data = data
 
     def create_plot(self, *args):
         kwargs = self.control.kwargs
