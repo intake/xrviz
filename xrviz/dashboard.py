@@ -51,7 +51,7 @@ class Dashboard(SigSlot):
 
     def create_plot(self, *args):
         kwargs = self.control.kwargs
-        var = kwargs['']
+        var = kwargs['Variables']
         graph_opts = {}
         graph_opts['x'] = kwargs['x']
         graph_opts['y'] = kwargs['y']
