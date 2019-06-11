@@ -66,5 +66,8 @@ class Display(SigSlot):
 
     @property
     def kwargs(self):
-        out = {self.panel.select()[0][0].name: self.panel.select()[0][0].value[0]}
+        """
+        Select only the first value from the selected variables.
+        """
+        out = {p.name: p.value[0] for p in self.panel}
         return out
