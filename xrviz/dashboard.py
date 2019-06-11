@@ -31,7 +31,7 @@ class Dashboard(SigSlot):
         super().__init__()
         self.data = data
         self.control = Control(self.data)
-        self.plot = pn.widgets.Button(name='Plot', width=200)
+        self.plot = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = self.control.fields.index_selectors
         self.output = pn.Row(pn.Spacer(name='Graph'))
 
@@ -43,11 +43,9 @@ class Dashboard(SigSlot):
                                self.plot,
                                self.output
                                )
-        if isinstance(self.data, xr.Dataset):
-            self.plot.disabled = True
-        else:
-            if self.data.name in self.data.coords or len(self.data.dims) <= 1:
-                self.plot.disabled = True
+
+        if isinstance(self.data, xr.DataArray):
+            self.check_is_plottable(var=None)
 
     def create_plot(self, *args):
         kwargs = self.control.kwargs
@@ -86,8 +84,11 @@ class Dashboard(SigSlot):
             pass
 
     def check_is_plottable(self, var):
-        var = var[0]
         self.plot.disabled = False
         if isinstance(self.data, xr.Dataset):
+            var = var[0]
             if var in list(self.data.coords) or len(list(self.data[var].dims)) <= 1:
+                self.plot.disabled = True
+        else:
+            if self.data.name in self.data.coords or len(self.data.dims) <= 1:
                 self.plot.disabled = True
