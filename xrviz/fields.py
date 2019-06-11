@@ -57,13 +57,9 @@ class Fields(SigSlot):
                 self.y.options = y_opts
 
     def change_y(self, value):
-        _opts = self.var_coords.copy()
-        values = _opts.copy()
+        values = self.var_coords.copy()
         values.remove(self.x.value)
-        if len(values) == 0:
-            self.y.options = []
-        else:
-            self.y.options = values
+        self.y.options = values
 
     @property
     def kwargs(self):
