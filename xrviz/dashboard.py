@@ -30,7 +30,7 @@ class Dashboard(SigSlot):
         super().__init__()
         self.set_data(data)
         self.control = Control(self.data)
-        self.plot = pn.widgets.Button(name='Plot', width=200,)
+        self.plot = pn.widgets.Button(name='Plot', width=200,disabled=True)
         self.index_selectors = []
         self.output = pn.Row(pn.Spacer(name='Graph'),
                              pn.Column(name='Index_selectors'),
@@ -38,7 +38,7 @@ class Dashboard(SigSlot):
 
         self._register(self.plot, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
-        # self.control.displayer.connect('variable_selected', self.check_is_plottable)
+        self.control.displayer.connect('variable_selected', self.check_is_plottable)
 
         self.panel = pn.Column(self.control.panel,
                                self.plot,
@@ -55,8 +55,13 @@ class Dashboard(SigSlot):
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
         self.var = self.kwargs['Variables']
-        self.var_dims = list(self.data[self.var].dims)
-        self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [ self.kwargs['x'], self.kwargs['y'] ]])
+        if isinstance(self.data, xr.Dataset):
+            self.var_dims = list(self.data[self.var].dims)
+            self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [ self.kwargs['x'], self.kwargs['y'] ]])
+        else:
+            self.var_dims = list(self.data.dims)
+            self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [ self.kwargs['x'], self.kwargs['y'] ]])
+
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
         self.output[2].clear()  # clears Players
@@ -73,8 +78,15 @@ class Dashboard(SigSlot):
             self.create_players()
 
         else:
-            graph_opts['title'] = self.data.name
-            self.graph = pn.Row(self.data.hvplot.quadmesh(**graph_opts))
+            for dim in self.var_selector_dims:
+                selector = pn.widgets.Select(name=dim, options=list(self.data[dim].values))
+                self.index_selectors.append(selector)
+                selector.param.watch(self.callback, ['value'], onlychanged=False)
+            self.output[0] = self.create_indexed_graph()
+
+            for selector in self.index_selectors:
+                self.output[1].append(selector)
+            self.create_players()
 
     def create_players(self):
         """
@@ -105,7 +117,10 @@ class Dashboard(SigSlot):
                       'y': y,
                       'title': self.var}
         assign_opts = {x: self.data[x], y: self.data[y]}
-        plot = self.data[self.var].sel(**args, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+        if isinstance(self.data, xr.Dataset):
+            plot = self.data[self.var].sel(**args, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+        else:
+            plot = self.data.sel(**args, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
         return plot
 
     def callback(self, *events):
