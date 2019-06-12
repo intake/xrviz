@@ -21,7 +21,6 @@ class Dashboard(SigSlot):
     ----------
     panel: Displays the generated dashboard.
     control: Provides access to the generated control panel.
-    index_selectors: Provides access to generated index_selectors.
     plot: Plot button, upon click generates graph according to
           kwargs selected in other sub-sections.
     output: Provides access to generated graph.
@@ -31,13 +30,15 @@ class Dashboard(SigSlot):
         super().__init__()
         self.set_data(data)
         self.control = Control(self.data)
-        self.plot = pn.widgets.Button(name='Plot', width=200, disabled=True)
-        self.index_selectors = self.control.fields.index_selectors
-        self.output = pn.Row(pn.Spacer(name='Graph'))
+        self.plot = pn.widgets.Button(name='Plot', width=200,)
+        self.index_selectors = []
+        self.output = pn.Row(pn.Spacer(name='Graph'),
+                             pn.Column(name='Index_selectors'),
+                             pn.Column(name='Players'))
 
         self._register(self.plot, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
-        self.control.displayer.connect('variable_selected', self.check_is_plottable)
+        # self.control.displayer.connect('variable_selected', self.check_is_plottable)
 
         self.panel = pn.Column(self.control.panel,
                                self.plot,
@@ -52,43 +53,37 @@ class Dashboard(SigSlot):
             self.data = data
 
     def create_plot(self, *args):
-        kwargs = self.control.kwargs
-        var = kwargs['Variables']
-        graph_opts = {'x': kwargs['x'],
-                      'y': kwargs['y'],
-                      'rasterize': True,
-                      'width': 600,
-                      'height': 400,
-                      'crs': ccrs.PlateCarree()}
+        self.kwargs = self.control.kwargs
+        self.var = self.kwargs['Variables']
+        self.var_dims = list(self.data[self.var].dims)
+        self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [ self.kwargs['x'], self.kwargs['y'] ]])
+        self.index_selectors = []
+        self.output[1].clear()  # clears Index_selectors
+        self.output[2].clear()  # clears Players
 
         if isinstance(self.data, xr.Dataset):
-            graph_opts['title'] = var
-            self.graph = pn.Row(self.data[var].hvplot.quadmesh(**graph_opts))
+            for dim in self.var_selector_dims:
+                selector = pn.widgets.Select(name=dim, options=list(self.data[self.var][dim].values))
+                self.index_selectors.append(selector)
+                selector.param.watch(self.callback, ['value'], onlychanged=False)
+            self.output[0] = self.create_indexed_graph()
+
+            for selector in self.index_selectors:
+                self.output[1].append(selector)
+            self.create_players()
+
         else:
             graph_opts['title'] = self.data.name
             self.graph = pn.Row(self.data.hvplot.quadmesh(**graph_opts))
 
-        self.output[0] = self.graph[0][0]
-        self.fill_index_selectors()
-
-    def fill_index_selectors(self):
+    def create_players(self):
         """
         To convert the auto-generated slider, into Select and Player
         widget.
         """
-        self.index_selectors.clear()
-        try:
-            for widget in self.graph[0][1]:
-                selector = convert_widget(widget, pn.widgets.Select())
-                player = convert_widget(selector, pn.widgets.DiscretePlayer())
-                combined = pn.Column(selector, player)
-                self.index_selectors.append(combined)
-        except IndexError as e:
-            # To handle the case when there is only a single QuadMesh
-            # object in the row i.e default sliders have not been generated.
-            # Here self.graph[0][1] object would not be present so for loop 
-            # will generate IndexError.
-            pass
+        for selector in self.index_selectors:
+            player = convert_widget(selector, pn.widgets.DiscretePlayer())
+            self.output[2].append(player)
 
     def check_is_plottable(self, var):
         self.plot.disabled = False
@@ -99,3 +94,22 @@ class Dashboard(SigSlot):
         else:
             if self.data.name in self.data.coords or len(self.data.dims) <= 1:
                 self.plot.disabled = True
+
+    def create_indexed_graph(self, **args):
+        for i, dim in enumerate(list(self.var_selector_dims)):
+            if dim not in list(args):
+                args[dim] = self.index_selectors[i].value
+        x = self.kwargs['x']
+        y = self.kwargs['y']
+        graph_opts = {'x': x,
+                      'y': y,
+                      'title': self.var}
+        assign_opts = {x: self.data[x], y: self.data[y]}
+        plot = self.data[self.var].sel(**args, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+        return plot
+
+    def callback(self, *events):
+        for event in events:
+            if event.name == 'value':
+                ops = {event.obj.name: event.new}
+                self.output[0] = self.create_indexed_graph(**ops)

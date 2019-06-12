@@ -42,9 +42,9 @@ class Fields(SigSlot):
     def setup(self, var):
         if isinstance(self.data, xr.Dataset):
             self.var = var[0]
-            self.var_coords = [coord for coord in self.data[var].coords.keys()]
+            self.var_coords = list(self.data[var].dims)
         else:
-            self.var_coords = [coord for coord in self.data.coords.keys()]
+            self.var_coords = list(self.data.dims)
         x_opts = self.var_coords.copy()
         if len(x_opts) > 0:  # to check that data has coords
             self.x.options = x_opts
