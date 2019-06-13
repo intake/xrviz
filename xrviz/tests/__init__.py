@@ -1,6 +1,5 @@
 import xarray as xr
 import pytest
-from ..utils import _is_coord
 
 
 @pytest.fixture(scope='module')
