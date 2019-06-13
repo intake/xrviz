@@ -30,20 +30,19 @@ class Dashboard(SigSlot):
         super().__init__()
         self.set_data(data)
         self.control = Control(self.data)
-        self.plot = pn.widgets.Button(name='Plot', width=200,disabled=True)
+        self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
         self.output = pn.Row(pn.Spacer(name='Graph'),
                              pn.Column(name='Index_selectors'),
                              pn.Column(name='Players'))
 
-        self._register(self.plot, 'plot_clicked', 'clicks')
+        self._register(self.plot_button, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
 
         self.panel = pn.Column(self.control.panel,
-                               self.plot,
-                               self.output
-                               )
+                               self.plot_button,
+                               self.output)
 
         if isinstance(self.data, xr.DataArray):
             self.check_is_plottable(var=None)
@@ -57,10 +56,9 @@ class Dashboard(SigSlot):
         self.var = self.kwargs['Variables']
         if isinstance(self.data, xr.Dataset):
             self.var_dims = list(self.data[self.var].dims)
-            self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [ self.kwargs['x'], self.kwargs['y'] ]])
         else:
             self.var_dims = list(self.data.dims)
-            self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [ self.kwargs['x'], self.kwargs['y'] ]])
+        self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [self.kwargs['x'], self.kwargs['y']]])
 
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
@@ -70,23 +68,17 @@ class Dashboard(SigSlot):
             for dim in self.var_selector_dims:
                 selector = pn.widgets.Select(name=dim, options=list(self.data[self.var][dim].values))
                 self.index_selectors.append(selector)
-                selector.param.watch(self.callback, ['value'], onlychanged=False)
-            self.output[0] = self.create_indexed_graph()
-
-            for selector in self.index_selectors:
-                self.output[1].append(selector)
-            self.create_players()
-
+                selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
         else:
             for dim in self.var_selector_dims:
                 selector = pn.widgets.Select(name=dim, options=list(self.data[dim].values))
                 self.index_selectors.append(selector)
-                selector.param.watch(self.callback, ['value'], onlychanged=False)
-            self.output[0] = self.create_indexed_graph()
+                selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
 
-            for selector in self.index_selectors:
-                self.output[1].append(selector)
-            self.create_players()
+        self.output[0] = self.create_indexed_graph()
+        for selector in self.index_selectors:
+            self.output[1].append(selector)
+        self.create_players()
 
     def create_players(self):
         """
@@ -98,19 +90,27 @@ class Dashboard(SigSlot):
             self.output[2].append(player)
 
     def check_is_plottable(self, var):
-        self.plot.disabled = False
+        """
+        If a variable is coordinate or 1-d, disable plot_button for it.
+        """
+        self.plot_button.disabled = False  # important to enable button once disabled
         if isinstance(self.data, xr.Dataset):
             var = var[0]
             if var in list(self.data.coords) or len(list(self.data[var].dims)) <= 1:
-                self.plot.disabled = True
+                self.plot_button.disabled = True
         else:
             if self.data.name in self.data.coords or len(self.data.dims) <= 1:
-                self.plot.disabled = True
+                self.plot_button.disabled = True
 
-    def create_indexed_graph(self, **args):
+    def create_indexed_graph(self, **selection):
+        """
+        Creates graph for  selected indexes in selectors or players
+        """
+        # selection consists of only one value here
+        # update it to have value of other var_selector_dims
         for i, dim in enumerate(list(self.var_selector_dims)):
-            if dim not in list(args):
-                args[dim] = self.index_selectors[i].value
+            if dim not in list(selection):
+                selection[dim] = self.index_selectors[i].value
         x = self.kwargs['x']
         y = self.kwargs['y']
         graph_opts = {'x': x,
@@ -118,13 +118,13 @@ class Dashboard(SigSlot):
                       'title': self.var}
         assign_opts = {x: self.data[x], y: self.data[y]}
         if isinstance(self.data, xr.Dataset):
-            plot = self.data[self.var].sel(**args, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+            graph = self.data[self.var].sel(**selection, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
         else:
-            plot = self.data.sel(**args, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
-        return plot
+            graph = self.data.sel(**selection, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+        return graph
 
-    def callback(self, *events):
+    def callback_for_indexed_graph(self, *events):
         for event in events:
             if event.name == 'value':
-                ops = {event.obj.name: event.new}
-                self.output[0] = self.create_indexed_graph(**ops)
+                selection = {event.obj.name: event.new}
+                self.output[0] = self.create_indexed_graph(**selection)  # passing only one value that has been changed
