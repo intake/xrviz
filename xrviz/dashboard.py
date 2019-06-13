@@ -44,27 +44,34 @@ class Dashboard(SigSlot):
                                self.plot_button,
                                self.output)
 
-        if isinstance(self.data, xr.DataArray):
+        if not self.is_dataset:
             self.check_is_plottable(var=None)
 
     def set_data(self, data):
-        if isinstance(data, xr.Dataset) or isinstance(data, xr.DataArray):
+        if isinstance(data, xr.Dataset):
             self.data = data
+            self.is_dataset = True
+        elif isinstance(data, xr.DataArray):
+            self.data = data
+            self.is_dataset = False
+        else:
+            raise ValueError
 
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
         self.var = self.kwargs['Variables']
-        if isinstance(self.data, xr.Dataset):
+        if self.is_dataset:
             self.var_dims = list(self.data[self.var].dims)
         else:
             self.var_dims = list(self.data.dims)
+        #  var_selector_dims refers to dims for which index_selectors would be created
         self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [self.kwargs['x'], self.kwargs['y']]])
 
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
         self.output[2].clear()  # clears Players
 
-        if isinstance(self.data, xr.Dataset):
+        if self.is_dataset:
             for dim in self.var_selector_dims:
                 selector = pn.widgets.Select(name=dim, options=list(self.data[self.var][dim].values))
                 self.index_selectors.append(selector)
@@ -94,13 +101,19 @@ class Dashboard(SigSlot):
         If a variable is coordinate or 1-d, disable plot_button for it.
         """
         self.plot_button.disabled = False  # important to enable button once disabled
-        if isinstance(self.data, xr.Dataset):
+        if self.is_dataset:
             var = var[0]
             if var in list(self.data.coords) or len(list(self.data[var].dims)) <= 1:
                 self.plot_button.disabled = True
         else:
             if self.data.name in self.data.coords or len(self.data.dims) <= 1:
                 self.plot_button.disabled = True
+
+    def callback_for_indexed_graph(self, *events):
+        for event in events:
+            if event.name == 'value':
+                selection = {event.obj.name: event.new}
+                self.output[0] = self.create_indexed_graph(**selection)  # passing only one value that has been changed
 
     def create_indexed_graph(self, **selection):
         """
@@ -117,14 +130,8 @@ class Dashboard(SigSlot):
                       'y': y,
                       'title': self.var}
         assign_opts = {x: self.data[x], y: self.data[y]}
-        if isinstance(self.data, xr.Dataset):
+        if self.is_dataset:
             graph = self.data[self.var].sel(**selection, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
         else:
             graph = self.data.sel(**selection, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
         return graph
-
-    def callback_for_indexed_graph(self, *events):
-        for event in events:
-            if event.name == 'value':
-                selection = {event.obj.name: event.new}
-                self.output[0] = self.create_indexed_graph(**selection)  # passing only one value that has been changed
