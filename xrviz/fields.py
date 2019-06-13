@@ -58,7 +58,7 @@ class Fields(SigSlot):
 
     def change_y(self, value):
         """
-        Updates the options of y, by removing option selected in x (value), 
+        Updates the options of y, by removing option selected in x (value),
         from all the coordinate options available.
         """
         values = self.var_coords.copy()

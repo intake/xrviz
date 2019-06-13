@@ -52,7 +52,7 @@ class Display(SigSlot):
     def select_variable(self, variable):
         if isinstance(self.data, xr.Dataset):
             if isinstance(variable, str):
-                if variable in list(self.select.options):
+                if variable in self.select.options.values():
                     self.select.value = [variable]
                 else:
                     print(f"Variable {variable} not present in displayer.")

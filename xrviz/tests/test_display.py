@@ -1,12 +1,7 @@
 import xarray as xr
 from xrviz.display import Display
-import pytest
+from . import data
 from ..utils import _is_coord
-
-
-@pytest.fixture(scope='module')
-def data():
-    return xr.open_dataset("xrviz/sample_data/great_lakes.nc")
 
 
 def test_fill_items_in_DataSet(data):
