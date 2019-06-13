@@ -1,6 +1,7 @@
 import panel as pn
 import xarray as xr
 from .sigslot import SigSlot
+from .utils import _is_coord
 
 
 class Display(SigSlot):
@@ -43,9 +44,9 @@ class Display(SigSlot):
 
     def set_variables(self,):
         if isinstance(self.data, xr.Dataset):
-            self.select.options = {self._is_coord(name): name for name in list(self.data.variables)}
+            self.select.options = {_is_coord(self.data, name): name for name in list(self.data.variables)}
         else:
-            self.select.options = {self._is_coord(self.data.name): self.data.name}
+            self.select.options = {_is_coord(self.data, self.data.name): self.data.name}
             self.select.value = [self.data.name]
 
     def select_variable(self, variable):
@@ -57,12 +58,6 @@ class Display(SigSlot):
                     print(f"Variable {variable} not present in displayer.")
         else:
             print('DataArray has a single variable.')
-
-    def _is_coord(self, name):
-        if name in list(self.data.coords):
-            return name + " " + '\U0001F4C8'
-        else:
-            return name
 
     @property
     def kwargs(self):

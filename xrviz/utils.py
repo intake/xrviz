@@ -33,3 +33,10 @@ def convert_widget(source, target):
     target_w.param.watch(callback, ['value'], onlychanged=False)
 
     return target_w
+
+
+def _is_coord(data, name):
+    if name in list(data.coords):
+        return name + " " + '\U0001F4C8'
+    else:
+        return name

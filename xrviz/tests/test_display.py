@@ -1,18 +1,21 @@
 import xarray as xr
 from xrviz.display import Display
+import pytest
+from ..utils import _is_coord
 
 
-def test_fill_items():
-    data = xr.open_dataset("xrviz/sample_data/great_lakes.nc")
+@pytest.fixture(scope='module')
+def data():
+    return xr.open_dataset("xrviz/sample_data/great_lakes.nc")
 
-    def in_DataSet(data):
-        displayer = Display(data)
-        for prop in ['# DataSet', '└── Dimensions', '└── Coordinates', '└── Variables', '└── Attributes']:
-            assert prop in displayer.select.options
 
-    def in_DataArray(data):
-        displayer = Display(data)
-        assert 'DataArray : air_u' in displayer.select.options
+def test_fill_items_in_DataSet(data):
+    displayer = Display(data)
+    for prop in data.variables:
+        assert _is_coord(data, prop) in displayer.select.options
 
-    in_DataSet(data)
-    in_DataArray(data.air_u)
+
+def test_fill_items_in_DataArray(data):
+    dataArray = data.temp
+    displayer = Display(dataArray)
+    assert _is_coord(dataArray, dataArray.name) in displayer.select.options
