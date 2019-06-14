@@ -26,7 +26,6 @@ class Fields(SigSlot):
         self.data = data
         self.x = pn.widgets.Select(name='x')
         self.y = pn.widgets.Select(name='y')
-        self.index_selectors = pn.Column()
 
         self._register(self.x, 'x')
 
@@ -34,7 +33,7 @@ class Fields(SigSlot):
 
         self.panel = pn.Row(pn.Column(self.x, self.y),
                             pn.Spacer(width=200),
-                            self.index_selectors, name='Fields',)
+                            name='Fields',)
 
         if isinstance(data, xr.DataArray):
             self.setup(data)
