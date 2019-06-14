@@ -103,10 +103,10 @@ class Dashboard(SigSlot):
         self.plot_button.disabled = False  # important to enable button once disabled
         if self.is_dataset:
             var = var[0]
-            if var in list(self.data.coords) or len(list(self.data[var].dims)) <= 1:
+            if len(list(self.data[var].dims)) <= 1:
                 self.plot_button.disabled = True
         else:
-            if self.data.name in self.data.coords or len(self.data.dims) <= 1:
+            if len(self.data.dims) <= 1:
                 self.plot_button.disabled = True
 
     def callback_for_indexed_graph(self, *events):
@@ -131,7 +131,15 @@ class Dashboard(SigSlot):
                       'title': self.var}
         assign_opts = {x: self.data[x], y: self.data[y]}
         if self.is_dataset:
-            graph = self.data[self.var].sel(**selection, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+            sel_data = self.data[self.var]
         else:
-            graph = self.data.sel(**selection, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+            sel_data = self.data
+
+        # rename the selection in case it is a coordinate, because we
+        # cannot create a Dataset from a DataArray with the same name
+        #  as one of its coordinates
+        if sel_data.name in self.data.coords:
+                sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
+
+        graph = sel_data.sel(**selection, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
         return graph
