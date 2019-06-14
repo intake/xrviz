@@ -6,7 +6,7 @@ from .sigslot import SigSlot
 class Fields(SigSlot):
     """
     This section provides the user with a fields selection panel.
-    Upon selection of a variable in `Display` panel, its data_coords
+    Upon selection of a variable in `Display` panel, its dimensions
     are available as options in `x` and `y` Select widget.
 
     Parameters
@@ -16,9 +16,9 @@ class Fields(SigSlot):
 
     Attributes
     ----------
-    x: `panel.widget.Select` for selection of coords along x-axis.
-    y: `panel.widget.Select` for selection of coords along y-axis.
-    kwargs: provides access to coords selected by `x` and `y`.
+    x: `panel.widget.Select` for selection of dims along x-axis.
+    y: `panel.widget.Select` for selection of dims along y-axis.
+    kwargs: provides access to dims selected by `x` and `y`.
     """
 
     def __init__(self, data):
@@ -41,11 +41,11 @@ class Fields(SigSlot):
     def setup(self, var):
         if isinstance(self.data, xr.Dataset):
             self.var = var[0]
-            self.var_coords = list(self.data[var].dims)
+            self.var_dims = list(self.data[var].dims)
         else:
-            self.var_coords = list(self.data.dims)
-        x_opts = self.var_coords.copy()
-        if len(x_opts) > 0:  # to check that data has coords
+            self.var_dims = list(self.data.dims)
+        x_opts = self.var_dims.copy()
+        if len(x_opts) > 0:  # to check that data has dim (is not Empty)
             self.x.options = x_opts
             self.x.value = x_opts[0]
             y_opts = x_opts.copy()
@@ -58,9 +58,9 @@ class Fields(SigSlot):
     def change_y(self, value):
         """
         Updates the options of y, by removing option selected in x (value),
-        from all the coordinate options available.
+        from all the variable dimensions available as options.
         """
-        values = self.var_coords.copy()
+        values = self.var_dims.copy()
         values.remove(self.x.value)
         self.y.options = values
 

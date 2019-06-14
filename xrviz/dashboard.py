@@ -89,8 +89,8 @@ class Dashboard(SigSlot):
 
     def create_players(self):
         """
-        To convert the auto-generated slider, into Select and Player
-        widget.
+        To convert the Selector widgets in index_selectors into Player
+        widgets. Player widgets are linked with their respective selectors.
         """
         for selector in self.index_selectors:
             player = convert_widget(selector, pn.widgets.DiscretePlayer())
@@ -98,7 +98,7 @@ class Dashboard(SigSlot):
 
     def check_is_plottable(self, var):
         """
-        If a variable is coordinate or 1-d, disable plot_button for it.
+        If a variable is 1-d, disable plot_button for it.
         """
         self.plot_button.disabled = False  # important to enable button once disabled
         if self.is_dataset:
@@ -117,7 +117,7 @@ class Dashboard(SigSlot):
 
     def create_indexed_graph(self, **selection):
         """
-        Creates graph for  selected indexes in selectors or players
+        Creates graph for  selected indexes in selectors or players.
         """
         # selection consists of only one value here
         # update it to have value of other var_selector_dims
