@@ -1,6 +1,7 @@
 import panel as pn
 import xarray as xr
 from .sigslot import SigSlot
+from .utils import convert_widget
 
 
 class Fields(SigSlot):
@@ -126,10 +127,15 @@ class Fields(SigSlot):
 
     def rearrange_graph(self, graph):
         # Moves the sliders to bottom of graph if they are present
+        # And convert them into Selectors
         graph = pn.Row(graph)
-        try:
+        try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
+            index_selectors = pn.Row()
             if graph[0][1]:  # if sliders are generated
-                return pn.Column(graph[0][0], graph[0][1])
+                for slider in graph[0][1]:
+                    index_selector = convert_widget(slider, pn.widgets.Select())
+                    index_selectors.append(index_selector)
+                return pn.Column(graph[0][0], index_selectors)
         except:  # else return simple graph
             return graph
 
