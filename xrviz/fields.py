@@ -122,7 +122,16 @@ class Fields(SigSlot):
         if len(sel.shape) == 1:
             self.agg_graph[0] = sel.hvplot()
         else:
-            self.agg_graph[0] = sel.hvplot.quadmesh()
+            self.agg_graph[0] = self.rearrange_graph(sel.hvplot.quadmesh())
+
+    def rearrange_graph(self, graph):
+        # Moves the sliders to bottom of graph if they are present
+        graph = pn.Row(graph)
+        try:
+            if graph[0][1]:  # if sliders are generated
+                return pn.Column(graph[0][0], graph[0][1])
+        except:  # else return simple graph
+            return graph
 
     @property
     def kwargs(self):
