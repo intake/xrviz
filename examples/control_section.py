@@ -1,8 +1,8 @@
 import xarray as xr
 import xrviz
-from xrviz.control import Control
+from xrviz.dashboard import Dashboard
 
 ds = xrviz.sample_data.great_lakes
 
-control = Control(ds)
-control.show()
+dash = Dashboard(ds)
+dash.show()
