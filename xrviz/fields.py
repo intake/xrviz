@@ -31,7 +31,7 @@ class Fields(SigSlot):
                                              width=200,
                                              options=['mean', 'max',
                                                       'min', 'median',
-                                                      'std'])
+                                                      'std', 'count'])
         self.dims_selector = pn.widgets.MultiSelect(size=8, min_width=200,
                                                     height=110,
                                                     width_policy='min',
@@ -115,6 +115,8 @@ class Fields(SigSlot):
             sel = self.data[self.var].median(self.dims_selected_for_agg)
         elif self.aggregation.value == 'std':
             sel = self.data[self.var].std(self.dims_selected_for_agg)
+        elif self.aggregation.value == 'count':
+            sel = (~ self.data[self.var].isnull()).sum(self.dims_selected_for_agg)
 
         sel = sel.assign_coords(**assign_opts)
 
