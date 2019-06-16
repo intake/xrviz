@@ -4,6 +4,7 @@ from .sigslot import SigSlot
 from .display import Display
 from .describe import Describe
 from .fields import Fields
+from .coord_setter import CoordSetter
 
 
 class Control(SigSlot):
@@ -31,6 +32,7 @@ class Control(SigSlot):
         self.displayer = Display(self.data)
         self.describer = Describe(self.data)
         self.fields = Fields(self.data)
+        self.coord_setter = CoordSetter(self.data)
 
         self.displayer.connect("variable_selected", self.describer.setup)
         self.displayer.connect("variable_selected", self.fields.setup)
@@ -39,7 +41,16 @@ class Control(SigSlot):
                                pn.Row(self.displayer.panel,
                                       self.describer.panel),
                                pn.Tabs(self.fields.panel,
+                                       self.coord_setter.panel,
                                        background=(230, 230, 230), width=1160))
+
+    def set_coords(self, data):
+        self.data = data
+        self.coord_setter.set_coords(self.data)
+        self.displayer.set_coords(self.data)
+        self.describer.set_coords(self.data)
+        self.fields.set_coords(self.data)
+        print('Control:', list(self.data.coords))
 
     @property
     def kwargs(self):

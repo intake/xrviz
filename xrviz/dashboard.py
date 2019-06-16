@@ -37,7 +37,11 @@ class Dashboard(SigSlot):
                              pn.Column(name='Players'))
 
         self._register(self.plot_button, 'plot_clicked', 'clicks')
+        self._register(self.control.coord_setter.set_coord_button, 'set_coords', 'clicks')
+
         self.connect('plot_clicked', self.create_plot)
+        self.connect("set_coords", self.set_coords)
+
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
 
         self.panel = pn.Column(self.control.panel,
@@ -56,6 +60,16 @@ class Dashboard(SigSlot):
             self.is_dataset = False
         else:
             raise ValueError
+
+    def set_coords(self, *args):
+        # We can't reset indexed coordinates so add them every time
+        # in coord_selector.value
+        self.data = self.data.reset_coords()
+        indexed_coords = set(self.data.dims) & set(self.data.coords)
+        new_coords = list(set(self.control.coord_setter.coord_selector.value) | set(indexed_coords))
+        self.data = self.data.set_coords(new_coords)
+        self.control.set_coords(self.data)
+        print('Dashboard:', list(self.data.coords))
 
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs

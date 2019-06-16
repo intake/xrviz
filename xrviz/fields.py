@@ -68,3 +68,7 @@ class Fields(SigSlot):
     def kwargs(self):
         out = {p.name: p.value for p in self.panel[0]}
         return out
+
+    def set_coords(self, data):
+        self.data = data
+        print('Fields:', list(self.data.coords))

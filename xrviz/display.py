@@ -66,3 +66,7 @@ class Display(SigSlot):
         """
         out = {p.name: p.value[0] for p in self.panel}
         return out
+
+    def set_coords(self, data):
+        self.data = data
+        print('Display:', list(self.data.coords))
