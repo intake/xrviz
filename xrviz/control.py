@@ -56,7 +56,7 @@ class Control(SigSlot):
         self.coord_setter.set_coords(self.data)
         self.displayer.set_coords(self.data)
         self.describer.set_coords(self.data, var)
-        self.fields.set_coords(self.data)
+        self.fields.set_coords(self.data, var)
         print('Control:', list(self.data.coords))
 
     @property
