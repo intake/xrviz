@@ -80,19 +80,29 @@ class Dashboard(SigSlot):
         self.output[2].clear()  # clears Players
 
         if self.is_dataset:
-            self.var_dims = list(self.data[self.var].dims)
-            #  var_selector_dims refers to dims for which index_selectors would be created
-            self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [self.kwargs['x'], self.kwargs['y']]])
+            x = self.kwargs['x']
+            if not self.is_non_indexed_coord(x):
+                self.var_dims = list(self.data[self.var].dims)
+                #  var_selector_dims refers to dims for which index_selectors would be created
+                self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [self.kwargs['x'], self.kwargs['y']]])
 
-            for dim in self.var_selector_dims:
-                selector = pn.widgets.Select(name=dim, options=list(self.data[self.var][dim].values))
-                self.index_selectors.append(selector)
-                selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
+                for dim in self.var_selector_dims:
+                    selector = pn.widgets.Select(name=dim, options=list(self.data[self.var][dim].values))
+                    self.index_selectors.append(selector)
+                    selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
 
-            self.output[0] = self.create_indexed_graph()
-            for selector in self.index_selectors:
-                self.output[1].append(selector)
-            self.create_players()
+                self.output[0] = self.create_indexed_graph()
+                for selector in self.index_selectors:
+                    self.output[1].append(selector)
+                self.create_players()
+            else:  # is_indexed_coord
+                graph_opts = {'x': self.kwargs['x'],
+                              'y': self.kwargs['y']}
+                sel = self.data[self.var]
+                if self.var in list(self.data.coords):
+                    sel = sel.to_dataset(name=f'{sel.name}_')
+                sel.hvplot.quadmesh(**graph_opts)
+                self.output[0] = pn.Row(sel.hvplot.quadmesh(**graph_opts))
 
         else:  # if is_dataArray
             self.var_dims = list(self.data.dims)
@@ -164,3 +174,11 @@ class Dashboard(SigSlot):
 
         graph = sel_data.sel(**selection, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
         return graph
+
+    def is_non_indexed_coord(self, x):
+        indexed_coords = set(self.data[self.var].dims) & set(self.data[self.var].coords)
+        non_indexed_coords = list(set(self.data[self.var].coords) - indexed_coords)
+        if x in non_indexed_coords:
+            return True
+        else:
+            return False
