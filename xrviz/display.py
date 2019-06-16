@@ -70,4 +70,3 @@ class Display(SigSlot):
     def set_coords(self, data):
         self.data = data
         self.set_variables()
-        print('Display:', list(self.data.coords))

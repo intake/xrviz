@@ -91,4 +91,3 @@ class Fields(SigSlot):
         self.data = data
         if var:
             self.setup(var)
-        print('Fields:', list(self.data.coords))

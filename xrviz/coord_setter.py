@@ -19,4 +19,3 @@ class CoordSetter(SigSlot):
     def set_coords(self, data):
         self.data = data
         self.coord_selector.value = list(self.data.coords)
-        print('Coords Setter:', list(self.data.coords))

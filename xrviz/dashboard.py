@@ -70,7 +70,6 @@ class Dashboard(SigSlot):
         new_coords = list(set(self.control.coord_setter.coord_selector.value) | set(indexed_coords))
         self.data = self.data.set_coords(new_coords)
         self.control.set_coords(self.data)
-        print('Dashboard:', list(self.data.coords))
 
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
