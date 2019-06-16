@@ -103,20 +103,10 @@ class Fields(SigSlot):
         remaining_dims = [dim for dim in self.var_dims if dim not in self.dims_selected_for_agg]
         assign_opts = {dim: self.data[dim] for dim in remaining_dims}
 
-        # the method getattr(data.air_u, self.aggregation.value ,[*self.dims_selected_for_agg])
-        # does not works as expected
-        if self.aggregation.value == 'mean':
-            sel = self.data[self.var].mean(self.dims_selected_for_agg)
-        elif self.aggregation.value == 'max':
-            sel = self.data[self.var].max(self.dims_selected_for_agg)
-        elif self.aggregation.value == 'min':
-            sel = self.data[self.var].min(self.dims_selected_for_agg)
-        elif self.aggregation.value == 'median':
-            sel = self.data[self.var].median(self.dims_selected_for_agg)
-        elif self.aggregation.value == 'std':
-            sel = self.data[self.var].std(self.dims_selected_for_agg)
-        elif self.aggregation.value == 'count':
+        if self.aggregation.value == 'count':
             sel = (~ self.data[self.var].isnull()).sum(self.dims_selected_for_agg)
+        else:  # for any of -- 'mean', 'max','min', 'median','std'
+            sel = getattr(self.data[self.var], self.aggregation.value)(self.dims_selected_for_agg)
 
         sel = sel.assign_coords(**assign_opts)
 
