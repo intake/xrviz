@@ -75,32 +75,38 @@ class Dashboard(SigSlot):
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
         self.var = self.kwargs['Variables']
-        if self.is_dataset:
-            self.var_dims = list(self.data[self.var].dims)
-        else:
-            self.var_dims = list(self.data.dims)
-        #  var_selector_dims refers to dims for which index_selectors would be created
-        self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [self.kwargs['x'], self.kwargs['y']]])
-
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
         self.output[2].clear()  # clears Players
 
         if self.is_dataset:
+            self.var_dims = list(self.data[self.var].dims)
+            #  var_selector_dims refers to dims for which index_selectors would be created
+            self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [self.kwargs['x'], self.kwargs['y']]])
+
             for dim in self.var_selector_dims:
                 selector = pn.widgets.Select(name=dim, options=list(self.data[self.var][dim].values))
                 self.index_selectors.append(selector)
                 selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
-        else:
+
+            self.output[0] = self.create_indexed_graph()
+            for selector in self.index_selectors:
+                self.output[1].append(selector)
+            self.create_players()
+
+        else:  # if is_dataArray
+            self.var_dims = list(self.data.dims)
+            self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [self.kwargs['x'], self.kwargs['y']]])
+
             for dim in self.var_selector_dims:
                 selector = pn.widgets.Select(name=dim, options=list(self.data[dim].values))
                 self.index_selectors.append(selector)
                 selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
 
-        self.output[0] = self.create_indexed_graph()
-        for selector in self.index_selectors:
-            self.output[1].append(selector)
-        self.create_players()
+            self.output[0] = self.create_indexed_graph()
+            for selector in self.index_selectors:
+                self.output[1].append(selector)
+            self.create_players()
 
     def create_players(self):
         """
