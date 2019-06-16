@@ -37,10 +37,11 @@ class Dashboard(SigSlot):
                              pn.Column(name='Players'))
 
         self._register(self.plot_button, 'plot_clicked', 'clicks')
-        self._register(self.control.coord_setter.set_coord_button, 'set_coords', 'clicks')
-
         self.connect('plot_clicked', self.create_plot)
-        self.connect("set_coords", self.set_coords)
+
+        if self.is_dataset:
+            self._register(self.control.coord_setter.set_coord_button, 'set_coords', 'clicks')
+            self.connect("set_coords", self.set_coords)
 
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
 

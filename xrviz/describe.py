@@ -93,6 +93,8 @@ class Describe(SigSlot):
                                               var_size=var_size,
                                               )
 
-    def set_coords(self, data):
+    def set_coords(self, data, var):
         self.data = data
+        if var is not None:
+            self.setup(var=[var])
         print('Describe:', list(self.data.coords))
