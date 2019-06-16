@@ -41,8 +41,8 @@ class Fields(SigSlot):
     def setup(self, var):
         #  For a variable Union of `dims` and `non_indexed_coords`
         #  will act as options in `x` Select, here called `sel_options`
+        self.var = var[0]
         if isinstance(self.data, xr.Dataset):
-            self.var = var[0]
             self.var_dims = list(self.data[var].dims)
             self.indexed_coords = set(self.var_dims) & set(self.data[var].coords)
             self.non_indexed_coords = list(set(self.data[var].coords) - self.indexed_coords)
@@ -70,13 +70,17 @@ class Fields(SigSlot):
         # else if x belong to non_indexed_coords, replace y with remaining
         # non_indexed_coords
         values = self.sel_options.copy()
-        x_val = self.x.value
-        values.remove(x_val)
-        if x_val in self.var_dims:
-            values = list(set(values) - set(self.non_indexed_coords))
-        else:  # x_val belong to non_indexed_coords
-            values = list(set(values) - set(self.var_dims))
-        self.y.options = values
+        if isinstance(self.data, xr.Dataset):
+            x_val = self.x.value
+            values.remove(x_val)
+            if x_val in self.var_dims:
+                values = list(set(values) - set(self.non_indexed_coords))
+            else:  # x_val belong to non_indexed_coords
+                values = list(set(values) - set(self.var_dims))
+            self.y.options = values
+        else:
+            values.remove(self.x.value)
+            self.y.options = values
 
     @property
     def kwargs(self):
