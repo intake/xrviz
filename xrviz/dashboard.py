@@ -80,7 +80,7 @@ class Dashboard(SigSlot):
 
         if self.is_dataset:
             x = self.kwargs['x']
-            if not self.is_non_indexed_coord(x):
+            if not self.is_non_indexed_coord(x):  # i.e is a var_dim
                 self.var_dims = list(self.data[self.var].dims)
                 #  var_selector_dims refers to dims for which index_selectors would be created
                 self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [self.kwargs['x'], self.kwargs['y']]])
