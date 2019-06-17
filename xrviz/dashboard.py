@@ -181,8 +181,11 @@ class Dashboard(SigSlot):
             return False
 
     def create_selectors_players(self, graph):
-        # Moves the sliders to bottom of graph if they are present
-        # And convert them into Selectors
+        """
+        This function is applicable for non_indexed coords, in case
+        sliders are generated. This function moves the sliders to bottom of
+        graph if they are present and convert them into Selectors,Players.
+        """
         graph = pn.Row(graph)
         try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
             index_selectors = []
@@ -195,4 +198,4 @@ class Dashboard(SigSlot):
                     self.output[1].append(index_selector)
                     self.output[2].append(index_player)
         except:  # else return simple graph
-             self.output[0] = graph
+            self.output[0] = graph
