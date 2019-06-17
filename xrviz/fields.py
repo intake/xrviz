@@ -74,11 +74,11 @@ class Fields(SigSlot):
             x_val = self.x.value
             values.remove(x_val)
             if x_val in self.var_dims:
-                values = list(set(values) - set(self.non_indexed_coords))
+                valid_values = list(set(values) - set(self.non_indexed_coords))
             else:  # x_val belong to non_indexed_coords
                 values = list(set(values) - set(self.var_dims))
-            #  Plot can be generated for 2 values only if ndims of both match
-            valid_values = [val for val in values if self.ndim_matches(x_val, val)]
+                #  Plot can be generated for 2 values only if ndims of both match
+                valid_values = [val for val in values if self.ndim_matches(x_val, val)]
             self.y.options = valid_values
         else:
             values.remove(self.x.value)
