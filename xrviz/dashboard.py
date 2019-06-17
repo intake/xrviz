@@ -91,8 +91,6 @@ class Dashboard(SigSlot):
                     selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
 
                 self.output[0] = self.create_indexed_graph()
-                for selector in self.index_selectors:
-                    self.output[1].append(selector)
                 self.create_players()
             else:  # is_indexed_coord
                 graph_opts = {'x': self.kwargs['x'],
@@ -101,7 +99,8 @@ class Dashboard(SigSlot):
                 if self.var in list(self.data.coords):
                     sel = sel.to_dataset(name=f'{sel.name}_')
                 sel.hvplot.quadmesh(**graph_opts)
-                self.output[0] = pn.Row(sel.hvplot.quadmesh(**graph_opts))
+                graph = sel.hvplot.quadmesh(**graph_opts)
+                self.create_selectors_players(graph)
 
         else:  # if is_dataArray
             self.var_dims = list(self.data.dims)
@@ -113,8 +112,6 @@ class Dashboard(SigSlot):
                 selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
 
             self.output[0] = self.create_indexed_graph()
-            for selector in self.index_selectors:
-                self.output[1].append(selector)
             self.create_players()
 
     def create_players(self):
@@ -123,6 +120,7 @@ class Dashboard(SigSlot):
         widgets. Player widgets are linked with their respective selectors.
         """
         for selector in self.index_selectors:
+            self.output[1].append(selector)
             player = convert_widget(selector, pn.widgets.DiscretePlayer())
             self.output[2].append(player)
 
@@ -181,3 +179,20 @@ class Dashboard(SigSlot):
             return True
         else:
             return False
+
+    def create_selectors_players(self, graph):
+        # Moves the sliders to bottom of graph if they are present
+        # And convert them into Selectors
+        graph = pn.Row(graph)
+        try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
+            index_selectors = []
+            if graph[0][1]:  # if sliders are generated
+                self.output[0] = graph[0][0]
+                for slider in graph[0][1]:
+                    index_selector = convert_widget(slider, pn.widgets.Select())
+                    index_player = convert_widget(slider, pn.widgets.DiscretePlayer())
+                    self.index_selectors.append(index_selector)
+                    self.output[1].append(index_selector)
+                    self.output[2].append(index_player)
+        except:  # else return simple graph
+             self.output[0] = graph
