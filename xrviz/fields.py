@@ -110,4 +110,5 @@ class Fields(SigSlot):
         out = {p.name: p.value for p in self.panel[0]}
         selectors = {p.name: p.value for p in self.panel[1][0]}
         out.update(selectors)
+        out.update({'rem_dims': self.remaining_dims})
         return out

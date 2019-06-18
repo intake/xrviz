@@ -92,7 +92,44 @@ class Dashboard(SigSlot):
         self.create_agg_graph()
 
     def create_agg_graph(self,):
-        print(self.kwargs)
+        rem_dims = self.kwargs['rem_dims']
+        rem_dims = [dim for dim in rem_dims if self.kwargs[dim] is not 'None']
+        if len(rem_dims) > 0:
+            if self.is_dataset:
+                sel_data = getattr(self.data, self.var)
+            else:
+                sel_data = self.data
+
+            for dim in rem_dims:
+                if self.kwargs[dim] == 'count':
+                    sel_data = (~ sel_data.isnull()).sum(dim)
+                else:
+                    agg = self.kwargs[dim]
+                    sel_data = getattr(sel_data, agg)(dim)
+
+            assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
+            sel_data = sel_data.assign_coords(**assign_opts)
+
+            # for 1d sel we have simple hvplot
+            # for 2d or 3d we will have quadmesh
+            if len(sel_data.shape) == 1:
+                self.output[3] = sel_data.hvplot()
+            else:
+                self.output[3] = self.rearrange_graph(sel_data.hvplot.quadmesh())
+
+    def rearrange_graph(self, graph):
+        # Moves the sliders to bottom of graph if they are present
+        # And convert them into Selectors
+        graph = pn.Row(graph)
+        try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
+            index_selectors = pn.Row()
+            if graph[0][1]:  # if sliders are generated
+                for slider in graph[0][1]:
+                    index_selector = convert_widget(slider, pn.widgets.Select())
+                    index_selectors.append(index_selector)
+                return pn.Column(graph[0][0], index_selectors)
+        except:  # else return simple graph
+            return graph
 
     def create_players(self):
         """
