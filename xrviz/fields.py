@@ -32,7 +32,7 @@ class Fields(SigSlot):
                          'min', 'median',
                          'std', 'count']
         self.agg_plot_button = pn.widgets.Button(name='Aggregate',
-                                                 width=200,
+                                                 width=100,
                                                  disabled=True)
         self.agg_graph = pn.Row(pn.Spacer(name='Agg Graph'))
 
@@ -69,13 +69,13 @@ class Fields(SigSlot):
         else:
             self.var_dims = list(self.data.dims)
 
-        self.dims_aggs = dict(zip(self.var_dims,['None']*len(self.var_dims)))
+        self.dims_aggs = dict(zip(self.var_dims, ['None']*len(self.var_dims)))
 
         for dim in self.var_dims:
             dim_selector = pn.widgets.Select(name=dim,
                                              options=self.agg_opts,
                                              width=100,)
-            dim_selector.param.watch(self.callback, ['value'], 
+            dim_selector.param.watch(self.callback, ['value'],
                                      onlychanged=False)
             self.agg_selectors.append(dim_selector)
 
@@ -110,9 +110,13 @@ class Fields(SigSlot):
 
     def create_agg_plot(self, *args):
         sel_dims = self.dims_selected_for_agg
-        sel = getattr(self.data, self.var) 
+        sel = getattr(self.data, self.var)
+
         for dim, agg in sel_dims.items():
-            sel = getattr(sel, agg)(dim)
+            if agg == 'count':
+                sel = (~ sel.isnull()).sum(dim)
+            else:
+                sel = getattr(sel, agg)(dim)
 
         assign_opts = {dim: self.data[dim] for dim in sel.dims}
         sel = sel.assign_coords(**assign_opts)
