@@ -24,7 +24,7 @@ class Fields(SigSlot):
 
     def __init__(self, data):
         super().__init__()
-        self.data = data
+        self.set_data(data)
         self.x = pn.widgets.Select(name='x', width=200)
         self.y = pn.widgets.Select(name='y', width=200)
         self.agg_selectors = pn.Column()
@@ -48,8 +48,16 @@ class Fields(SigSlot):
                             self.agg_graph,
                             name='Fields',)
 
-        if isinstance(data, xr.DataArray):
+        if not self.is_dataset:
             self.setup(data)
+
+    def set_data(self, data):
+        if isinstance(data, xr.Dataset):
+            self.data = data
+            self.is_dataset = True
+        else:
+            self.data = data
+            self.is_dataset = False
 
     def setup(self, var):
         # print(self.panel)
@@ -60,7 +68,7 @@ class Fields(SigSlot):
         self.agg_plot_button.disabled = True
         self.agg_graph[0] = pn.Spacer(name='Agg Graph')  # To clear Agg Graph upon selection of new variable
 
-        if isinstance(self.data, xr.Dataset):
+        if self.is_dataset:
             if isinstance(var, str):
                 self.var = var
             else:
@@ -110,7 +118,10 @@ class Fields(SigSlot):
 
     def create_agg_plot(self, *args):
         sel_dims = self.dims_selected_for_agg
-        sel = getattr(self.data, self.var)
+        if self.is_dataset:
+            sel = getattr(self.data, self.var)
+        else:
+            sel = self.data
 
         for dim, agg in sel_dims.items():
             if agg == 'count':
