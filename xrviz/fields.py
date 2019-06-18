@@ -27,32 +27,24 @@ class Fields(SigSlot):
         self.data = data
         self.x = pn.widgets.Select(name='x', width=200)
         self.y = pn.widgets.Select(name='y', width=200)
-        self.aggregation = pn.widgets.Select(name='Aggregation',
-                                             width=200,
-                                             options=['mean', 'max',
-                                                      'min', 'median',
-                                                      'std', 'count'])
-        self.dims_selector = pn.widgets.MultiSelect(size=8, min_width=200,
-                                                    height=110,
-                                                    width_policy='min',
-                                                    name='Aggregate along')
+        self.agg_selectors = pn.Column()
+        self.agg_opts = ['None', 'mean', 'max',
+                         'min', 'median',
+                         'std', 'count']
         self.agg_plot_button = pn.widgets.Button(name='Aggregate',
                                                  width=200,
                                                  disabled=True)
         self.agg_graph = pn.Row(pn.Spacer(name='Agg Graph'))
 
         self._register(self.x, 'x')
-        self._register(self.dims_selector, 'agg_dims')
         self._register(self.agg_plot_button, 'agg_plot_button', 'clicks')
 
         self.connect('x', self.change_y)
-        self.connect('agg_dims', self.setup_agg_button)
         self.connect('agg_plot_button', self.create_agg_plot)
 
         self.panel = pn.Row(pn.Column(self.x, self.y),
-                            pn.Column(self.aggregation,
-                                      self.dims_selector,
-                                      self.agg_plot_button),
+                            pn.Column(self.agg_selectors,
+                                      pn.Spacer(name='agg_plot_button')),
                             self.agg_graph,
                             name='Fields',)
 
@@ -60,17 +52,34 @@ class Fields(SigSlot):
             self.setup(data)
 
     def setup(self, var):
-        self.dims_selector.value = []  # To empty previouly selected value from selector
+        # print(self.panel)
+        self.agg_selectors.clear()  # To empty previouly selected value from selector
+        # print(self.panel[1][1])
+        self.panel[1][1] = self.agg_plot_button
         self.dims_selected_for_agg = []
         self.agg_plot_button.disabled = True
         self.agg_graph[0] = pn.Spacer(name='Agg Graph')  # To clear Agg Graph upon selection of new variable
+
         if isinstance(self.data, xr.Dataset):
-            self.var = var[0]
+            if isinstance(var, str):
+                self.var = var
+            else:
+                self.var = var[0]
             self.var_dims = list(self.data[var].dims)
         else:
             self.var_dims = list(self.data.dims)
 
-        self.dims_selector.options = self.var_dims
+        self.dims_aggs = dict(zip(self.var_dims,['None']*len(self.var_dims)))
+
+        for dim in self.var_dims:
+            dim_selector = pn.widgets.Select(name=dim,
+                                             options=self.agg_opts,
+                                             width=100,)
+            dim_selector.param.watch(self.callback, ['value'], 
+                                     onlychanged=False)
+            self.agg_selectors.append(dim_selector)
+
+        # self.dims_selector.options = self.var_dims
         x_opts = self.var_dims.copy()
         if len(x_opts) > 0:  # to check that data has dim (is not Empty)
             self.x.options = x_opts
@@ -100,14 +109,12 @@ class Fields(SigSlot):
         self.y.options = values
 
     def create_agg_plot(self, *args):
-        remaining_dims = [dim for dim in self.var_dims if dim not in self.dims_selected_for_agg]
-        assign_opts = {dim: self.data[dim] for dim in remaining_dims}
+        sel_dims = self.dims_selected_for_agg
+        sel = getattr(self.data, self.var) 
+        for dim, agg in sel_dims.items():
+            sel = getattr(sel, agg)(dim)
 
-        if self.aggregation.value == 'count':
-            sel = (~ self.data[self.var].isnull()).sum(self.dims_selected_for_agg)
-        else:  # for any of -- 'mean', 'max','min', 'median','std'
-            sel = getattr(self.data[self.var], self.aggregation.value)(self.dims_selected_for_agg)
-
+        assign_opts = {dim: self.data[dim] for dim in sel.dims}
         sel = sel.assign_coords(**assign_opts)
 
         # for 1d sel we have simple hvplot
@@ -130,6 +137,19 @@ class Fields(SigSlot):
                 return pn.Column(graph[0][0], index_selectors)
         except:  # else return simple graph
             return graph
+
+    def callback(self, *events):
+        for event in events:
+            if event.name == 'value':
+                self.dims_aggs[event.obj.name] = event.new
+                selected_dims = {k: v for k, v in self.dims_aggs.items() if v is not 'None'}
+
+        self.dims_selected_for_agg = selected_dims
+        self.agg_plot_button.disabled = True
+        # We need atleast 1 and at max (dims-1) selections to aggregate
+        # So this button would be enbled when this condition is satisfied.
+        if len(selected_dims) == 1 or len(selected_dims) < len(self.var_dims):
+            self.agg_plot_button.disabled = False
 
     @property
     def kwargs(self):
