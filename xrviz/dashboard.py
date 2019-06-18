@@ -73,16 +73,13 @@ class Dashboard(SigSlot):
         self.output[2].clear()  # clears Players
         self.output[3].clear()
 
-        if self.is_dataset:
-            for dim in self.var_selector_dims:
+        for dim in self.var_selector_dims:
+            if self.is_dataset:
                 selector = pn.widgets.Select(name=dim, options=list(self.data[self.var][dim].values))
-                self.index_selectors.append(selector)
-                selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
-        else:
-            for dim in self.var_selector_dims:
+            else:
                 selector = pn.widgets.Select(name=dim, options=list(self.data[dim].values))
-                self.index_selectors.append(selector)
-                selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
+            self.index_selectors.append(selector)
+            selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
 
         self.output[0] = self.create_indexed_graph()
         for selector in self.index_selectors:
@@ -106,8 +103,10 @@ class Dashboard(SigSlot):
                 else:
                     agg = self.kwargs[dim]
                     sel_data = getattr(sel_data, agg)(dim)
+                    # print(dim, agg)
 
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
+            # print(assign_opts)
             sel_data = sel_data.assign_coords(**assign_opts)
 
             # for 1d sel we have simple hvplot
@@ -166,14 +165,12 @@ class Dashboard(SigSlot):
         # selection consists of only one value here
         # update it to have value of other var_selector_dims
         for i, dim in enumerate(list(self.var_selector_dims)):
-            if dim not in list(selection):
-                selection[dim] = self.index_selectors[i].value
+            selection[dim] = self.index_selectors[i].value
         x = self.kwargs['x']
         y = self.kwargs['y']
         graph_opts = {'x': x,
                       'y': y,
                       'title': self.var}
-        assign_opts = {x: self.data[x], y: self.data[y]}
         if self.is_dataset:
             sel_data = self.data[self.var]
         else:
@@ -185,5 +182,7 @@ class Dashboard(SigSlot):
         if sel_data.name in self.data.coords:
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
-        graph = sel_data.sel(**selection, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+        sel_data = sel_data.sel(**selection, drop=True)
+        assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
+        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
         return graph
