@@ -34,7 +34,8 @@ class Dashboard(SigSlot):
         self.index_selectors = []
         self.output = pn.Row(pn.Spacer(name='Graph'),
                              pn.Column(name='Index_selectors'),
-                             pn.Column(name='Players'))
+                             pn.Column(name='Players'),
+                             pn.Column(name='Agg Graph'),)
 
         self._register(self.plot_button, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
@@ -70,6 +71,7 @@ class Dashboard(SigSlot):
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
         self.output[2].clear()  # clears Players
+        self.output[3].clear()
 
         if self.is_dataset:
             for dim in self.var_selector_dims:
@@ -86,6 +88,11 @@ class Dashboard(SigSlot):
         for selector in self.index_selectors:
             self.output[1].append(selector)
         self.create_players()
+
+        self.create_agg_graph()
+
+    def create_agg_graph(self,):
+        print(self.kwargs)
 
     def create_players(self):
         """
