@@ -60,11 +60,8 @@ class Fields(SigSlot):
             self.is_dataset = False
 
     def setup(self, var):
-        # print(self.panel)
         self.agg_selectors.clear()  # To empty previouly selected value from selector
-        # print(self.panel[1][1])
         self.panel[1][1] = self.agg_plot_button
-        self.dims_selected_for_agg = []
         self.agg_plot_button.disabled = True
         self.agg_graph[0] = pn.Spacer(name='Agg Graph')  # To clear Agg Graph upon selection of new variable
 
@@ -76,7 +73,7 @@ class Fields(SigSlot):
             self.var_dims = list(self.data[var].dims)
         else:
             self.var_dims = list(self.data.dims)
-
+        #  dims_aggs: for ex {'dim1':'None','dim2':'None'}
         self.dims_aggs = dict(zip(self.var_dims, ['None']*len(self.var_dims)))
 
         for dim in self.var_dims:
@@ -87,7 +84,6 @@ class Fields(SigSlot):
                                      onlychanged=False)
             self.agg_selectors.append(dim_selector)
 
-        # self.dims_selector.options = self.var_dims
         x_opts = self.var_dims.copy()
         if len(x_opts) > 0:  # to check that data has dim (is not Empty)
             self.x.options = x_opts
@@ -98,14 +94,6 @@ class Fields(SigSlot):
                 self.y.options = []
             else:
                 self.y.options = y_opts
-
-    def setup_agg_button(self, selected_dims):
-        self.dims_selected_for_agg = selected_dims
-        self.agg_plot_button.disabled = True
-        # We need atleast 1 and at max (dims-1) selections to aggregate
-        # So this button would be enbled when this condition is satisfied.
-        if len(selected_dims) == 1 or len(selected_dims) < len(self.dims_selector.options):
-            self.agg_plot_button.disabled = False
 
     def change_y(self, value):
         """
@@ -119,25 +107,25 @@ class Fields(SigSlot):
     def create_agg_plot(self, *args):
         sel_dims = self.dims_selected_for_agg
         if self.is_dataset:
-            sel = getattr(self.data, self.var)
+            sel_data = getattr(self.data, self.var)
         else:
-            sel = self.data
+            sel_data = self.data
 
         for dim, agg in sel_dims.items():
             if agg == 'count':
-                sel = (~ sel.isnull()).sum(dim)
+                sel_data = (~ sel_data.isnull()).sum(dim)
             else:
-                sel = getattr(sel, agg)(dim)
+                sel_data = getattr(sel_data, agg)(dim)
 
-        assign_opts = {dim: self.data[dim] for dim in sel.dims}
-        sel = sel.assign_coords(**assign_opts)
+        assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
+        sel_data = sel_data.assign_coords(**assign_opts)
 
         # for 1d sel we have simple hvplot
         # for 2d or 3d we will have quadmesh
-        if len(sel.shape) == 1:
-            self.agg_graph[0] = sel.hvplot()
+        if len(sel_data.shape) == 1:
+            self.agg_graph[0] = sel_data.hvplot()
         else:
-            self.agg_graph[0] = self.rearrange_graph(sel.hvplot.quadmesh())
+            self.agg_graph[0] = self.rearrange_graph(sel_data.hvplot.quadmesh())
 
     def rearrange_graph(self, graph):
         # Moves the sliders to bottom of graph if they are present
@@ -163,7 +151,7 @@ class Fields(SigSlot):
         self.agg_plot_button.disabled = True
         # We need atleast 1 and at max (dims-1) selections to aggregate
         # So this button would be enbled when this condition is satisfied.
-        if len(selected_dims) == 1 or len(selected_dims) < len(self.var_dims):
+        if len(selected_dims) >= 1 and len(selected_dims) < len(self.var_dims):
             self.agg_plot_button.disabled = False
 
     @property
