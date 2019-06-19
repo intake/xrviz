@@ -88,8 +88,10 @@ class Dashboard(SigSlot):
             player = convert_widget(selector, pn.widgets.DiscretePlayer())
             for i, sel_widget in enumerate(self.control.fields.panel[1][1]):
                 if sel_widget.name == player.name:
-                    self.control.fields.panel[1][1][i] = pn.Row(selector, player)
-                    # pn.Row(selector, player)
+                    self.control.fields.panel[1][1][i] = pn.Row(selector,
+                                                                player,
+                                                                name=selector.name)
+
 
     def check_is_plottable(self, var):
         """
@@ -108,7 +110,7 @@ class Dashboard(SigSlot):
         for event in events:
             if event.name == 'value':
                 selection = {event.obj.name: event.new}
-                self.output[0] = self.create_indexed_graph(**selection)  # passing only one value that has been changed
+                self.create_indexed_graph()
 
     def create_indexed_graph(self, **selection):
         """
@@ -145,4 +147,4 @@ class Dashboard(SigSlot):
         sel_data = sel_data.sel(**selection, drop=True)
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
-        return graph
+        self.output[0] = graph
