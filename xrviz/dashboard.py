@@ -32,10 +32,7 @@ class Dashboard(SigSlot):
         self.control = Control(self.data)
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
-        self.output = pn.Row(pn.Spacer(name='Graph'),
-                             pn.Column(name='Index_selectors'),
-                             pn.Column(name='Players'),
-                             pn.Column(name='Agg Graph'),)
+        self.output = pn.Row(pn.Spacer(name='Graph'))
 
         self._register(self.plot_button, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
@@ -65,15 +62,12 @@ class Dashboard(SigSlot):
             self.var_dims = list(self.data[self.var].dims)
         else:
             self.var_dims = list(self.data.dims)
-            
+
         #  var_selector_dims refers to dims for which index_selectors would be created
         not_to_index = [self.kwargs['x'], self.kwargs['y'], *self.kwargs['dims_to_agg']]
         self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in not_to_index])
 
         self.index_selectors = []
-        self.output[1].clear()  # clears Index_selectors
-        self.output[2].clear()  # clears Players
-
         for dim in self.var_selector_dims:
             if self.is_dataset:
                 selector = pn.widgets.Select(name=dim, options=list(self.data[self.var][dim].values))
@@ -83,8 +77,6 @@ class Dashboard(SigSlot):
             selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
 
         self.output[0] = self.create_indexed_graph()
-        for selector in self.index_selectors:
-            self.output[1].append(selector)
         self.create_players()
 
     def create_players(self):
@@ -94,7 +86,10 @@ class Dashboard(SigSlot):
         """
         for selector in self.index_selectors:
             player = convert_widget(selector, pn.widgets.DiscretePlayer())
-            self.output[2].append(player)
+            for i, sel_widget in enumerate(self.control.fields.panel[1][1]):
+                if sel_widget.name == player.name:
+                    self.control.fields.panel[1][1][i] = pn.Row(selector, player)
+                    # pn.Row(selector, player)
 
     def check_is_plottable(self, var):
         """

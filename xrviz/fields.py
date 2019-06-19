@@ -105,7 +105,7 @@ class Fields(SigSlot):
         for dim in self.remaining_dims:
             agg_selector = pn.widgets.Select(name=dim,
                                              options=self.agg_opts,
-                                             width=200,)
+                                             width=300,)
             self.agg_selectors.append(agg_selector)
 
     @property
@@ -121,8 +121,8 @@ class Fields(SigSlot):
         #             [0] Select()
         #             [1] Select()
         out = {p.name: p.value for p in [self.panel[0][1], self.panel[0][2]]}
-        selectors = {p.name: p.value for p in self.panel[1][1]}
+        selectors = {p.name: p.value for p in self.panel[1][1] if not isinstance(p, pn.Row)}
         out.update(selectors)
-        dims_to_agg = [dim for dim, agg in selectors.items() if agg is not 'None']
+        dims_to_agg = [dim for dim, agg in selectors.items() if (agg is not 'None' and agg in self.agg_opts)]
         out.update({'dims_to_agg': dims_to_agg})
         return out
