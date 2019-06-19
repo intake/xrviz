@@ -65,13 +65,14 @@ class Dashboard(SigSlot):
             self.var_dims = list(self.data[self.var].dims)
         else:
             self.var_dims = list(self.data.dims)
+            
         #  var_selector_dims refers to dims for which index_selectors would be created
-        self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [self.kwargs['x'], self.kwargs['y']]])
+        not_to_index = [self.kwargs['x'], self.kwargs['y'], *self.kwargs['dims_to_agg']]
+        self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in not_to_index])
 
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
         self.output[2].clear()  # clears Players
-        self.output[3].clear()
 
         for dim in self.var_selector_dims:
             if self.is_dataset:
@@ -85,50 +86,6 @@ class Dashboard(SigSlot):
         for selector in self.index_selectors:
             self.output[1].append(selector)
         self.create_players()
-
-        self.create_agg_graph()
-
-    def create_agg_graph(self,):
-        rem_dims = self.kwargs['rem_dims']
-        rem_dims = [dim for dim in rem_dims if self.kwargs[dim] is not 'None']
-        if len(rem_dims) > 0:
-            if self.is_dataset:
-                sel_data = getattr(self.data, self.var)
-            else:
-                sel_data = self.data
-
-            for dim in rem_dims:
-                if self.kwargs[dim] == 'count':
-                    sel_data = (~ sel_data.isnull()).sum(dim)
-                else:
-                    agg = self.kwargs[dim]
-                    sel_data = getattr(sel_data, agg)(dim)
-                    # print(dim, agg)
-
-            assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-            # print(assign_opts)
-            sel_data = sel_data.assign_coords(**assign_opts)
-
-            # for 1d sel we have simple hvplot
-            # for 2d or 3d we will have quadmesh
-            if len(sel_data.shape) == 1:
-                self.output[3] = sel_data.hvplot()
-            else:
-                self.output[3] = self.rearrange_graph(sel_data.hvplot.quadmesh())
-
-    def rearrange_graph(self, graph):
-        # Moves the sliders to bottom of graph if they are present
-        # And convert them into Selectors
-        graph = pn.Row(graph)
-        try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
-            index_selectors = pn.Row()
-            if graph[0][1]:  # if sliders are generated
-                for slider in graph[0][1]:
-                    index_selector = convert_widget(slider, pn.widgets.Select())
-                    index_selectors.append(index_selector)
-                return pn.Column(graph[0][0], index_selectors)
-        except:  # else return simple graph
-            return graph
 
     def create_players(self):
         """
@@ -168,6 +125,7 @@ class Dashboard(SigSlot):
             selection[dim] = self.index_selectors[i].value
         x = self.kwargs['x']
         y = self.kwargs['y']
+        dims_to_agg = self.kwargs['dims_to_agg']
         graph_opts = {'x': x,
                       'y': y,
                       'title': self.var}
@@ -175,6 +133,13 @@ class Dashboard(SigSlot):
             sel_data = self.data[self.var]
         else:
             sel_data = self.data
+
+        for dim in dims_to_agg:
+            if self.kwargs[dim] == 'count':
+                sel_data = (~ sel_data.isnull()).sum(dim)
+            else:
+                agg = self.kwargs[dim]
+                sel_data = getattr(sel_data, agg)(dim)
 
         # rename the selection in case it is a coordinate, because we
         # cannot create a Dataset from a DataArray with the same name
