@@ -91,7 +91,17 @@ class Dashboard(SigSlot):
                     self.control.fields.panel[1][1][i] = pn.Row(selector,
                                                                 player,
                                                                 name=selector.name)
+        #  link agg_selectors with a callback to create_plot
+        for i, sel_widget in enumerate(self.control.fields.panel[1][1]):
+            if sel_widget.name in self.kwargs['dims_to_agg']:
+                sel_widget.param.watch(self.callback_for_agg_selector,
+                                       ['value'],
+                                       onlychanged=False)
 
+    def callback_for_agg_selector(self, *events):
+        for event in events:
+            if event.name == 'value':
+                self.create_plot()
 
     def check_is_plottable(self, var):
         """
@@ -109,7 +119,6 @@ class Dashboard(SigSlot):
     def callback_for_indexed_graph(self, *events):
         for event in events:
             if event.name == 'value':
-                selection = {event.obj.name: event.new}
                 self.create_indexed_graph()
 
     def create_indexed_graph(self, **selection):
