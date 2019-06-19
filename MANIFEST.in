@@ -2,3 +2,5 @@ include versioneer.py
 include xrviz/_version.py
 include xrviz/sample_data/great_lakes.nc
 include xrviz/templates/*.html
+include requirements.txt
+include README.md
