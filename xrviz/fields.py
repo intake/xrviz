@@ -40,9 +40,12 @@ class Fields(SigSlot):
         self.connect('x', self.change_y)
         self.connect('y', self.change_dim_selectors)
 
-        self.panel = pn.Row(pn.Column(self.x, self.y),
-                            pn.Column(self.agg_selectors,
-                                      pn.Spacer(name='agg_plot_button')),
+        self.panel = pn.Row(pn.Column('### Plot Dimensions',
+                                      self.x, self.y,
+                                      background='rgb(175,175,175)'),
+                            pn.Column('### Aggregations',
+                                      self.agg_selectors,
+                                      background='rgb(175,175,175)'),
                             name='Fields',)
 
         if not self.is_dataset:
@@ -102,13 +105,23 @@ class Fields(SigSlot):
         for dim in self.remaining_dims:
             agg_selector = pn.widgets.Select(name=dim,
                                              options=self.agg_opts,
-                                             width=100,)
+                                             width=200,)
             self.agg_selectors.append(agg_selector)
 
     @property
     def kwargs(self):
-        out = {p.name: p.value for p in self.panel[0]}
-        selectors = {p.name: p.value for p in self.panel[1][0]}
+        # Row(name='Fields')
+        #     [0] Column(background='rgb(175,175,175)')
+        #         [0] Markdown(str)     --> self.panel[0][0]
+        #         [1] Select(name='x',) --> self.panel[0][1]
+        #         [2] Select(name='y',) --> self.panel[0][2]
+        #     [1] Column(background='rgb(175,175,175)')
+        #         [0] Markdown(str)     --> self.panel[1][0]
+        #         [1] Column            --> self.panel[1][1]
+        #             [0] Select()
+        #             [1] Select()
+        out = {p.name: p.value for p in [self.panel[0][1], self.panel[0][2]]}
+        selectors = {p.name: p.value for p in self.panel[1][1]}
         out.update(selectors)
         dims_to_agg = [dim for dim, agg in selectors.items() if agg is not 'None']
         out.update({'dims_to_agg': dims_to_agg})
