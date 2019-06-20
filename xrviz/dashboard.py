@@ -4,7 +4,7 @@ import hvplot.xarray
 from cartopy import crs as ccrs
 from .sigslot import SigSlot
 from .control import Control
-from .utils import convert_widget
+from .utils import convert_widget, player_with_name_and_value
 
 
 class Dashboard(SigSlot):
@@ -69,10 +69,19 @@ class Dashboard(SigSlot):
 
         self.index_selectors = []
         for dim in self.var_selector_dims:
-            if self.is_dataset:
-                selector = pn.widgets.Select(name=dim, options=list(self.data[self.var][dim].values))
-            else:
-                selector = pn.widgets.Select(name=dim, options=list(self.data[dim].values))
+            if self.kwargs[dim] == 'Select':
+                if self.is_dataset:
+                    selector = pn.widgets.Select(name=dim, options=list(self.data[self.var][dim].values))
+                else:
+                    selector = pn.widgets.Select(name=dim, options=list(self.data[dim].values))
+            elif self.kwargs[dim] == 'Animate':
+                if self.is_dataset:
+                    ops = list(self.data[self.var][dim].values)
+                    selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
+                else:
+                    ops = list(self.data[dim].values)
+                    selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
+
             self.index_selectors.append(selector)
             selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
 

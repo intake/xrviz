@@ -28,9 +28,8 @@ class Fields(SigSlot):
         self.x = pn.widgets.Select(name='x', width=200)
         self.y = pn.widgets.Select(name='y', width=200)
         self.agg_selectors = pn.Column()
-        self.agg_opts = ['None', 'mean', 'max',
-                         'min', 'median',
-                         'std', 'count']
+        self.agg_opts = ['Select', 'Animate', 'mean', 'max',
+                         'min', 'median', 'std', 'count']
 
         self.agg_graph = pn.Row(pn.Spacer(name='Agg Graph'))
 
@@ -72,7 +71,7 @@ class Fields(SigSlot):
         else:
             self.var_dims = list(self.data.dims)
         #  dims_aggs: for ex {'dim1':'None','dim2':'None'}
-        self.dims_aggs = dict(zip(self.var_dims, ['None']*len(self.var_dims)))
+        self.dims_aggs = dict(zip(self.var_dims, ['Select']*len(self.var_dims)))
 
         x_opts = self.var_dims.copy()
         if len(x_opts) > 0:  # to check that data has dim (is not Empty)
