@@ -43,19 +43,22 @@ def _is_coord(data, name):
         return name
 
 
-def player_with_name_and_value(target):
+def player_with_name_and_value(source):
     """
-    With pn.widgets.DiscretePlayer, we don't getname and
+    source: pn.widgets.DiscretePlayer()
+    target: consists of source player's name, value and player itself
+    
+    With pn.widgets.DiscretePlayer, we don't get name and
     value updates in textual form. This method is useful
     in case we want name and continuous value update.
     """
-    mark = pn.pane.Markdown(f'{target.value}')
+    mark = pn.pane.Markdown(f'{source.value}')
 
     def callback(*events):
         for event in events:
             if event.name == 'value':
                 mark.object = str(event.new)
 
-    target.param.watch(callback, ['value'], onlychanged=False)
-    out = pn.Column(pn.Row(target.name, mark), target)
-    return out
+    source.param.watch(callback, ['value'], onlychanged=False)
+    target = pn.Column(pn.Row(source.name, mark), source)
+    return target
