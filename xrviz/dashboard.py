@@ -32,7 +32,10 @@ class Dashboard(SigSlot):
         self.control = Control(self.data)
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
-        self.output = pn.Row(pn.Spacer(name='Graph'))
+        self.output = pn.Row(pn.Spacer(name='Graph'),
+                             pn.Column(name='Index_selectors'),
+                             pn.Column(name='Players'),
+                             pn.Column(name='Agg Graph'),)
 
         self._register(self.plot_button, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
@@ -68,6 +71,9 @@ class Dashboard(SigSlot):
         self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in not_to_index])
 
         self.index_selectors = []
+        self.output[1].clear()  # clears Index_selectors
+        self.output[2].clear()  # clears Players
+
         for dim in self.var_selector_dims:
             if self.kwargs[dim] == 'Select':
                 if self.is_dataset:
@@ -86,31 +92,13 @@ class Dashboard(SigSlot):
             selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
 
         self.output[0] = self.create_indexed_graph()
-        self.create_players()
-
-    def create_players(self):
-        """
-        To convert the Selector widgets in index_selectors into Player
-        widgets. Player widgets are linked with their respective selectors.
-        """
         for selector in self.index_selectors:
-            player = convert_widget(selector, pn.widgets.DiscretePlayer())
-            for i, sel_widget in enumerate(self.control.fields.panel[1][1]):
-                if sel_widget.name == player.name:
-                    self.control.fields.panel[1][1][i] = pn.Row(selector,
-                                                                player,
-                                                                name=selector.name)
-        #  link agg_selectors with a callback to create_plot
-        for i, sel_widget in enumerate(self.control.fields.panel[1][1]):
-            if sel_widget.name in self.kwargs['dims_to_agg']:
-                sel_widget.param.watch(self.callback_for_agg_selector,
-                                       ['value'],
-                                       onlychanged=False)
-
-    def callback_for_agg_selector(self, *events):
-        for event in events:
-            if event.name == 'value':
-                self.create_plot()
+            if isinstance(selector, pn.widgets.Select):
+                self.output[1].append(selector)
+            else:
+                player = player_with_name_and_value(selector)
+                self.output[1].append(player)
+        # self.create_players()
 
     def check_is_plottable(self, var):
         """
@@ -128,7 +116,8 @@ class Dashboard(SigSlot):
     def callback_for_indexed_graph(self, *events):
         for event in events:
             if event.name == 'value':
-                self.create_indexed_graph()
+                selection = {event.obj.name: event.new}
+                self.output[0] = self.create_indexed_graph(**selection)  # passing only one value that has been changed
 
     def create_indexed_graph(self, **selection):
         """
@@ -165,4 +154,4 @@ class Dashboard(SigSlot):
         sel_data = sel_data.sel(**selection, drop=True)
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
-        self.output[0] = graph
+        return graph
