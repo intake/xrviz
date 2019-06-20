@@ -4,7 +4,7 @@ import hvplot.xarray
 from cartopy import crs as ccrs
 from .sigslot import SigSlot
 from .control import Control
-from .utils import convert_widget
+from .utils import convert_widget, player_with_name_and_value
 
 
 class Dashboard(SigSlot):
@@ -33,8 +33,7 @@ class Dashboard(SigSlot):
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
         self.output = pn.Row(pn.Spacer(name='Graph'),
-                             pn.Column(name='Index_selectors'),
-                             pn.Column(name='Players'))
+                             pn.Column(name='Index_selectors'))
 
         self._register(self.plot_button, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
@@ -64,37 +63,35 @@ class Dashboard(SigSlot):
             self.var_dims = list(self.data[self.var].dims)
         else:
             self.var_dims = list(self.data.dims)
+
         #  var_selector_dims refers to dims for which index_selectors would be created
-        self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in [self.kwargs['x'], self.kwargs['y']]])
+        not_to_index = [self.kwargs['x'], self.kwargs['y'], *self.kwargs['dims_to_agg']]
+        self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in not_to_index])
 
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
-        self.output[2].clear()  # clears Players
 
-        if self.is_dataset:
-            for dim in self.var_selector_dims:
-                selector = pn.widgets.Select(name=dim, options=list(self.data[self.var][dim].values))
-                self.index_selectors.append(selector)
-                selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
-        else:
-            for dim in self.var_selector_dims:
-                selector = pn.widgets.Select(name=dim, options=list(self.data[dim].values))
-                self.index_selectors.append(selector)
-                selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
+        for dim in self.var_selector_dims:
+            if self.is_dataset:
+                ops = list(self.data[self.var][dim].values)
+            else:
+                ops = list(self.data[dim].values)
+
+            if self.kwargs[dim] == 'Select':
+                selector = pn.widgets.Select(name=dim, options=ops)
+            else:
+                selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
+
+            self.index_selectors.append(selector)
+            selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
 
         self.output[0] = self.create_indexed_graph()
         for selector in self.index_selectors:
-            self.output[1].append(selector)
-        self.create_players()
-
-    def create_players(self):
-        """
-        To convert the Selector widgets in index_selectors into Player
-        widgets. Player widgets are linked with their respective selectors.
-        """
-        for selector in self.index_selectors:
-            player = convert_widget(selector, pn.widgets.DiscretePlayer())
-            self.output[2].append(player)
+            if isinstance(selector, pn.widgets.Select):
+                self.output[1].append(selector)
+            else:
+                player = player_with_name_and_value(selector)
+                self.output[1].append(player)
 
     def check_is_plottable(self, var):
         """
@@ -112,34 +109,40 @@ class Dashboard(SigSlot):
     def callback_for_indexed_graph(self, *events):
         for event in events:
             if event.name == 'value':
-                selection = {event.obj.name: event.new}
-                self.output[0] = self.create_indexed_graph(**selection)  # passing only one value that has been changed
+                self.output[0] = self.create_indexed_graph()
 
-    def create_indexed_graph(self, **selection):
+    def create_indexed_graph(self):
         """
         Creates graph for  selected indexes in selectors or players.
         """
-        # selection consists of only one value here
-        # update it to have value of other var_selector_dims
+        selection = {} # to collect the value of insex selectors
         for i, dim in enumerate(list(self.var_selector_dims)):
-            if dim not in list(selection):
-                selection[dim] = self.index_selectors[i].value
+            selection[dim] = self.index_selectors[i].value
         x = self.kwargs['x']
         y = self.kwargs['y']
+        dims_to_agg = self.kwargs['dims_to_agg']
         graph_opts = {'x': x,
                       'y': y,
                       'title': self.var}
-        assign_opts = {x: self.data[x], y: self.data[y]}
         if self.is_dataset:
             sel_data = self.data[self.var]
         else:
             sel_data = self.data
 
-        # rename the selection in case it is a coordinate, because we
+        for dim in dims_to_agg:
+            if self.kwargs[dim] == 'count':
+                sel_data = (~ sel_data.isnull()).sum(dim)
+            else:
+                agg = self.kwargs[dim]
+                sel_data = getattr(sel_data, agg)(dim)
+
+        # rename the sel_data in case it is a coordinate, because we
         # cannot create a Dataset from a DataArray with the same name
         #  as one of its coordinates
         if sel_data.name in self.data.coords:
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
-        graph = sel_data.sel(**selection, drop=True).assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+        sel_data = sel_data.sel(**selection, drop=True)
+        assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
+        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
         return graph

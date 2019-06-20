@@ -1,3 +1,4 @@
+import panel as pn
 
 
 def convert_widget(source, target):
@@ -40,3 +41,24 @@ def _is_coord(data, name):
         return name + " " + '\U0001F4C8'
     else:
         return name
+
+
+def player_with_name_and_value(source):
+    """
+    source: pn.widgets.DiscretePlayer()
+    target: consists of source player's name, value and player itself
+    
+    With pn.widgets.DiscretePlayer, we don't get name and
+    value updates in textual form. This method is useful
+    in case we want name and continuous value update.
+    """
+    mark = pn.pane.Markdown(f'{source.value}')
+
+    def callback(*events):
+        for event in events:
+            if event.name == 'value':
+                mark.object = str(event.new)
+
+    source.param.watch(callback, ['value'], onlychanged=False)
+    target = pn.Column(pn.Row(source.name, mark), source)
+    return target
