@@ -33,9 +33,7 @@ class Dashboard(SigSlot):
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
         self.output = pn.Row(pn.Spacer(name='Graph'),
-                             pn.Column(name='Index_selectors'),
-                             pn.Column(name='Players'),
-                             pn.Column(name='Agg Graph'),)
+                             pn.Column(name='Index_selectors'))
 
         self._register(self.plot_button, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
@@ -72,21 +70,17 @@ class Dashboard(SigSlot):
 
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
-        self.output[2].clear()  # clears Players
 
         for dim in self.var_selector_dims:
+            if self.is_dataset:
+                ops = list(self.data[self.var][dim].values)
+            else:
+                ops = list(self.data[dim].values)
+
             if self.kwargs[dim] == 'Select':
-                if self.is_dataset:
-                    selector = pn.widgets.Select(name=dim, options=list(self.data[self.var][dim].values))
-                else:
-                    selector = pn.widgets.Select(name=dim, options=list(self.data[dim].values))
-            elif self.kwargs[dim] == 'Animate':
-                if self.is_dataset:
-                    ops = list(self.data[self.var][dim].values)
-                    selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
-                else:
-                    ops = list(self.data[dim].values)
-                    selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
+                selector = pn.widgets.Select(name=dim, options=ops)
+            else:
+                selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
 
             self.index_selectors.append(selector)
             selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
@@ -98,7 +92,6 @@ class Dashboard(SigSlot):
             else:
                 player = player_with_name_and_value(selector)
                 self.output[1].append(player)
-        # self.create_players()
 
     def check_is_plottable(self, var):
         """
@@ -116,15 +109,13 @@ class Dashboard(SigSlot):
     def callback_for_indexed_graph(self, *events):
         for event in events:
             if event.name == 'value':
-                selection = {event.obj.name: event.new}
-                self.output[0] = self.create_indexed_graph(**selection)  # passing only one value that has been changed
+                self.output[0] = self.create_indexed_graph()
 
-    def create_indexed_graph(self, **selection):
+    def create_indexed_graph(self):
         """
         Creates graph for  selected indexes in selectors or players.
         """
-        # selection consists of only one value here
-        # update it to have value of other var_selector_dims
+        selection = {} # to collect the value of insex selectors
         for i, dim in enumerate(list(self.var_selector_dims)):
             selection[dim] = self.index_selectors[i].value
         x = self.kwargs['x']
@@ -145,7 +136,7 @@ class Dashboard(SigSlot):
                 agg = self.kwargs[dim]
                 sel_data = getattr(sel_data, agg)(dim)
 
-        # rename the selection in case it is a coordinate, because we
+        # rename the sel_data in case it is a coordinate, because we
         # cannot create a Dataset from a DataArray with the same name
         #  as one of its coordinates
         if sel_data.name in self.data.coords:
