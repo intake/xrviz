@@ -119,7 +119,7 @@ class Fields(SigSlot):
         #         [1] Column            --> self.panel[1][1]
         #             [0] Select()
         #             [1] Select()
-        out = {p.name: p.value for p in [self.panel[0][1], self.panel[0][2]]}
+        out = {p.name: p.value for p in self.panel[0][1:]} #since panel[0][0] is Markdown
         selectors = {p.name: p.value for p in self.panel[1][1]}
         out.update(selectors)
         dims_to_agg = [dim for dim, agg in selectors.items() if agg not in ['Select', 'Animate']]
