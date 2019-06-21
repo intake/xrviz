@@ -38,7 +38,7 @@ class Describe(SigSlot):
         if isinstance(self.data, xr.Dataset):
             self.panel.object = self.variable_pane_for_dataset(var)
         else:
-            self.panel.object = self.variable_pane_for_dataarray(var)
+            self.panel.object = self.variable_pane_for_dataarray()
 
     def variable_pane_for_dataset(self, var):
         if var is not None:

@@ -123,7 +123,7 @@ class Dashboard(SigSlot):
             self.output[1].clear()  # clears Index_selectors
 
             for dim in self.var_selector_dims:
-                ops = list(self.data[self.var][dim].values)
+                ops = list(self.data[dim].values)
 
                 if self.kwargs[dim] == 'Select':
                     selector = pn.widgets.Select(name=dim, options=ops)

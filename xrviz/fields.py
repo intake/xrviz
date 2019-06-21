@@ -87,9 +87,10 @@ class Fields(SigSlot):
             else:
                 self.y.options = y_opts
                 self.remaining_dims = [opt for opt in y_opts if opt!=self.y.value]
-        self.change_dim_selectors()
+                self.change_y()
+                # self.change_dim_selectors()
 
-    def change_y(self, value):
+    def change_y(self, value=None):
         """
         Updates the options of y, by removing option selected in x (value),
         from all the variable dimensions available as options.
@@ -115,7 +116,13 @@ class Fields(SigSlot):
     def change_dim_selectors(self, *args):
         self.agg_selectors.clear()
         used_opts = [self.x.value, self.y.value]
-        self.remaining_dims = [dim for dim in self.var_dims if dim not in used_opts]
+        if self.is_dataset:
+            if self.x.value in self.var_dims:
+                self.remaining_dims = [dim for dim in self.var_dims if dim not in used_opts]
+            else: # is a coord
+                self.remaining_dims = []
+        else:
+            self.remaining_dims = [dim for dim in self.sel_options if dim not in used_opts]
         for dim in self.remaining_dims:
             agg_selector = pn.widgets.Select(name=dim,
                                              options=self.agg_opts,
