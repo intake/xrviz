@@ -202,7 +202,6 @@ class Dashboard(SigSlot):
         """
         graph = pn.Row(graph)
         try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
-            index_selectors = []
             if graph[0][1]:  # if sliders are generated
                 self.output[0] = graph[0][0]
                 for slider in graph[0][1]:
@@ -210,7 +209,7 @@ class Dashboard(SigSlot):
                     index_player = convert_widget(slider, pn.widgets.DiscretePlayer())
                     self.index_selectors.append(index_selector)
                     self.output[1].append(index_selector)
-                    self.output[2].append(index_player)
+                    self.output[1].append(index_player)
         except:  # else return simple graph
             self.output[0] = graph
 
