@@ -31,8 +31,6 @@ class Fields(SigSlot):
         self.agg_opts = ['Select', 'Animate', 'mean', 'max',
                          'min', 'median', 'std', 'count']
 
-        self.agg_graph = pn.Row(pn.Spacer(name='Agg Graph'))
-
         self._register(self.x, 'x')
         self._register(self.y, 'y')
 
@@ -60,7 +58,6 @@ class Fields(SigSlot):
 
     def setup(self, var):
         self.agg_selectors.clear()  # To empty previouly selected value from selector
-        self.agg_graph[0] = pn.Spacer(name='Agg Graph')  # To clear Agg Graph upon selection of new variable
 
         if self.is_dataset:
             if isinstance(var, str):
@@ -68,12 +65,17 @@ class Fields(SigSlot):
             else:
                 self.var = var[0]
             self.var_dims = list(self.data[var].dims)
+            self.indexed_coords = set(self.var_dims) & set(self.data[var].coords)
+            self.non_indexed_coords = list(set(self.data[var].coords) - self.indexed_coords)
+            self.sel_options = self.var_dims + self.non_indexed_coords
         else:
-            self.var_dims = list(self.data.dims)
-        #  dims_aggs: for ex {'dim1':'None','dim2':'None'}
-        self.dims_aggs = dict(zip(self.var_dims, ['Select']*len(self.var_dims)))
+            #  DataArray will only have dims in options
+            self.sel_options = list(self.data.dims)
 
-        x_opts = self.var_dims.copy()
+        # #  dims_aggs: for ex {'dim1':'Select','dim2':'Select'}
+        # self.dims_aggs = dict(zip(self.var_dims, ['Select']*len(self.var_dims)))
+
+        x_opts = self.sel_options.copy()
         if len(x_opts) > 0:  # to check that data has dim (is not Empty)
             self.x.options = x_opts
             self.x.value = x_opts[0]
@@ -92,9 +94,22 @@ class Fields(SigSlot):
         Updates the options of y, by removing option selected in x (value),
         from all the variable dimensions available as options.
         """
-        values = self.var_dims.copy()
-        values.remove(self.x.value)
-        self.y.options = values
+         # if x belong to var_dims replace the y with remaining var_dims
+        # else if x belong to non_indexed_coords, replace y with remaining
+        # non_indexed_coords
+        values = self.sel_options.copy()
+        x_val = self.x.value
+        values.remove(x_val)
+        if isinstance(self.data, xr.Dataset):
+            if x_val in self.var_dims:
+                valid_values = list(set(values) - set(self.non_indexed_coords))
+            else:  # x_val belong to non_indexed_coords
+                values = list(set(values) - set(self.var_dims))
+                #  Plot can be generated for 2 values only if ndims of both match
+                valid_values = [val for val in values if self.ndim_matches(x_val, val)]
+            self.y.options = valid_values
+        else:
+            self.y.options = values
         self.change_dim_selectors()
 
     def change_dim_selectors(self, *args):
@@ -125,3 +140,11 @@ class Fields(SigSlot):
         dims_to_agg = [dim for dim, agg in selectors.items() if agg not in ['Select', 'Animate']]
         out.update({'dims_to_agg': dims_to_agg})
         return out
+
+    def set_coords(self, data, var):
+        self.data = data
+        if var:
+            self.setup(var)
+
+    def ndim_matches(self, var1, var2):
+        return self.data[var1].ndim == self.data[var2].ndim

@@ -92,3 +92,7 @@ class Describe(SigSlot):
                                               var_nbytes=var_nbytes,
                                               var_size=var_size,
                                               )
+    def set_coords(self, data, var):
+        self.data = data
+        if var is not None:
+            self.setup(var=[var])

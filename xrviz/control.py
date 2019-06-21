@@ -4,6 +4,7 @@ from .sigslot import SigSlot
 from .display import Display
 from .describe import Describe
 from .fields import Fields
+from .coord_setter import CoordSetter
 
 
 class Control(SigSlot):
@@ -26,20 +27,38 @@ class Control(SigSlot):
     """
 
     def __init__(self, data):
-        super().__init__()
-        self.data = data
-        self.displayer = Display(self.data)
-        self.describer = Describe(self.data)
-        self.fields = Fields(self.data)
+       super().__init__()
+       self.data = data
+       self.displayer = Display(self.data)
+       self.describer = Describe(self.data)
+       self.fields = Fields(self.data)
+       self.tabs = pn.Tabs(self.fields.panel,
+                           background=(230, 230, 230), width=1160)
+        
+       if isinstance(self.data, xr.Dataset):
+           self.coord_setter = CoordSetter(self.data)
+           self.tabs.append(self.coord_setter.panel)
 
-        self.displayer.connect("variable_selected", self.describer.setup)
-        self.displayer.connect("variable_selected", self.fields.setup)
 
-        self.panel = pn.Column(
-                               pn.Row(self.displayer.panel,
-                                      self.describer.panel),
-                               pn.Tabs(self.fields.panel,
-                                       background=(230, 230, 230), width=1160))
+       self.displayer.connect("variable_selected", self.describer.setup)
+       self.displayer.connect("variable_selected", self.fields.setup)
+
+       self.panel = pn.Column(
+                              pn.Row(self.displayer.panel,
+                                     self.describer.panel),
+                              self.tabs)
+
+    def set_coords(self, data):
+       try:  # Upon setting coords before selecting a variable
+           var = self.kwargs['Variables']
+       except:
+           var = None
+       self.data = data
+       self.coord_setter.set_coords(self.data)
+       self.displayer.set_coords(self.data)
+       self.describer.set_coords(self.data, var)
+       self.fields.set_coords(self.data, var)
+
 
     @property
     def kwargs(self):
