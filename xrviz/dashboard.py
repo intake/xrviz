@@ -106,7 +106,8 @@ class Dashboard(SigSlot):
                         self.output[1].append(player)
             else:   # is_indexed_coord
                 graph_opts = {'x': self.kwargs['x'],
-                              'y': self.kwargs['y']}
+                              'y': self.kwargs['y'],
+                              'title': self.var}
                 dims_to_agg = self.kwargs['dims_to_agg']
                 sel_data = self.data[self.var]
 
@@ -123,7 +124,6 @@ class Dashboard(SigSlot):
                 assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
                 graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
 
-                # graph = sel_data.hvplot.quadmesh(**graph_opts)
                 self.create_selectors_players(graph)
 
         else:  # if is_dataArray
@@ -216,12 +216,24 @@ class Dashboard(SigSlot):
         try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
             if graph[0][1]:  # if sliders are generated
                 self.output[0] = graph[0][0]
+
+                # link the generated slider with agg selector in fields 
                 for slider in graph[0][1]:
-                    index_selector = convert_widget(slider, pn.widgets.Select())
-                    index_player = convert_widget(slider, pn.widgets.DiscretePlayer())
-                    self.index_selectors.append(index_selector)
-                    self.output[1].append(index_selector)
-                    self.output[1].append(index_player)
+                    for dim in self.kwargs['dims_to_select_animate']:
+                        if slider.name == dim or slider.name == self.data[dim].long_name:
+                            if self.kwargs[dim] == 'Select':
+                                selector = convert_widget(slider, pn.widgets.Select())
+                            else:
+                                selector = convert_widget(slider, pn.widgets.DiscretePlayer())
+                            self.index_selectors.append(selector)
+
+                for selector in self.index_selectors:
+                    if isinstance(selector, pn.widgets.Select):
+                        self.output[1].append(selector)
+                    else:
+                        player = player_with_name_and_value(selector)
+                        self.output[1].append(player)
+
         except:  # else return simple graph
             self.output[0] = graph
 
