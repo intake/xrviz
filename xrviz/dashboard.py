@@ -107,11 +107,23 @@ class Dashboard(SigSlot):
             else:   # is_indexed_coord
                 graph_opts = {'x': self.kwargs['x'],
                               'y': self.kwargs['y']}
-                sel = self.data[self.var]
-                if self.var in list(self.data.coords):
-                    sel = sel.to_dataset(name=f'{sel.name}_')
-                sel.hvplot.quadmesh(**graph_opts)
-                graph = sel.hvplot.quadmesh(**graph_opts)
+                dims_to_agg = self.kwargs['dims_to_agg']
+                sel_data = self.data[self.var]
+
+                for dim in dims_to_agg:
+                    if self.kwargs[dim] == 'count':
+                        sel_data = (~ sel_data.isnull()).sum(dim)
+                    else:
+                        agg = self.kwargs[dim]
+                        sel_data = getattr(sel_data, agg)(dim)
+
+                if self.var in list(sel_data.coords):  # When a var(coord) is plotted wrt itself
+                    sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
+
+                assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
+                graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+
+                # graph = sel_data.hvplot.quadmesh(**graph_opts)
                 self.create_selectors_players(graph)
 
         else:  # if is_dataArray

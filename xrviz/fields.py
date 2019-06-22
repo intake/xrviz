@@ -72,9 +72,6 @@ class Fields(SigSlot):
             #  DataArray will only have dims in options
             self.sel_options = list(self.data.dims)
 
-        # #  dims_aggs: for ex {'dim1':'Select','dim2':'Select'}
-        # self.dims_aggs = dict(zip(self.var_dims, ['Select']*len(self.var_dims)))
-
         x_opts = self.sel_options.copy()
         if len(x_opts) > 0:  # to check that data has dim (is not Empty)
             self.x.options = x_opts
@@ -88,7 +85,6 @@ class Fields(SigSlot):
                 self.y.options = y_opts
                 self.remaining_dims = [opt for opt in y_opts if opt!=self.y.value]
                 self.change_y()
-                # self.change_dim_selectors()
 
     def change_y(self, value=None):
         """
@@ -116,13 +112,17 @@ class Fields(SigSlot):
     def change_dim_selectors(self, *args):
         self.agg_selectors.clear()
         used_opts = [self.x.value, self.y.value]
+
         if self.is_dataset:
             if self.x.value in self.var_dims:
                 self.remaining_dims = [dim for dim in self.var_dims if dim not in used_opts]
             else: # is a coord
-                self.remaining_dims = []
+                #  We can't aggregate along dims which are present in x and y.
+                dims_not_to_agg = set(self.data[self.x.value].dims) | set(self.data[self.y.value].dims) | set(used_opts)
+                self.remaining_dims = [dim for dim in self.var_dims if dim not in dims_not_to_agg]
         else:
             self.remaining_dims = [dim for dim in self.sel_options if dim not in used_opts]
+
         for dim in self.remaining_dims:
             agg_selector = pn.widgets.Select(name=dim,
                                              options=self.agg_opts,
@@ -145,7 +145,9 @@ class Fields(SigSlot):
         selectors = {p.name: p.value for p in self.panel[1][1]}
         out.update(selectors)
         dims_to_agg = [dim for dim, agg in selectors.items() if agg not in ['Select', 'Animate']]
+        dims_to_select_animate = [dim for dim, agg in selectors.items() if agg in ['Select', 'Animate']]
         out.update({'dims_to_agg': dims_to_agg})
+        out.update({'dims_to_select_animate': dims_to_select_animate})
         return out
 
     def set_coords(self, data, var):
