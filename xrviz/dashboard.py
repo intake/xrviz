@@ -95,9 +95,10 @@ class Dashboard(SigSlot):
                     else:
                         selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
                     self.index_selectors.append(selector)
-                    selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
+                    self._register(selector, selector.name)
+                    self.connect(selector.name, self.create_indexed_graph )
 
-                self.output[0] = self.create_indexed_graph()
+                self.create_indexed_graph()
                 for selector in self.index_selectors:
                     if isinstance(selector, pn.widgets.Select):
                         self.output[1].append(selector)
@@ -142,9 +143,10 @@ class Dashboard(SigSlot):
                 else:
                     selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
                 self.index_selectors.append(selector)
-                selector.param.watch(self.callback_for_indexed_graph, ['value'], onlychanged=False)
+                self._register(selector, selector.name)
+                self.connect(selector.name, self.create_indexed_graph )
 
-            self.output[0] = self.create_indexed_graph()
+            self.create_indexed_graph()
             for selector in self.index_selectors:
                 if isinstance(selector, pn.widgets.Select):
                     self.output[1].append(selector)
@@ -165,12 +167,7 @@ class Dashboard(SigSlot):
             if len(self.data.dims) <= 1:
                 self.plot_button.disabled = True
 
-    def callback_for_indexed_graph(self, *events):
-        for event in events:
-            if event.name == 'value':
-                self.output[0] = self.create_indexed_graph()
-
-    def create_indexed_graph(self):
+    def create_indexed_graph(self, *args):
         """
         Creates graph for  selected indexes in selectors or players.
         """
@@ -204,7 +201,7 @@ class Dashboard(SigSlot):
         sel_data = sel_data.sel(**selection, drop=True)
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
-        return graph
+        self.output[0] = graph
 
     def create_selectors_players(self, graph):
         """
