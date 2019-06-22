@@ -62,9 +62,7 @@ class Dashboard(SigSlot):
             if not self.is_non_indexed_coord(x):  # i.e is a var_dim
                 self.var_dims = list(self.data[self.var].dims)
                 #  var_selector_dims refers to dims for which index_selectors would be created
-                not_to_index = [self.kwargs['x'], self.kwargs['y'], *self.kwargs['dims_to_agg']]
-                self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in not_to_index])
-
+                self.var_selector_dims = self.kwargs['dims_to_select_animate']
                 self.index_selectors = []
                 self.output[1].clear()  # clears Index_selectors
 
@@ -110,8 +108,7 @@ class Dashboard(SigSlot):
 
         else:  # if is_dataArray
             self.var_dims = list(self.data.dims)
-            not_to_index = [self.kwargs['x'], self.kwargs['y'], *self.kwargs['dims_to_agg']]
-            self.var_selector_dims = sorted([dim for dim in self.var_dims if dim not in not_to_index])
+            self.var_selector_dims = self.kwargs['dims_to_select_animate']
 
             self.index_selectors = []
             self.output[1].clear()  # clears Index_selectors
