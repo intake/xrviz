@@ -32,19 +32,17 @@ class Control(SigSlot):
         self.displayer = Display(self.data)
         self.describer = Describe(self.data)
         self.fields = Fields(self.data)
-        self.tabs = pn.Tabs(self.fields.panel,
-                            background=(230, 230, 230), width=1160)
-
         self.coord_setter = CoordSetter(self.data)
-        self.tabs.append(self.coord_setter.panel)
+        self.tabs = pn.Tabs(self.coord_setter.panel,
+                            pn.Row(self.displayer.panel,
+                                   self.describer.panel, name='Variables'),
+                            self.fields.panel,
+                            background=(240, 240, 240), width=1160)
 
         self.displayer.connect("variable_selected", self.describer.setup)
         self.displayer.connect("variable_selected", self.fields.setup)
 
-        self.panel = pn.Column(
-                              pn.Row(self.displayer.panel,
-                                     self.describer.panel),
-                              self.tabs)
+        self.panel = pn.Column(self.tabs)
 
     def set_coords(self, data):
         try:  # Upon setting coords before selecting a variable

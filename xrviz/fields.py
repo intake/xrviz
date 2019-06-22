@@ -43,7 +43,7 @@ class Fields(SigSlot):
                             pn.Column('### Aggregations',
                                       self.agg_selectors,
                                       background='rgb(175,175,175)'),
-                            name='Fields',)
+                            name='Axes',)
 
     def setup(self, var):
         self.agg_selectors.clear()  # To empty previouly selected value from selector
