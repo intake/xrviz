@@ -51,25 +51,6 @@ class Dashboard(SigSlot):
         if not self.is_dataset:
             self.check_is_plottable(var=None)
 
-    def set_data(self, data):
-        if isinstance(data, xr.Dataset):
-            self.data = data
-            self.is_dataset = True
-        elif isinstance(data, xr.DataArray):
-            self.data = data
-            self.is_dataset = False
-        else:
-            raise ValueError
-
-    def set_coords(self, *args):
-        # We can't reset indexed coordinates so add them every time
-        # in coord_selector.value
-        self.data = self.data.reset_coords()
-        indexed_coords = set(self.data.dims) & set(self.data.coords)
-        new_coords = list(set(self.control.coord_setter.coord_selector.value) | set(indexed_coords))
-        self.data = self.data.set_coords(new_coords)
-        self.control.set_coords(self.data)
-
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
         self.var = self.kwargs['Variables']
@@ -154,19 +135,6 @@ class Dashboard(SigSlot):
                     player = player_with_name_and_value(selector)
                     self.output[1].append(player)
 
-    def check_is_plottable(self, var):
-        """
-        If a variable is 1-d, disable plot_button for it.
-        """
-        self.plot_button.disabled = False  # important to enable button once disabled
-        if self.is_dataset:
-            var = var[0]
-            if len(list(self.data[var].dims)) <= 1:
-                self.plot_button.disabled = True
-        else:
-            if len(self.data.dims) <= 1:
-                self.plot_button.disabled = True
-
     def create_indexed_graph(self, *args):
         """
         Creates graph for  selected indexes in selectors or players.
@@ -241,3 +209,35 @@ class Dashboard(SigSlot):
             return True
         else:
             return False
+
+    def set_data(self, data):
+        if isinstance(data, xr.Dataset):
+            self.data = data
+            self.is_dataset = True
+        elif isinstance(data, xr.DataArray):
+            self.data = data
+            self.is_dataset = False
+        else:
+            raise ValueError
+
+    def set_coords(self, *args):
+        # We can't reset indexed coordinates so add them every time
+        # in coord_selector.value
+        self.data = self.data.reset_coords()
+        indexed_coords = set(self.data.dims) & set(self.data.coords)
+        new_coords = list(set(self.control.coord_setter.coord_selector.value) | set(indexed_coords))
+        self.data = self.data.set_coords(new_coords)
+        self.control.set_coords(self.data)
+
+    def check_is_plottable(self, var):
+        """
+        If a variable is 1-d, disable plot_button for it.
+        """
+        self.plot_button.disabled = False  # important to enable button once disabled
+        if self.is_dataset:
+            var = var[0]
+            if len(list(self.data[var].dims)) <= 1:
+                self.plot_button.disabled = True
+        else:
+            if len(self.data.dims) <= 1:
+                self.plot_button.disabled = True
