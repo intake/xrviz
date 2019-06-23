@@ -4,6 +4,7 @@ from .sigslot import SigSlot
 from .display import Display
 from .describe import Describe
 from .fields import Fields
+from .projection import Projection
 from .coord_setter import CoordSetter
 
 
@@ -32,7 +33,9 @@ class Control(SigSlot):
         self.displayer = Display(self.data)
         self.describer = Describe(self.data)
         self.fields = Fields(self.data)
+        self.projection = Projection()
         self.tabs = pn.Tabs(self.fields.panel,
+                            self.projection.panel,
                             background=(230, 230, 230), width=1160)
 
         self.coord_setter = CoordSetter(self.data)
@@ -61,4 +64,5 @@ class Control(SigSlot):
     def kwargs(self):
         out = self.displayer.kwargs
         out.update(self.fields.kwargs)
+        out.update(self.projection.kwargs)
         return out

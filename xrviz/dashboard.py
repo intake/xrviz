@@ -1,7 +1,7 @@
 import panel as pn
 import xarray as xr
 import hvplot.xarray
-from cartopy import crs as ccrs
+from cartopy import crs
 from .sigslot import SigSlot
 from .control import Control
 from .utils import convert_widget, player_with_name_and_value
@@ -67,9 +67,13 @@ class Dashboard(SigSlot):
         if self.are_var_coords(x, y):
             graph_opts = {'x': x,
                           'y': y,
-                          'title': self.var}
+                          'title': self.var,
+                          'crs': crs.PlateCarree()}
             dims_to_agg = self.kwargs['dims_to_agg']
             sel_data = self.data[self.var]
+            is_geo = self.kwargs['is_geo']
+            base_map = self.kwargs['basemap']
+            alpha = self.kwargs['alpha']
 
             for dim in dims_to_agg:
                 if self.kwargs[dim] == 'count':
@@ -82,7 +86,9 @@ class Dashboard(SigSlot):
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
+            if is_geo:
+                    graph = base_map * graph.opts(alpha=alpha).opts(active_tools=['wheel_zoom', 'pan'])
 
             self.create_selectors_players(graph)
 
@@ -140,7 +146,7 @@ class Dashboard(SigSlot):
 
         sel_data = sel_data.sel(**selection, drop=True)
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
         self.output[0] = graph
 
     def create_selectors_players(self, graph):
