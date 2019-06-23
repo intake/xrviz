@@ -2,6 +2,7 @@ import panel as pn
 import xarray as xr
 import hvplot.xarray
 from cartopy import crs as ccrs
+import numpy
 from .sigslot import SigSlot
 from .control import Control
 from .utils import convert_widget, player_with_name_and_value
@@ -73,6 +74,7 @@ class Dashboard(SigSlot):
                           'cmap': self.kwargs['cmap'],
                           'colorbar': self.kwargs['colorbar']}
             colormap_limits = self.kwargs['colormap_limits']
+            color_scale = self.kwargs['color_scale']
             dims_to_agg = self.kwargs['dims_to_agg']
             sel_data = self.data[self.var]
 
@@ -88,6 +90,8 @@ class Dashboard(SigSlot):
 
             color_range = {sel_data.name: (sel_data.quantile(colormap_limits[0]),
                                                sel_data.quantile(colormap_limits[1]))}
+            if color_scale is not 'None':
+                sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
 
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
             graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range)
@@ -136,6 +140,7 @@ class Dashboard(SigSlot):
                       'cmap': self.kwargs['cmap'],
                       'colorbar': self.kwargs['colorbar']}
         colormap_limits = self.kwargs['colormap_limits']
+        color_scale = self.kwargs['color_scale']
 
         sel_data = self.data[self.var]
 
@@ -156,6 +161,8 @@ class Dashboard(SigSlot):
                                        sel_data.quantile(colormap_limits[1]))}
 
         sel_data = sel_data.sel(**selection, drop=True)
+        if color_scale is not 'None':
+            sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range)
         self.output[0] = graph
