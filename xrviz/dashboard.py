@@ -74,7 +74,13 @@ class Dashboard(SigSlot):
             is_geo = self.kwargs['is_geo']
             base_map = self.kwargs['basemap']
             alpha = self.kwargs['alpha']
+            projection = self.kwargs['projection']
 
+            graph_opts = {'x': self.kwargs['x'],
+                            'y': self.kwargs['y'],
+                            'title': self.var}
+            if is_geo:
+                graph_opts.update({'crs': getattr(crs, projection)()})
             for dim in dims_to_agg:
                 if self.kwargs[dim] == 'count':
                     sel_data = (~ sel_data.isnull()).sum(dim)
@@ -88,7 +94,7 @@ class Dashboard(SigSlot):
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
             graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
             if is_geo:
-                    graph = base_map * graph.opts(alpha=alpha).opts(active_tools=['wheel_zoom', 'pan'])
+                    graph = base_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
 
             self.create_selectors_players(graph)
 
