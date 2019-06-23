@@ -22,15 +22,12 @@ class Style(SigSlot):
         self.color_scale = pn.widgets.Select(name='color_scale', value='None',
                                              options=scaling_ops)
 
-        self.panel = pn.Column(self.height,
-                               self.width,
-                               self.cmap,
-                               self.colorbar,
-                               self.colormap_limits,
-                               self.color_scale,
+        self.panel = pn.Column(pn.Row(self.height, self.width),
+                               pn.Row(self.cmap, self.colorbar),
+                               pn.Row(self.colormap_limits, self.color_scale),
                                name='Style')
 
     @property
     def kwargs(self):
-        out = {p.name: p.value for p in self.panel}
+        out = {widget.name: widget.value for row in self.panel for widget in row}
         return out
