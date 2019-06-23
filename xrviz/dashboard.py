@@ -72,6 +72,7 @@ class Dashboard(SigSlot):
                           'width': self.kwargs['width'],
                           'cmap': self.kwargs['cmap'],
                           'colorbar': self.kwargs['colorbar']}
+            colormap_limits = self.kwargs['colormap_limits']
             dims_to_agg = self.kwargs['dims_to_agg']
             sel_data = self.data[self.var]
 
@@ -85,8 +86,11 @@ class Dashboard(SigSlot):
             if self.var in list(sel_data.coords):  # When a var(coord) is plotted wrt itself
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
+            color_range = {sel_data.name: (sel_data.quantile(colormap_limits[0]),
+                                               sel_data.quantile(colormap_limits[1]))}
+
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range)
 
             self.create_selectors_players(graph)
 
@@ -131,6 +135,7 @@ class Dashboard(SigSlot):
                       'width': self.kwargs['width'],
                       'cmap': self.kwargs['cmap'],
                       'colorbar': self.kwargs['colorbar']}
+        colormap_limits = self.kwargs['colormap_limits']
 
         sel_data = self.data[self.var]
 
@@ -147,9 +152,12 @@ class Dashboard(SigSlot):
         if sel_data.name in self.data.coords:
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
+        color_range = {sel_data.name: (sel_data.quantile(colormap_limits[0]),
+                                       sel_data.quantile(colormap_limits[1]))}
+
         sel_data = sel_data.sel(**selection, drop=True)
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range)
         self.output[0] = graph
 
     def create_selectors_players(self, graph):
