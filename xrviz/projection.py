@@ -23,11 +23,17 @@ class Projection(SigSlot):
         self.projection = pn.widgets.Select(name='projection',
                                             options=sorted(projections_list),
                                             value='PlateCarree')
+        self.features = pn.widgets.MultiSelect(name='features',
+                                               options=['borders', 'coastline',
+                                                        'land', 'lakes',
+                                                        'grid', 'ocean',
+                                                        'rivers'])
 
         self.panel = pn.Column(self.is_geo,
                                self.basemap,
                                self.alpha,
                                self.projection,
+                               self.features,
                                name='Projection')
         self.setup(value=self.is_geo.value)
 

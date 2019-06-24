@@ -2,6 +2,7 @@ import panel as pn
 import xarray as xr
 import hvplot.xarray
 from cartopy import crs
+import geoviews.feature as gf
 from .sigslot import SigSlot
 from .control import Control
 from .utils import convert_widget, player_with_name_and_value
@@ -75,10 +76,11 @@ class Dashboard(SigSlot):
             base_map = self.kwargs['basemap']
             alpha = self.kwargs['alpha']
             projection = self.kwargs['projection']
+            features = self.kwargs['features']
 
             graph_opts = {'x': self.kwargs['x'],
-                            'y': self.kwargs['y'],
-                            'title': self.var}
+                          'y': self.kwargs['y'],
+                          'title': self.var}
             if is_geo:
                 graph_opts.update({'crs': getattr(crs, projection)()})
             for dim in dims_to_agg:
@@ -94,7 +96,10 @@ class Dashboard(SigSlot):
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
             graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
             if is_geo:
-                    graph = base_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
+                if len(features):
+                    for feature in features:
+                        base_map *= getattr(gf, feature)
+                graph = base_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
 
             self.create_selectors_players(graph)
 
