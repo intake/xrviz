@@ -56,6 +56,9 @@ class Dashboard(SigSlot):
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
         self.var = self.kwargs['Variables']
+        if self.index_selectors:
+            for selector in self.index_selectors:
+                del selector
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
 
@@ -204,8 +207,9 @@ class Dashboard(SigSlot):
         return x in non_indexed_coords
 
     def set_data(self, data):
-        self.data = data
-        self.is_dataset = isinstance(data, xr.Dataset)
+        if isinstance(data, xr.DataArray):
+            self.data = data = xr.Dataset({f'{data.name}': data},attrs=data.attrs)
+        self.is_dataset = True
 
     def set_coords(self, *args):
         # We can't reset indexed coordinates so add them every time
