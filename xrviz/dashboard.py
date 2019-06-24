@@ -207,9 +207,8 @@ class Dashboard(SigSlot):
         return x in non_indexed_coords
 
     def set_data(self, data):
-        if isinstance(data, xr.DataArray):
-            self.data = data = xr.Dataset({f'{data.name}': data},attrs=data.attrs)
-        self.is_dataset = True
+        self.data = data
+        self.is_dataset = isinstance(data, xr.Dataset)
 
     def set_coords(self, *args):
         # We can't reset indexed coordinates so add them every time
