@@ -28,6 +28,8 @@ class Dashboard(SigSlot):
 
     def __init__(self, data):
         super().__init__()
+        if not isinstance(data, xr.core.dataarray.DataWithCoords):
+            raise ValueError("Input should be an xarray data object, not %s" % type(data))
         self.set_data(data)
         self.control = Control(self.data)
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
@@ -145,10 +147,7 @@ class Dashboard(SigSlot):
         graph_opts = {'x': x,
                       'y': y,
                       'title': self.var}
-        if self.is_dataset:
-            sel_data = self.data[self.var]
-        else:
-            sel_data = self.data
+        sel_data = self.data[self.var] if self.is_dataset else self.data
 
         for dim in dims_to_agg:
             if self.kwargs[dim] == 'count':
@@ -202,20 +201,11 @@ class Dashboard(SigSlot):
     def is_non_indexed_coord(self, x):
         indexed_coords = set(self.data[self.var].dims) & set(self.data[self.var].coords)
         non_indexed_coords = list(set(self.data[self.var].coords) - indexed_coords)
-        if x in non_indexed_coords:
-            return True
-        else:
-            return False
+        return x in non_indexed_coords
 
     def set_data(self, data):
-        if isinstance(data, xr.Dataset):
-            self.data = data
-            self.is_dataset = True
-        elif isinstance(data, xr.DataArray):
-            self.data = data
-            self.is_dataset = False
-        else:
-            raise ValueError
+        self.data = data
+        self.is_dataset = isinstance(data, xr.Dataset)
 
     def set_coords(self, *args):
         # We can't reset indexed coordinates so add them every time
@@ -231,10 +221,5 @@ class Dashboard(SigSlot):
         If a variable is 1-d, disable plot_button for it.
         """
         self.plot_button.disabled = False  # important to enable button once disabled
-        if self.is_dataset:
-            var = var[0]
-            if len(list(self.data[var].dims)) <= 1:
-                self.plot_button.disabled = True
-        else:
-            if len(self.data.dims) <= 1:
-                self.plot_button.disabled = True
+        data = self.data[var[0]] if self.is_dataset else self.data
+        self.plot_button.disabled = len(data.dims) <= 1

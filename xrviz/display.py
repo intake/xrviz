@@ -39,18 +39,18 @@ class Display(SigSlot):
         self.panel = pn.Row(self.select)
 
     def set_data(self, data):
-        if isinstance(data, xr.Dataset) or isinstance(data, xr.DataArray):
-            self.data = data
+        self.data = data
+        self.is_dataset = isinstance(data, xr.Dataset)
 
     def set_variables(self,):
-        if isinstance(self.data, xr.Dataset):
+        if self.is_dataset:
             self.select.options = {_is_coord(self.data, name): name for name in list(self.data.variables)}
         else:
             self.select.options = {_is_coord(self.data, self.data.name): self.data.name}
             self.select.value = [self.data.name]
 
     def select_variable(self, variable):
-        if isinstance(self.data, xr.Dataset):
+        if self.is_dataset:
             if isinstance(variable, str):
                 if variable in self.select.options.values():
                     self.select.value = [variable]

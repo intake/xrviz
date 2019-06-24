@@ -49,21 +49,14 @@ class Fields(SigSlot):
             self.setup(data)
 
     def set_data(self, data):
-        if isinstance(data, xr.Dataset):
-            self.data = data
-            self.is_dataset = True
-        else:
-            self.data = data
-            self.is_dataset = False
+        self.data = data
+        self.is_dataset = isinstance(data, xr.Dataset)
 
     def setup(self, var):
         self.agg_selectors.clear()  # To empty previouly selected value from selector
 
         if self.is_dataset:
-            if isinstance(var, str):
-                self.var = var
-            else:
-                self.var = var[0]
+            self.var = var if isinstance(var, str) else var[0]
             self.var_dims = list(self.data[var].dims)
             self.indexed_coords = set(self.var_dims) & set(self.data[var].coords)
             self.non_indexed_coords = list(set(self.data[var].coords) - self.indexed_coords)
@@ -73,7 +66,7 @@ class Fields(SigSlot):
             self.sel_options = list(self.data.dims)
 
         x_opts = self.sel_options.copy()
-        if len(x_opts) > 0:  # to check that data has dim (is not Empty)
+        if len(x_opts):  # to check that data has dim (is not Empty)
             self.x.options = x_opts
             self.x.value = x_opts[0]
             y_opts = x_opts.copy()
@@ -91,7 +84,7 @@ class Fields(SigSlot):
         Updates the options of y, by removing option selected in x (value),
         from all the variable dimensions available as options.
         """
-         # if x belong to var_dims replace the y with remaining var_dims
+        # if x belong to var_dims replace the y with remaining var_dims
         # else if x belong to non_indexed_coords, replace y with remaining
         # non_indexed_coords
         values = self.sel_options.copy()
@@ -116,7 +109,7 @@ class Fields(SigSlot):
         if self.is_dataset:
             if self.x.value in self.var_dims:
                 self.remaining_dims = [dim for dim in self.var_dims if dim not in used_opts]
-            else: # is a coord
+            else:  # is a coord
                 #  We can't aggregate along dims which are present in x and y.
                 dims_not_to_agg = set(self.data[self.x.value].dims) | set(self.data[self.y.value].dims) | set(used_opts)
                 self.remaining_dims = [dim for dim in self.var_dims if dim not in dims_not_to_agg]
@@ -141,7 +134,7 @@ class Fields(SigSlot):
         #         [1] Column            --> self.panel[1][1]
         #             [0] Select()
         #             [1] Select()
-        out = {p.name: p.value for p in self.panel[0][1:]} #since panel[0][0] is Markdown
+        out = {p.name: p.value for p in self.panel[0][1:]}  # since panel[0][0] is Markdown
         selectors = {p.name: p.value for p in self.panel[1][1]}
         out.update(selectors)
         dims_to_select_animate = [dim for dim, agg in selectors.items() if agg in ['Select', 'Animate']]
