@@ -58,9 +58,9 @@ class Fields(SigSlot):
         if self.is_dataset:
             self.var = var if isinstance(var, str) else var[0]
             self.var_dims = list(self.data[var].dims)
-            self.indexed_coords = set(self.var_dims) & set(self.data[var].coords)
-            self.non_indexed_coords = list(set(self.data[var].coords) - self.indexed_coords)
-            self.sel_options = self.var_dims + self.non_indexed_coords
+            self.indexed_coords = set(self.var_dims).intersection(set(self.data[var].coords))
+            self.non_indexed_coords = set(self.data[var].coords) - self.indexed_coords
+            self.sel_options = self.var_dims + list(self.non_indexed_coords)
         else:
             #  DataArray will only have dims in options
             self.sel_options = list(self.data.dims)
@@ -92,14 +92,14 @@ class Fields(SigSlot):
         values.remove(x_val)
         if isinstance(self.data, xr.Dataset):
             if x_val in self.var_dims:
-                valid_values = list(set(values) - set(self.non_indexed_coords))
+                valid_values = set(values) - self.non_indexed_coords
             else:  # x_val belong to non_indexed_coords
-                values = list(set(values) - set(self.var_dims))
+                values = set(values) - set(self.var_dims)
                 #  Plot can be generated for 2 values only if ndims of both match
                 valid_values = [val for val in values if self.ndim_matches(x_val, val)]
-            self.y.options = valid_values
+            self.y.options = list(valid_values)
         else:
-            self.y.options = values
+            self.y.options = list(values)
         self.change_dim_selectors()
 
     def change_dim_selectors(self, *args):
@@ -111,7 +111,7 @@ class Fields(SigSlot):
                 self.remaining_dims = [dim for dim in self.var_dims if dim not in used_opts]
             else:  # is a coord
                 #  We can't aggregate along dims which are present in x and y.
-                dims_not_to_agg = set(self.data[self.x.value].dims) | set(self.data[self.y.value].dims) | set(used_opts)
+                dims_not_to_agg = set(self.data[self.x.value].dims).union(set(self.data[self.y.value].dims)).union(set(used_opts))
                 self.remaining_dims = [dim for dim in self.var_dims if dim not in dims_not_to_agg]
         else:
             self.remaining_dims = [dim for dim in self.sel_options if dim not in used_opts]

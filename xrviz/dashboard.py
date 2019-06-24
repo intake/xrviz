@@ -199,8 +199,8 @@ class Dashboard(SigSlot):
             self.output[0] = graph
 
     def is_non_indexed_coord(self, x):
-        indexed_coords = set(self.data[self.var].dims) & set(self.data[self.var].coords)
-        non_indexed_coords = list(set(self.data[self.var].coords) - indexed_coords)
+        indexed_coords = set(self.data[self.var].dims).intersection(set(self.data[self.var].coords))
+        non_indexed_coords = set(self.data[self.var].coords) - indexed_coords
         return x in non_indexed_coords
 
     def set_data(self, data):
@@ -211,9 +211,9 @@ class Dashboard(SigSlot):
         # We can't reset indexed coordinates so add them every time
         # in coord_selector.value
         self.data = self.data.reset_coords()
-        indexed_coords = set(self.data.dims) & set(self.data.coords)
-        new_coords = list(set(self.control.coord_setter.coord_selector.value) | set(indexed_coords))
-        self.data = self.data.set_coords(new_coords)
+        indexed_coords = set(self.data.dims).intersection(set(self.data.coords))
+        new_coords = set(self.control.coord_setter.coord_selector.value).union(indexed_coords)
+        self.data = self.data.set_coords(new_coords)  # this `set_coords` belongs to xr.dataset
         self.control.set_coords(self.data)
 
     def check_is_plottable(self, var):
