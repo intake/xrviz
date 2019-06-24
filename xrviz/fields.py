@@ -60,10 +60,10 @@ class Fields(SigSlot):
             self.var_dims = list(self.data[var].dims)
             self.indexed_coords = set(self.var_dims).intersection(set(self.data[var].coords))
             self.non_indexed_coords = set(self.data[var].coords) - self.indexed_coords
-            self.sel_options = self.var_dims + list(self.non_indexed_coords)
+            self.sel_options = sorted(self.var_dims + list(self.non_indexed_coords))
         else:
             #  DataArray will only have dims in options
-            self.sel_options = list(self.data.dims)
+            self.sel_options = sorted(list(self.data.dims))
 
         x_opts = self.sel_options.copy()
         if len(x_opts):  # to check that data has dim (is not Empty)
@@ -97,9 +97,9 @@ class Fields(SigSlot):
                 values = set(values) - set(self.var_dims)
                 #  Plot can be generated for 2 values only if ndims of both match
                 valid_values = [val for val in values if self.ndim_matches(x_val, val)]
-            self.y.options = list(valid_values)
+            self.y.options = sorted(list(valid_values))
         else:
-            self.y.options = list(values)
+            self.y.options = sorted(list(values))
         self.change_dim_selectors()
 
     def change_dim_selectors(self, *args):
