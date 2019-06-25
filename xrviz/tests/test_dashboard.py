@@ -1,4 +1,5 @@
 import xarray as xr
+import panel as pn
 from xrviz.dashboard import Dashboard
 import pytest
 from . import data
@@ -8,6 +9,11 @@ from ..utils import _is_coord
 @pytest.fixture(scope='module')
 def dashboard(data):
     return Dashboard(data)
+
+
+@pytest.fixture(scope='module')
+def dashboard_for_dataArray(data):
+    return Dashboard(data.temp)
 
 
 def test_check_is_plottable_1D(dashboard):
@@ -29,3 +35,43 @@ def test_check_is_plottable_other_vars(dashboard):
     dashboard.plot_button.disabled = True
     dashboard.control.displayer.select_variable('temp')
     assert dashboard.plot_button.disabled is False
+
+
+def test_2d_variable(dashboard):
+    dashboard.control.displayer.select_variable('lat')
+    fields = dashboard.control.fields
+    assert fields.x.value == 'nx'
+    assert fields.y.value == 'ny'
+    assert [agg_sel.name for agg_sel in fields.agg_selectors] == []
+    dashboard.plot_button.clicks += 1
+    graph = dashboard.output[0]
+    assert isinstance(graph, pn.pane.holoviews.HoloViews)
+    assert [index_sel for index_sel in dashboard.output[1]] == []
+
+
+def test_3d_variable(dashboard):
+    dashboard.control.displayer.select_variable('air_v')
+    fields = dashboard.control.fields
+    assert fields.x.value == 'nx'
+    assert fields.y.value == 'ny'
+    agg_selectors = [agg_sel.name for agg_sel in fields.agg_selectors]
+    assert agg_selectors == ['time']
+    dashboard.plot_button.clicks += 1
+    graph = dashboard.output[0]
+    assert isinstance(graph, pn.pane.holoviews.HoloViews)
+    index_selectors = [index_sel.name for index_sel in dashboard.output[1]]
+    assert index_selectors == ['time']
+
+
+def test_4d_variable(dashboard):
+    dashboard.control.displayer.select_variable('temp')
+    fields = dashboard.control.fields
+    assert fields.x.value == 'nx'
+    assert fields.y.value == 'ny'
+    agg_selectors = [agg_sel.name for agg_sel in fields.agg_selectors]
+    assert agg_selectors == ['sigma', 'time']
+    dashboard.plot_button.clicks += 1
+    graph = dashboard.output[0]
+    assert isinstance(graph, pn.pane.holoviews.HoloViews)
+    index_selectors = [index_sel.name for index_sel in dashboard.output[1]]
+    assert index_selectors == ['sigma', 'time']
