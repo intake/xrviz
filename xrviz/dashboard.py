@@ -49,6 +49,10 @@ class Dashboard(SigSlot):
                                self.plot_button,
                                self.output)
 
+        # To auto-select in case of single variable
+        if len(list(self.data.variables)) == 1:
+            self.control.displayer.select.value = list(self.data.variables)
+
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
         self.var = self.kwargs['Variables']
@@ -59,7 +63,29 @@ class Dashboard(SigSlot):
         self.output[1].clear()  # clears Index_selectors
 
         x = self.kwargs['x']
-        if not self.is_non_indexed_coord(x):  # i.e is a var_dim
+        y = self.kwargs['y']
+        if self.are_var_coords(x, y):
+            graph_opts = {'x': x,
+                          'y': y,
+                          'title': self.var}
+            dims_to_agg = self.kwargs['dims_to_agg']
+            sel_data = self.data[self.var]
+
+            for dim in dims_to_agg:
+                if self.kwargs[dim] == 'count':
+                    sel_data = (~ sel_data.isnull()).sum(dim)
+                else:
+                    agg = self.kwargs[dim]
+                    sel_data = getattr(sel_data, agg)(dim)
+
+            if self.var in list(sel_data.coords):  # When a var(coord) is plotted wrt itself
+                sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
+
+            assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
+            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+
+            self.create_selectors_players(graph)
+        else:  # i.e one or both of x,y are var_dims
             self.var_dims = list(self.data[self.var].dims)
             #  var_selector_dims refers to dims for which index_selectors would be created
             self.var_selector_dims = self.kwargs['dims_to_select_animate']
@@ -84,33 +110,12 @@ class Dashboard(SigSlot):
                 else:
                     player = player_with_name_and_value(selector)
                     self.output[1].append(player)
-        else:   # is_indexed_coord
-            graph_opts = {'x': self.kwargs['x'],
-                          'y': self.kwargs['y'],
-                          'title': self.var}
-            dims_to_agg = self.kwargs['dims_to_agg']
-            sel_data = self.data[self.var]
-
-            for dim in dims_to_agg:
-                if self.kwargs[dim] == 'count':
-                    sel_data = (~ sel_data.isnull()).sum(dim)
-                else:
-                    agg = self.kwargs[dim]
-                    sel_data = getattr(sel_data, agg)(dim)
-
-            if self.var in list(sel_data.coords):  # When a var(coord) is plotted wrt itself
-                sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
-
-            assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
-
-            self.create_selectors_players(graph)
 
     def create_indexed_graph(self, *args):
         """
         Creates graph for  selected indexes in selectors or players.
         """
-        selection = {} # to collect the value of insex selectors
+        selection = {}  # to collect the value of insex selectors
         for i, dim in enumerate(list(self.var_selector_dims)):
             selection[dim] = self.index_selectors[i].value
         x = self.kwargs['x']
@@ -150,10 +155,11 @@ class Dashboard(SigSlot):
             if graph[0][1]:  # if sliders are generated
                 self.output[0] = graph[0][0]
 
-                # link the generated slider with agg selector in fields 
+                # link the generated slider with agg selector in fields
                 for slider in graph[0][1]:
                     for dim in self.kwargs['dims_to_select_animate']:
-                        if slider.name == dim or slider.name == self.data[dim].long_name:
+                        long_name = self.data[dim].long_name if hasattr(self.data[dim], 'long_name') else None
+                        if slider.name == dim or slider.name == long_name:
                             if self.kwargs[dim] == 'Select':
                                 selector = convert_widget(slider, pn.widgets.Select())
                             else:
@@ -170,10 +176,12 @@ class Dashboard(SigSlot):
         except:  # else return simple graph
             self.output[0] = graph
 
-    def is_non_indexed_coord(self, x):
-        indexed_coords = set(self.data[self.var].dims).intersection(set(self.data[self.var].coords))
-        non_indexed_coords = set(self.data[self.var].coords) - indexed_coords
-        return x in non_indexed_coords
+    def are_var_coords(self, x, y):
+        '''
+        Check if both x and y are in variable's coords
+        '''
+        var_coords = list(self.data[self.var].coords)
+        return True if x in var_coords and y in var_coords else False
 
     def set_data(self, data):
         self.data = xr.Dataset({f'{data.name}': data}, attrs=data.attrs) if isinstance(data, xr.DataArray) else data
