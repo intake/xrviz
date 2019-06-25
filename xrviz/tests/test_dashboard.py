@@ -12,7 +12,7 @@ def dashboard(data):
 
 
 @pytest.fixture(scope='module')
-def dashboard_for_dataArray(data):
+def dash_for_Array(data):
     return Dashboard(data.temp)
 
 
@@ -63,6 +63,9 @@ def test_3d_variable(dashboard):
     assert index_selectors == ['time']
 
 
+@pytest.mark.parametrize('dashboard',
+                         ['dashboard','dash_for_Array'],
+                         indirect=True)
 def test_4d_variable(dashboard):
     dashboard.control.displayer.select_variable('temp')
     fields = dashboard.control.fields
