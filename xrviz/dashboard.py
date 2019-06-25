@@ -85,12 +85,11 @@ class Dashboard(SigSlot):
             graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
 
             self.create_selectors_players(graph)
-        else:  # i.e one or both of x,y are var_dims
+
+        else:  # if one or both x,y are var_dims
             self.var_dims = list(self.data[self.var].dims)
             #  var_selector_dims refers to dims for which index_selectors would be created
             self.var_selector_dims = self.kwargs['dims_to_select_animate']
-            self.index_selectors = []
-            self.output[1].clear()  # clears Index_selectors
 
             for dim in self.var_selector_dims:
                 ops = list(self.data[self.var][dim].values)
@@ -115,7 +114,7 @@ class Dashboard(SigSlot):
         """
         Creates graph for  selected indexes in selectors or players.
         """
-        selection = {}  # to collect the value of insex selectors
+        selection = {}  # to collect the value of index selectors
         for i, dim in enumerate(list(self.var_selector_dims)):
             selection[dim] = self.index_selectors[i].value
         x = self.kwargs['x']
@@ -146,9 +145,10 @@ class Dashboard(SigSlot):
 
     def create_selectors_players(self, graph):
         """
-        This function is applicable for non_indexed coords, in case
-        sliders are generated. This function moves the sliders to bottom of
-        graph if they are present and convert them into Selectors,Players.
+        This function is applicable for when both x and y are in var coords,
+        In case sliders are generated, this function moves the sliders to
+        bottom of graph if they are present and convert them into Selectors,
+        Players.
         """
         graph = pn.Row(graph)
         try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
