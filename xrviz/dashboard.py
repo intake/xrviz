@@ -40,18 +40,14 @@ class Dashboard(SigSlot):
         self._register(self.plot_button, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
 
-        if self.is_dataset:
-            self._register(self.control.coord_setter.set_coord_button, 'set_coords', 'clicks')
-            self.connect("set_coords", self.set_coords)
+        self._register(self.control.coord_setter.set_coord_button, 'set_coords', 'clicks')
+        self.connect("set_coords", self.set_coords)
 
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
 
         self.panel = pn.Column(self.control.panel,
                                self.plot_button,
                                self.output)
-
-        if not self.is_dataset:
-            self.check_is_plottable(var=None)
 
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
@@ -62,64 +58,16 @@ class Dashboard(SigSlot):
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
 
-        if self.is_dataset:
-            x = self.kwargs['x']
-            if not self.is_non_indexed_coord(x):  # i.e is a var_dim
-                self.var_dims = list(self.data[self.var].dims)
-                #  var_selector_dims refers to dims for which index_selectors would be created
-                self.var_selector_dims = self.kwargs['dims_to_select_animate']
-                self.index_selectors = []
-                self.output[1].clear()  # clears Index_selectors
-
-                for dim in self.var_selector_dims:
-                    ops = list(self.data[self.var][dim].values)
-
-                    if self.kwargs[dim] == 'Select':
-                        selector = pn.widgets.Select(name=dim, options=ops)
-                    else:
-                        selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
-                    self.index_selectors.append(selector)
-                    self._register(selector, selector.name)
-                    self.connect(selector.name, self.create_indexed_graph )
-
-                self.create_indexed_graph()
-                for selector in self.index_selectors:
-                    if isinstance(selector, pn.widgets.Select):
-                        self.output[1].append(selector)
-                    else:
-                        player = player_with_name_and_value(selector)
-                        self.output[1].append(player)
-            else:   # is_indexed_coord
-                graph_opts = {'x': self.kwargs['x'],
-                              'y': self.kwargs['y'],
-                              'title': self.var}
-                dims_to_agg = self.kwargs['dims_to_agg']
-                sel_data = self.data[self.var]
-
-                for dim in dims_to_agg:
-                    if self.kwargs[dim] == 'count':
-                        sel_data = (~ sel_data.isnull()).sum(dim)
-                    else:
-                        agg = self.kwargs[dim]
-                        sel_data = getattr(sel_data, agg)(dim)
-
-                if self.var in list(sel_data.coords):  # When a var(coord) is plotted wrt itself
-                    sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
-
-                assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-                graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
-
-                self.create_selectors_players(graph)
-
-        else:  # if is_dataArray
-            self.var_dims = list(self.data.dims)
+        x = self.kwargs['x']
+        if not self.is_non_indexed_coord(x):  # i.e is a var_dim
+            self.var_dims = list(self.data[self.var].dims)
+            #  var_selector_dims refers to dims for which index_selectors would be created
             self.var_selector_dims = self.kwargs['dims_to_select_animate']
-
             self.index_selectors = []
             self.output[1].clear()  # clears Index_selectors
 
             for dim in self.var_selector_dims:
-                ops = list(self.data[dim].values)
+                ops = list(self.data[self.var][dim].values)
 
                 if self.kwargs[dim] == 'Select':
                     selector = pn.widgets.Select(name=dim, options=ops)
@@ -136,6 +84,27 @@ class Dashboard(SigSlot):
                 else:
                     player = player_with_name_and_value(selector)
                     self.output[1].append(player)
+        else:   # is_indexed_coord
+            graph_opts = {'x': self.kwargs['x'],
+                          'y': self.kwargs['y'],
+                          'title': self.var}
+            dims_to_agg = self.kwargs['dims_to_agg']
+            sel_data = self.data[self.var]
+
+            for dim in dims_to_agg:
+                if self.kwargs[dim] == 'count':
+                    sel_data = (~ sel_data.isnull()).sum(dim)
+                else:
+                    agg = self.kwargs[dim]
+                    sel_data = getattr(sel_data, agg)(dim)
+
+            if self.var in list(sel_data.coords):  # When a var(coord) is plotted wrt itself
+                sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
+
+            assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
+            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts)
+
+            self.create_selectors_players(graph)
 
     def create_indexed_graph(self, *args):
         """
@@ -150,7 +119,7 @@ class Dashboard(SigSlot):
         graph_opts = {'x': x,
                       'y': y,
                       'title': self.var}
-        sel_data = self.data[self.var] if self.is_dataset else self.data
+        sel_data = self.data[self.var]
 
         for dim in dims_to_agg:
             if self.kwargs[dim] == 'count':
@@ -207,8 +176,7 @@ class Dashboard(SigSlot):
         return x in non_indexed_coords
 
     def set_data(self, data):
-        self.data = data
-        self.is_dataset = isinstance(data, xr.Dataset)
+        self.data = xr.Dataset({f'{data.name}': data}, attrs=data.attrs) if isinstance(data, xr.DataArray) else data
 
     def set_coords(self, *args):
         # We can't reset indexed coordinates so add them every time
@@ -224,5 +192,5 @@ class Dashboard(SigSlot):
         If a variable is 1-d, disable plot_button for it.
         """
         self.plot_button.disabled = False  # important to enable button once disabled
-        data = self.data[var[0]] if self.is_dataset else self.data
+        data = self.data[var[0]]
         self.plot_button.disabled = len(data.dims) <= 1
