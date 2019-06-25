@@ -45,10 +45,6 @@ class Fields(SigSlot):
                                       background='rgb(175,175,175)'),
                             name='Fields',)
 
-        if len(list(self.data.variables))==1:
-            print("Single Variable")
-            # self.setup(data)
-
     def setup(self, var):
         self.agg_selectors.clear()  # To empty previouly selected value from selector
         self.var = var if isinstance(var, str) else var[0]

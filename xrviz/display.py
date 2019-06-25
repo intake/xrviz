@@ -38,8 +38,6 @@ class Display(SigSlot):
 
     def set_variables(self,):
         self.select.options = {_is_coord(self.data, name): name for name in list(self.data.variables)}
-        # if len(self.select.options) == 1:
-        #     self.select.value = list(self.select.options)
 
     def select_variable(self, variable):
         if isinstance(variable, str):

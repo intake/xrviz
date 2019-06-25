@@ -46,6 +46,10 @@ class Control(SigSlot):
                                      self.describer.panel),
                               self.tabs)
 
+        # To auto-select in case of single variable
+        if len(list(self.data.variables)) == 1:
+            self.displayer.select.value = list(self.data.variables)
+
     def set_coords(self, data):
         try:  # Upon setting coords before selecting a variable
             var = self.kwargs['Variables']
