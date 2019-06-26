@@ -1,6 +1,7 @@
 import panel as pn
 import xarray as xr
 import hvplot.xarray
+import holoviews as hv
 from cartopy import crs
 import geoviews.feature as gf
 from .sigslot import SigSlot
@@ -96,10 +97,10 @@ class Dashboard(SigSlot):
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
             graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
             if is_geo:
-                if len(features):
-                    for feature in features:
-                        base_map *= getattr(gf, feature)
-                graph = base_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
+                feature_map = hv.Overlay()
+                for feature in features:
+                    feature_map *= getattr(gf, feature)
+                graph = base_map * feature_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
 
             self.create_selectors_players(graph)
 
