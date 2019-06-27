@@ -66,7 +66,8 @@ class Dashboard(SigSlot):
 
         x = self.kwargs['x']
         y = self.kwargs['y']
-        if self.are_var_coords(x, y):
+        are_var_coords = self.kwargs['are_var_coords']
+        if are_var_coords:
             graph_opts = {'x': x,
                           'y': y,
                           'title': self.var,
@@ -199,13 +200,6 @@ class Dashboard(SigSlot):
 
         except:  # else return simple graph
             self.output[0] = graph
-
-    def are_var_coords(self, x, y):
-        '''
-        Check if both x and y are in variable's coords
-        '''
-        var_coords = list(self.data[self.var].coords)
-        return True if x in var_coords and y in var_coords else False
 
     def set_data(self, data):
         self.data = xr.Dataset({f'{data.name}': data}, attrs=data.attrs) if isinstance(data, xr.DataArray) else data

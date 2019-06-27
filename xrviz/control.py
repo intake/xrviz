@@ -44,6 +44,9 @@ class Control(SigSlot):
         self.displayer.connect("variable_selected", self.describer.setup)
         self.displayer.connect("variable_selected", self.fields.setup)
 
+        self.fields.connect('x', self.check_is_projectable)
+        self.fields.connect('y', self.check_is_projectable)
+
         self.panel = pn.Column(
                               pn.Row(self.displayer.panel,
                                      self.describer.panel),
@@ -59,6 +62,9 @@ class Control(SigSlot):
         self.displayer.set_coords(self.data)
         self.describer.set_coords(self.data, var)
         self.fields.set_coords(self.data, var)
+
+    def check_is_projectable(self, *args):
+        self.projection.is_geo.disabled = not self.fields.kwargs['are_var_coords']
 
     @property
     def kwargs(self):

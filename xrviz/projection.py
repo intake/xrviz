@@ -10,7 +10,8 @@ class Projection(SigSlot):
 
     def __init__(self):
         super().__init__()
-        self.is_geo = pn.widgets.Checkbox(name='is_geo', value=False)
+        self.is_geo = pn.widgets.Checkbox(name='is_geo', value=False,
+                                          disabled=True)
         self.alpha = pn.widgets.FloatSlider(name='alpha', start=0, end=1,
                                             step=0.01, value=0.7)
 

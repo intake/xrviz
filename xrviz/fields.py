@@ -30,6 +30,7 @@ class Fields(SigSlot):
         self.agg_selectors = pn.Column()
         self.agg_opts = ['Select', 'Animate', 'mean', 'max',
                          'min', 'median', 'std', 'count']
+        self.are_var_coords = False
 
         self._register(self.x, 'x')
         self._register(self.y, 'y')
@@ -86,10 +87,11 @@ class Fields(SigSlot):
             #  Plot can be generated for 2 values only if ndims of both match
             valid_values = [val for val in values if self.ndim_matches(x_val, val)]
         self.y.options = sorted(list(valid_values))
-
+        self.are_var_coords = self.check_are_var_coords()
         self.change_dim_selectors()
 
     def change_dim_selectors(self, *args):
+        self.are_var_coords = self.check_are_var_coords()
         self.agg_selectors.clear()
         used_opts = [self.x.value, self.y.value]
 
@@ -125,6 +127,7 @@ class Fields(SigSlot):
         dims_to_agg = [dim for dim in selectors if dim not in dims_to_select_animate]
         out.update({'dims_to_agg': dims_to_agg})
         out.update({'dims_to_select_animate': sorted(dims_to_select_animate)})
+        out.update({'are_var_coords': self.are_var_coords})
         return out
 
     def set_coords(self, data, var):
@@ -134,3 +137,12 @@ class Fields(SigSlot):
 
     def ndim_matches(self, var1, var2):
         return self.data[var1].ndim == self.data[var2].ndim
+
+    def check_are_var_coords(self):
+        '''
+        Check if both x and y are in variable's coords
+        '''
+        var_coords = list(self.data[self.var].coords)
+        x = self.x.value
+        y = self.y.value
+        return True if x in var_coords and y in var_coords else False
