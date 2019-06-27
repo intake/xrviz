@@ -15,11 +15,9 @@ class Style(SigSlot):
         self.colormap_limits = pn.widgets.RangeSlider(name='colormap_limits',
                                                       start=0, end=1,
                                                       value=(0.1, 0.9), step=0.01)
-        scaling_ops = ['None', 'arcsin', 'arccos', 'arctan', 'arcsinh',
-                       'arccosh', 'arctanh', 'cos', 'cosh', 'exp', 'exp2',
-                       'expm1', 'log', 'log2', 'log10', 'reciprocal',
-                       'square', 'sqrt', 'sin', 'sinh', 'tan', 'tanh']
-        self.color_scale = pn.widgets.Select(name='color_scale', value='None',
+        scaling_ops = ['linear', 'cos', 'exp', 'log', 'reciprocal',
+                       'square', 'sqrt', 'sin', 'tan']
+        self.color_scale = pn.widgets.Select(name='color_scale', value='linear',
                                              options=scaling_ops)
 
         self.panel = pn.Column(pn.Row(self.height, self.width),

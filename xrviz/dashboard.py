@@ -1,7 +1,6 @@
 import panel as pn
 import xarray as xr
 import hvplot.xarray
-from cartopy import crs as ccrs
 import numpy
 from .sigslot import SigSlot
 from .control import Control
@@ -161,7 +160,7 @@ class Dashboard(SigSlot):
                                        sel_data.quantile(colormap_limits[1]))}
 
         sel_data = sel_data.sel(**selection, drop=True)
-        if color_scale is not 'None':
+        if color_scale is not 'linear':
             sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range)
