@@ -40,7 +40,7 @@ class Dashboard(SigSlot):
         self._register(self.plot_button, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
 
-        self._register(self.control.coord_setter.set_coord_button, 'set_coords', 'clicks')
+        self._register(self.control.coord_setter.coord_selector, 'set_coords')
         self.connect("set_coords", self.set_coords)
 
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
@@ -214,7 +214,7 @@ class Dashboard(SigSlot):
         # in coord_selector.value
         self.data = self.data.reset_coords()
         indexed_coords = set(self.data.dims).intersection(set(self.data.coords))
-        new_coords = set(self.control.coord_setter.coord_selector.value).union(indexed_coords)
+        new_coords = set(args[0]).union(indexed_coords)
         self.data = self.data.set_coords(new_coords)  # this `set_coords` belongs to xr.dataset
         self.control.set_coords(self.data)
 
