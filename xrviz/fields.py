@@ -93,13 +93,17 @@ class Fields(SigSlot):
     def change_dim_selectors(self, *args):
         self.are_var_coords = self.check_are_var_coords()
         self.agg_selectors.clear()
-        used_opts = [self.x.value, self.y.value]
+        x = self.x.value
+        y = self.y.value
+        used_opts = set([x, y])
 
-        if self.x.value in self.var_dims:
+        if x in self.var_dims:
             self.remaining_dims = [dim for dim in self.var_dims if dim not in used_opts]
         else:  # is a coord
             #  We can't aggregate along dims which are present in x and y.
-            dims_not_to_agg = set(self.data[self.x.value].dims).union(set(self.data[self.y.value].dims)).union(set(used_opts))
+            x_val_dims = set(self.data[x].dims) if x is not None else set()
+            y_val_dims = set(self.data[y].dims) if y is not None else set()
+            dims_not_to_agg = x_val_dims.union(y_val_dims).union(used_opts)
             self.remaining_dims = [dim for dim in self.var_dims if dim not in dims_not_to_agg]
 
         for dim in sorted(self.remaining_dims):
