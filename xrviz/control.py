@@ -33,7 +33,7 @@ class Control(SigSlot):
         self.displayer = Display(self.data)
         self.describer = Describe(self.data)
         self.fields = Fields(self.data)
-        self.style = Style(self.data)
+        self.style = Style()
         self.coord_setter = CoordSetter(self.data)
         self.tabs = pn.Tabs(self.coord_setter.panel,
                             pn.Row(self.displayer.panel,
@@ -44,7 +44,6 @@ class Control(SigSlot):
 
         self.displayer.connect("variable_selected", self.describer.setup)
         self.displayer.connect("variable_selected", self.fields.setup)
-        self.displayer.connect("variable_selected", self.style.setup)
 
         self.panel = pn.Column(self.tabs)
 
