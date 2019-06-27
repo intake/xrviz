@@ -45,6 +45,8 @@ class Dashboard(SigSlot):
 
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
 
+        self.control.style.connect('colormap_limits', self.change_limits)
+
         self.panel = pn.Column(self.control.panel,
                                self.plot_button,
                                self.output)
@@ -74,18 +76,7 @@ class Dashboard(SigSlot):
                           'colorbar': self.kwargs['colorbar']}
             colormap_limits = self.kwargs['colormap_limits']
             color_scale = self.kwargs['color_scale']
-            dims_to_agg = self.kwargs['dims_to_agg']
-            sel_data = self.data[self.var]
-
-            for dim in dims_to_agg:
-                if self.kwargs[dim] == 'count':
-                    sel_data = (~ sel_data.isnull()).sum(dim)
-                else:
-                    agg = self.kwargs[dim]
-                    sel_data = getattr(sel_data, agg)(dim)
-
-            if self.var in list(sel_data.coords):  # When a var(coord) is plotted wrt itself
-                sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
+            sel_data = self.select_data()
 
             color_range = {sel_data.name: (sel_data.quantile(colormap_limits[0]),
                                                sel_data.quantile(colormap_limits[1]))}
@@ -130,7 +121,6 @@ class Dashboard(SigSlot):
             selection[dim] = self.index_selectors[i].value
         x = self.kwargs['x']
         y = self.kwargs['y']
-        dims_to_agg = self.kwargs['dims_to_agg']
         graph_opts = {'x': x,
                       'y': y,
                       'title': self.var,
@@ -140,10 +130,24 @@ class Dashboard(SigSlot):
                       'colorbar': self.kwargs['colorbar']}
         colormap_limits = self.kwargs['colormap_limits']
         color_scale = self.kwargs['color_scale']
+        sel_data = self.select_data()
 
-        sel_data = self.data[self.var]
+        color_range = {sel_data.name: (sel_data.quantile(colormap_limits[0]),
+                                       sel_data.quantile(colormap_limits[1]))}
 
-        for dim in dims_to_agg:
+        sel_data = sel_data.sel(**selection, drop=True)
+        if color_scale is not 'linear':
+            sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
+        assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
+        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range)
+        self.output[0] = graph
+
+    def select_data(self):
+        self.kwargs = self.control.kwargs
+        var = self.kwargs['Variables']
+        sel_data = self.data[var]
+
+        for dim in self.kwargs['dims_to_agg']:
             if self.kwargs[dim] == 'count':
                 sel_data = (~ sel_data.isnull()).sum(dim)
             else:
@@ -155,16 +159,7 @@ class Dashboard(SigSlot):
         #  as one of its coordinates
         if sel_data.name in self.data.coords:
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
-
-        color_range = {sel_data.name: (sel_data.quantile(colormap_limits[0]),
-                                       sel_data.quantile(colormap_limits[1]))}
-
-        sel_data = sel_data.sel(**selection, drop=True)
-        if color_scale is not 'linear':
-            sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
-        assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range)
-        self.output[0] = graph
+        return sel_data
 
     def create_selectors_players(self, graph):
         """
@@ -225,3 +220,12 @@ class Dashboard(SigSlot):
         self.plot_button.disabled = False  # important to enable button once disabled
         data = self.data[var[0]]
         self.plot_button.disabled = len(data.dims) <= 1
+
+    def change_limits(self, *args):
+        limits = args[0]
+        sel_data = self.select_data()
+        c_lim_lower = sel_data.quantile(limits[0])
+        c_lim_upper = sel_data.quantile(limits[1])
+
+        self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
+        self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
