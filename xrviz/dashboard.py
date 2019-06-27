@@ -44,8 +44,12 @@ class Dashboard(SigSlot):
         self.connect("set_coords", self.set_coords)
 
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
+        self.control.displayer.connect('variable_selected', self.get_selected_data)
+        self.control.displayer.connect('variable_selected', self.link_aggregation_selectors)
+        self.control.fields.connect('x', self.link_aggregation_selectors)
+        self.control.fields.connect('y', self.link_aggregation_selectors)
 
-        self.control.style.connect('colormap_limits', self.change_limits)
+        self.control.style.connect('colormap_limits', self.change_colormap_limits)
 
         self.panel = pn.Column(self.control.panel,
                                self.plot_button,
@@ -54,6 +58,16 @@ class Dashboard(SigSlot):
         # To auto-select in case of single variable
         if len(list(self.data.variables)) == 1:
             self.control.displayer.select.value = list(self.data.variables)
+
+    def link_aggregation_selectors(self, *args):
+        """
+        To link aggregation selectors with color_limits
+        Whenever any aggregation selector changes it value,
+        self.selected_data is updated and the limits are changed.
+        """
+        for dim in self.control.kwargs['remaining_dims']:
+            self.control.fields.connect(dim, self.get_selected_data)
+            self.control.fields.connect(dim, self.change_colormap_limits)
 
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
@@ -79,7 +93,7 @@ class Dashboard(SigSlot):
             sel_data = self.select_data()
 
             color_range = {sel_data.name: (sel_data.quantile(colormap_limits[0]),
-                                               sel_data.quantile(colormap_limits[1]))}
+                                           sel_data.quantile(colormap_limits[1]))}
             if color_scale is not 'linear':
                 sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
 
@@ -212,6 +226,7 @@ class Dashboard(SigSlot):
         new_coords = set(args[0]).union(indexed_coords)
         self.data = self.data.set_coords(new_coords)  # this `set_coords` belongs to xr.dataset
         self.control.set_coords(self.data)
+        self.link_aggregation_selectors()  # need to link here also since new agg selectors are created
 
     def check_is_plottable(self, var):
         """
@@ -221,11 +236,19 @@ class Dashboard(SigSlot):
         data = self.data[var[0]]
         self.plot_button.disabled = len(data.dims) <= 1
 
-    def change_limits(self, *args):
-        limits = args[0]
+    def change_colormap_limits(self, *args):
+        print(args)
+        print('change_limit')
         sel_data = self.select_data()
+        limits = self.control.style.colormap_limits.value
         c_lim_lower = sel_data.quantile(limits[0])
         c_lim_upper = sel_data.quantile(limits[1])
+        print(str(c_lim_lower.values.round(5)), str(c_lim_upper.values.round(5)))
 
         self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
         self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
+
+    def get_selected_data(self, *args):
+        # When a variable changes, we need to find the data,
+        # according to selections made by the user
+        self.selected_data = self.select_data()
