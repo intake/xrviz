@@ -89,7 +89,7 @@ class Dashboard(SigSlot):
 
             color_range = {sel_data.name: (sel_data.quantile(colormap_limits[0]),
                                                sel_data.quantile(colormap_limits[1]))}
-            if color_scale is not 'None':
+            if color_scale is not 'linear':
                 sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
 
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
@@ -105,7 +105,7 @@ class Dashboard(SigSlot):
             for dim in self.var_selector_dims:
                 ops = list(self.data[self.var][dim].values)
 
-                if self.kwargs[dim] == 'Select':
+                if self.kwargs[dim] == 'select':
                     selector = pn.widgets.Select(name=dim, options=ops)
                 else:
                     selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
@@ -183,7 +183,7 @@ class Dashboard(SigSlot):
                     for dim in self.kwargs['dims_to_select_animate']:
                         long_name = self.data[dim].long_name if hasattr(self.data[dim], 'long_name') else None
                         if slider.name == dim or slider.name == long_name:
-                            if self.kwargs[dim] == 'Select':
+                            if self.kwargs[dim] == 'select':
                                 selector = convert_widget(slider, pn.widgets.Select())
                             else:
                                 selector = convert_widget(slider, pn.widgets.DiscretePlayer())

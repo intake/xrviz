@@ -28,7 +28,7 @@ class Fields(SigSlot):
         self.x = pn.widgets.Select(name='x', width=200)
         self.y = pn.widgets.Select(name='y', width=200)
         self.agg_selectors = pn.Column()
-        self.agg_opts = ['Select', 'Animate', 'mean', 'max',
+        self.agg_opts = ['select', 'animate', 'mean', 'max',
                          'min', 'median', 'std', 'count']
 
         self._register(self.x, 'x')
@@ -121,7 +121,7 @@ class Fields(SigSlot):
         out = {p.name: p.value for p in self.panel[0][1:]}  # since panel[0][0] is Markdown
         selectors = {p.name: p.value for p in self.panel[1][1]}
         out.update(selectors)
-        dims_to_select_animate = [dim for dim, agg in selectors.items() if agg in ['Select', 'Animate']]
+        dims_to_select_animate = [dim for dim, agg in selectors.items() if agg in ['select', 'animate']]
         dims_to_agg = [dim for dim in selectors if dim not in dims_to_select_animate]
         out.update({'dims_to_agg': dims_to_agg})
         out.update({'dims_to_select_animate': sorted(dims_to_select_animate)})
