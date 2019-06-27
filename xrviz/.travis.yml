@@ -18,10 +18,10 @@ install:
   # Install dependencies
   - conda create -n test python=$TRAVIS_PYTHON_VERSION pytest
   - source activate test
-  - conda install -c conda-forge xrviz
+  - conda install xarray cartopy panel hvplot netcdf4
 
 script:
-  - python setup.py install
+  - pip install . --no-deps
   - pytest
 
 notifications:
