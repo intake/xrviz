@@ -83,7 +83,9 @@ class Dashboard(SigSlot):
                           'y': self.kwargs['y'],
                           'title': self.var}
             if is_geo:
-                graph_opts.update({'crs': getattr(crs, projection)()})
+                if projection is not 'None':
+                    graph_opts.update({'crs': getattr(crs, projection)()})
+
             for dim in dims_to_agg:
                 if self.kwargs[dim] == 'count':
                     sel_data = (~ sel_data.isnull()).sum(dim)
@@ -101,7 +103,10 @@ class Dashboard(SigSlot):
                 for feature in features:
                     if feature is not 'None':
                         feature_map *= getattr(gf, feature)
-                graph = base_map * feature_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
+                if base_map is not 'None':
+                    graph = base_map * feature_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
+                else:
+                    graph = feature_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
 
             self.create_selectors_players(graph)
 

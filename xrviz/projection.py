@@ -17,11 +17,13 @@ class Projection(SigSlot):
         self._register(self.is_geo, 'is_geo')
         self.connect('is_geo', self.setup)
 
+        basemap_opts = {'None': 'None'}
+        basemap_opts.update(gvts.tile_sources)
         self.basemap = pn.widgets.Select(name='basemap',
-                                         options=gvts.tile_sources,
+                                         options=basemap_opts,
                                          value=gvts.OSM)
         self.projection = pn.widgets.Select(name='projection',
-                                            options=sorted(projections_list),
+                                            options=['None'] + sorted(projections_list),
                                             value='PlateCarree')
         self.features = pn.widgets.MultiSelect(name='features',
                                                options=['None', 'borders',
