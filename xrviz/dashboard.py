@@ -99,7 +99,8 @@ class Dashboard(SigSlot):
             if is_geo:
                 feature_map = hv.Overlay()
                 for feature in features:
-                    feature_map *= getattr(gf, feature)
+                    if feature is not 'None':
+                        feature_map *= getattr(gf, feature)
                 graph = base_map * feature_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
 
             self.create_selectors_players(graph)

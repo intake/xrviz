@@ -24,10 +24,11 @@ class Projection(SigSlot):
                                             options=sorted(projections_list),
                                             value='PlateCarree')
         self.features = pn.widgets.MultiSelect(name='features',
-                                               options=['borders', 'coastline',
+                                               options=['None', 'borders',
+                                                        'coastline', 'grid',
                                                         'land', 'lakes',
-                                                        'grid', 'ocean',
-                                                        'rivers'])
+                                                        'ocean', 'rivers'],
+                                               value=['None'])
 
         self.panel = pn.Column(self.is_geo,
                                self.basemap,
