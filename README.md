@@ -11,7 +11,7 @@ pip install git+https://github.com/intake/xrviz --no-deps
 
 ### Using Pip
 ```
-pip install pip+https://github.com/intake/xrviz.git .
+pip install git+https://github.com/intake/xrviz.git
 ```
 
 ### Usage
