@@ -2,4 +2,4 @@ panel
 hvplot
 xarray
 netcdf4
-cartopy
+matplotlib

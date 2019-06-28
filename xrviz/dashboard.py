@@ -1,7 +1,6 @@
 import panel as pn
 import xarray as xr
 import hvplot.xarray
-from cartopy import crs as ccrs
 from .sigslot import SigSlot
 from .control import Control
 from .utils import convert_widget, player_with_name_and_value
