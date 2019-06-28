@@ -2,4 +2,3 @@ panel
 hvplot
 xarray
 netcdf4
-matplotlib

@@ -66,7 +66,8 @@ class Dashboard(SigSlot):
         if self.are_var_coords(x, y):
             graph_opts = {'x': x,
                           'y': y,
-                          'title': self.var}
+                          'title': self.var,
+                          'cmap': 'Inferno'}
             dims_to_agg = self.kwargs['dims_to_agg']
             sel_data = self.data[self.var]
 
@@ -121,7 +122,8 @@ class Dashboard(SigSlot):
         dims_to_agg = self.kwargs['dims_to_agg']
         graph_opts = {'x': x,
                       'y': y,
-                      'title': self.var}
+                      'title': self.var,
+                      'cmap': 'Inferno'}
         sel_data = self.data[self.var]
 
         for dim in dims_to_agg:
