@@ -5,9 +5,9 @@ __version__ = get_versions()['version']
 del get_versions
 
 
-def example():
+def example(show=True):
     import xarray as xr
     from . import dashboard
     ds = sample_data.great_lakes
     dash = dashboard.Dashboard(ds)
-    dash.show()
+    return dash.show() if show else dash
