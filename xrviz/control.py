@@ -4,7 +4,6 @@ from .sigslot import SigSlot
 from .display import Display
 from .describe import Describe
 from .fields import Fields
-from .projection import Projection
 from .coord_setter import CoordSetter
 
 
@@ -30,22 +29,24 @@ class Control(SigSlot):
     def __init__(self, data):
         super().__init__()
         self.data = data
+        self.has_cartopy = self.is_cartopy_installed()
         self.displayer = Display(self.data)
         self.describer = Describe(self.data)
         self.fields = Fields(self.data)
-        self.projection = Projection()
+        self.coord_setter = CoordSetter(self.data)
         self.tabs = pn.Tabs(self.fields.panel,
-                            self.projection.panel,
+                            self.coord_setter.panel,
                             background=(230, 230, 230), width=1160)
 
-        self.coord_setter = CoordSetter(self.data)
-        self.tabs.append(self.coord_setter.panel)
+        if self.has_cartopy:
+            from .projection import Projection
+            self.projection = Projection()
+            self.tabs.append(self.projection.panel)
+            self.fields.connect('x', self.check_is_projectable)
+            self.fields.connect('y', self.check_is_projectable)
 
         self.displayer.connect("variable_selected", self.describer.setup)
         self.displayer.connect("variable_selected", self.fields.setup)
-
-        self.fields.connect('x', self.check_is_projectable)
-        self.fields.connect('y', self.check_is_projectable)
 
         self.panel = pn.Column(
                               pn.Row(self.displayer.panel,
@@ -70,5 +71,13 @@ class Control(SigSlot):
     def kwargs(self):
         out = self.displayer.kwargs
         out.update(self.fields.kwargs)
-        out.update(self.projection.kwargs)
+        if self.has_cartopy:
+            out.update(self.projection.kwargs)
         return out
+
+    def is_cartopy_installed(self):
+        try:
+            from cartopy import crs
+            return True
+        except:
+            return False

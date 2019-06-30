@@ -2,8 +2,6 @@ import panel as pn
 import xarray as xr
 import hvplot.xarray
 import holoviews as hv
-from cartopy import crs
-import geoviews.feature as gf
 from .sigslot import SigSlot
 from .control import Control
 from .utils import convert_widget, player_with_name_and_value
@@ -33,6 +31,7 @@ class Dashboard(SigSlot):
         if not isinstance(data, xr.core.dataarray.DataWithCoords):
             raise ValueError("Input should be an xarray data object, not %s" % type(data))
         self.set_data(data)
+        self.cartopy_installed()
         self.control = Control(self.data)
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
@@ -64,26 +63,21 @@ class Dashboard(SigSlot):
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
 
-        x = self.kwargs['x']
-        y = self.kwargs['y']
         are_var_coords = self.kwargs['are_var_coords']
         if are_var_coords:
-            graph_opts = {'x': x,
-                          'y': y,
-                          'title': self.var,
-                          'crs': crs.PlateCarree()}
             dims_to_agg = self.kwargs['dims_to_agg']
             sel_data = self.data[self.var]
-            is_geo = self.kwargs['is_geo']
-            base_map = self.kwargs['basemap']
-            alpha = self.kwargs['alpha']
-            projection = self.kwargs['projection']
-            features = self.kwargs['features']
-
             graph_opts = {'x': self.kwargs['x'],
                           'y': self.kwargs['y'],
-                          'title': self.var}
-            if is_geo:
+                          'title': self.var,
+                          'cmap': 'Inferno'}
+
+            if self.has_cartopy:
+                is_geo = self.kwargs['is_geo']
+                projection = self.kwargs['projection']
+                base_map = self.kwargs['basemap']
+                alpha = self.kwargs['alpha']
+                features = self.kwargs['features']
                 if projection is not 'None':
                     graph_opts.update({'crs': getattr(crs, projection)()})
 
@@ -99,7 +93,8 @@ class Dashboard(SigSlot):
 
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
             graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
-            if is_geo:
+
+            if self.has_cartopy and is_geo:
                 feature_map = hv.Overlay()
                 for feature in features:
                     if feature is not 'None':
@@ -147,7 +142,8 @@ class Dashboard(SigSlot):
         dims_to_agg = self.kwargs['dims_to_agg']
         graph_opts = {'x': x,
                       'y': y,
-                      'title': self.var}
+                      'title': self.var,
+                      'cmap': 'Inferno'}
         sel_data = self.data[self.var]
 
         for dim in dims_to_agg:
@@ -220,3 +216,13 @@ class Dashboard(SigSlot):
         self.plot_button.disabled = False  # important to enable button once disabled
         data = self.data[var[0]]
         self.plot_button.disabled = len(data.dims) <= 1
+
+    def cartopy_installed(self):
+        try:
+            from cartopy import crs
+            import geoviews.feature as gf
+            global crs, gf
+            self.has_cartopy = True
+        except:
+            print("Install Cartopy to view Projection Panel.")
+            self.has_cartopy = False
