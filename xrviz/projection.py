@@ -15,9 +15,6 @@ class Projection(SigSlot):
         self.alpha = pn.widgets.FloatSlider(name='alpha', start=0, end=1,
                                             step=0.01, value=0.7)
 
-        self._register(self.is_geo, 'is_geo')
-        self.connect('is_geo', self.setup)
-
         basemap_opts = {'None': 'None'}
         basemap_opts.update(gvts.tile_sources)
         self.basemap = pn.widgets.Select(name='basemap',
@@ -33,18 +30,24 @@ class Projection(SigSlot):
                                                         'ocean', 'rivers'],
                                                value=['None'])
 
+        self.is_geo.param.watch(self.setup, ['value', 'disabled'])
+
         self.panel = pn.Column(self.is_geo,
                                self.basemap,
                                self.alpha,
                                self.projection,
                                self.features,
                                name='Projection')
-        self.setup(value=self.is_geo.value)
+        self.setup()
 
-    def setup(self, value):
-        # disable the widgets if not is_geo else enable
+    def setup(self, *args):
+        # disable the widgets if is_geo is disabled or if is_geo is False
+        if self.is_geo.disabled:
+            disabled = True
+        else:
+            disabled = False if self.is_geo.value else True
         for widget in self.panel[1:]:
-            widget.disabled = not value
+            widget.disabled = disabled
 
     @property
     def kwargs(self):
