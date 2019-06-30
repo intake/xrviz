@@ -1,5 +1,5 @@
 import panel as pn
-import holoviews
+from holoviews.plotting import list_cmaps
 from .sigslot import SigSlot
 
 
@@ -9,8 +9,8 @@ class Style(SigSlot):
         super().__init__()
         self.height = pn.widgets.IntSlider(name='height', value=300, start=100, end=1200)
         self.width = pn.widgets.IntSlider(name='width', value=700, start=100, end=1200)
-        self.cmap = pn.widgets.Select(name='cmap', value='fire',
-                                      options=holoviews.plotting.list_cmaps())
+        self.cmap = pn.widgets.Select(name='cmap', value='Inferno',
+                                      options=list_cmaps(provider='bokeh', reverse = False))
         self.colorbar = pn.widgets.Checkbox(name='colorbar', value=True)
         self.colormap_limits = pn.widgets.RangeSlider(name='colormap_limits',
                                                       start=0, end=1,
