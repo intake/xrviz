@@ -44,6 +44,7 @@ class Control(SigSlot):
 
         self.displayer.connect("variable_selected", self.describer.setup)
         self.displayer.connect("variable_selected", self.fields.setup)
+        self.displayer.connect("variable_selected", self.style.setup)
 
         self.panel = pn.Column(self.tabs)
 

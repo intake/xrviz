@@ -44,6 +44,9 @@ class Dashboard(SigSlot):
         self.connect("set_coords", self.set_coords)
 
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
+        self.control.displayer.connect('variable_selected', self.link_aggregation_selectors)
+        self.control.fields.connect('x', self.link_aggregation_selectors)
+        self.control.fields.connect('y', self.link_aggregation_selectors)
 
         self.panel = pn.Column(self.control.panel,
                                self.plot_button,
@@ -52,6 +55,15 @@ class Dashboard(SigSlot):
         # To auto-select in case of single variable
         if len(list(self.data.variables)) == 1:
             self.control.displayer.select.value = list(self.data.variables)
+
+    def link_aggregation_selectors(self, *args):
+        """
+        To link aggregation selectors with cmap limits
+        Whenever any aggregation selector changes it value,
+        limits are cleared.
+        """
+        for dim_selector in self.control.kwargs['remaining_dims']:
+            self.control.fields.connect(dim_selector, self.control.style.setup)
 
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
@@ -72,7 +84,6 @@ class Dashboard(SigSlot):
                           'width': self.kwargs['width'],
                           'cmap': self.kwargs['cmap'],
                           'colorbar': self.kwargs['colorbar']}
-            colormap_limits = self.kwargs['colormap_limits']
             color_scale = self.kwargs['color_scale']
             dims_to_agg = self.kwargs['dims_to_agg']
             sel_data = self.data[self.var]
@@ -87,8 +98,20 @@ class Dashboard(SigSlot):
             if self.var in list(sel_data.coords):  # When a var(coord) is plotted wrt itself
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
-            color_range = {sel_data.name: (sel_data.quantile(colormap_limits[0]),
-                                               sel_data.quantile(colormap_limits[1]))}
+            c_low_val = self.kwargs['cmap lower limit']
+            c_upp_val = self.kwargs['cmap upper limit']
+
+            # It is better to set initial values as 0.1,0.9 rather than 0,1 i.e. (min, max)
+            # to get a color balanced graph
+            c_lim_lower = float(c_low_val) if c_low_val else sel_data.quantile(0.1)
+            c_lim_upper = float(c_upp_val) if c_upp_val else sel_data.quantile(0.9)
+
+            color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
+
+            if not c_low_val:  # if initial values are empty
+                self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
+                self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
+
             if color_scale is not 'linear':
                 sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
 
@@ -138,7 +161,6 @@ class Dashboard(SigSlot):
                       'width': self.kwargs['width'],
                       'cmap': self.kwargs['cmap'],
                       'colorbar': self.kwargs['colorbar']}
-        colormap_limits = self.kwargs['colormap_limits']
         color_scale = self.kwargs['color_scale']
 
         sel_data = self.data[self.var]
@@ -156,8 +178,19 @@ class Dashboard(SigSlot):
         if sel_data.name in self.data.coords:
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
-        color_range = {sel_data.name: (sel_data.quantile(colormap_limits[0]),
-                                       sel_data.quantile(colormap_limits[1]))}
+        c_low_val = self.kwargs['cmap lower limit']
+        c_upp_val = self.kwargs['cmap upper limit']
+
+        # It is better to set initial values as 0.1,0.9 rather than 0,1(min, max)
+        # to get a color balance graph
+        c_lim_lower = float(c_low_val) if c_low_val else sel_data.quantile(0.1)
+        c_lim_upper = float(c_upp_val) if c_upp_val else sel_data.quantile(0.9)
+
+        color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
+
+        if not c_low_val:  # if initial values are empty
+            self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
+            self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
 
         sel_data = sel_data.sel(**selection, drop=True)
         if color_scale is not 'linear':

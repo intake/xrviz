@@ -104,6 +104,7 @@ class Fields(SigSlot):
             agg_selector = pn.widgets.Select(name=dim,
                                              options=self.agg_opts,
                                              width=200,)
+            self._register(agg_selector, agg_selector.name)
             self.agg_selectors.append(agg_selector)
 
     @property
@@ -119,12 +120,13 @@ class Fields(SigSlot):
         #             [0] Select()
         #             [1] Select()
         out = {p.name: p.value for p in self.panel[0][1:]}  # since panel[0][0] is Markdown
-        selectors = {p.name: p.value for p in self.panel[1][1]}
+        selectors = {p.name: p.value for p in self.panel[1][1]}  # remaining_dims
         out.update(selectors)
         dims_to_select_animate = [dim for dim, agg in selectors.items() if agg in ['select', 'animate']]
         dims_to_agg = [dim for dim in selectors if dim not in dims_to_select_animate]
         out.update({'dims_to_agg': dims_to_agg})
         out.update({'dims_to_select_animate': sorted(dims_to_select_animate)})
+        out.update({'remaining_dims': self.remaining_dims})  # dims_to_agg + dims_to_select_animate
         return out
 
     def set_coords(self, data, var):

@@ -12,18 +12,25 @@ class Style(SigSlot):
         self.cmap = pn.widgets.Select(name='cmap', value='Inferno',
                                       options=list_cmaps(provider='bokeh', reverse = False))
         self.colorbar = pn.widgets.Checkbox(name='colorbar', value=True)
-        self.colormap_limits = pn.widgets.RangeSlider(name='colormap_limits',
-                                                      start=0, end=1,
-                                                      value=(0.1, 0.9), step=0.01)
+        # colormap_limits
+        self.lower_limit = pn.widgets.TextInput(name='cmap lower limit', width=140)
+        self.upper_limit = pn.widgets.TextInput(name='cmap upper limit', width=140)
+
         scaling_ops = ['linear', 'cos', 'exp', 'log', 'reciprocal',
                        'square', 'sqrt', 'sin', 'tan']
         self.color_scale = pn.widgets.Select(name='color_scale', value='linear',
                                              options=scaling_ops)
 
         self.panel = pn.Column(pn.Row(self.height, self.width),
-                               pn.Row(self.cmap, self.colorbar),
-                               pn.Row(self.colormap_limits, self.color_scale),
+                               pn.Row(self.cmap, self.color_scale),
+                               pn.Row(self.lower_limit, self.upper_limit,
+                                      self.colorbar),
                                name='Style')
+
+    def setup(self, *args):
+        #  Changes cmap limits
+        self.lower_limit.value = None
+        self.upper_limit.value = None
 
     @property
     def kwargs(self):
