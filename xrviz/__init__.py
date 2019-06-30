@@ -6,6 +6,19 @@ del get_versions
 
 
 def example(show=True):
+    """
+    Generates interface for the sample dataset.
+
+    Parameters
+    ----------
+    show: True (by default): Directly opens the interface in a browser
+          False : Returns the interface(dashboard) object
+            Usage:
+            ```
+            dash = xrviz.example(show = False)
+            dash.panel  # To display interface in Jupyter Notebook
+            ```
+    """
     import xarray as xr
     from . import dashboard
     ds = sample_data.great_lakes
