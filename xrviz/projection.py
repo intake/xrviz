@@ -30,7 +30,11 @@ class Projection(SigSlot):
                                                         'ocean', 'rivers'],
                                                value=['None'])
 
-        self.is_geo.param.watch(self.setup, ['value', 'disabled'])
+        self._register(self.is_geo, 'is_geo_value')
+        self._register(self.is_geo, 'is_geo_disabled', 'disabled')
+
+        self.connect('is_geo_value', self.setup)
+        self.connect('is_geo_disabled', self.setup)
 
         self.panel = pn.Column(self.is_geo,
                                self.basemap,
