@@ -9,17 +9,16 @@ def example(show=True):
 
     Parameters
     ----------
-    show: True (by default): Directly opens the interface in a browser
-          False : Returns the interface(dashboard) object
-            Usage:
-            ```
-            dash = xrviz.example(show = False)
-            dash.panel  # To display interface in Jupyter Notebook
-            ```
+    show: bool (True)
+        Whether to directly execute the interface. If True, a new browser tab
+        will be opened, and the function will block until interrupted. If
+        False, the Dashboard instance is returned without being executed.
     """
     import xarray as xr
     from . import sample_data
     from . import dashboard
     ds = sample_data.great_lakes
     dash = dashboard.Dashboard(ds)
-    return dash.show() if show else dash
+    if show:
+        dash.show()
+    return dash
