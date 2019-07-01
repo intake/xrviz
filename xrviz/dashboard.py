@@ -74,12 +74,23 @@ class Dashboard(SigSlot):
 
             if self.has_cartopy:
                 is_geo = self.kwargs['is_geo']
-                projection = self.kwargs['projection']
-                base_map = self.kwargs['basemap']
-                alpha = self.kwargs['alpha']
-                features = self.kwargs['features']
-                if projection is not 'None':
-                    graph_opts.update({'crs': getattr(crs, projection)()})
+                if is_geo:
+                    # base_map = self.kwargs['basemap']
+                    alpha = self.kwargs['alpha']
+                    projection = getattr(ccrs, self.kwargs['projection'])()
+                    crs_val = self.kwargs['crs']
+                    crs = getattr(ccrs, crs_val)() if crs_val is not None else crs_val
+                    geo_ops = {'alpha': alpha,
+                               'crs': crs,
+                               'projection': projection,
+                               'geo': True}
+                    graph_opts.update(geo_ops)
+
+                    features = self.kwargs['features']
+                    feature_map = hv.Overlay()
+                    for feature in features:
+                        if feature is not 'None':
+                            feature_map *= getattr(gf, feature)
 
             for dim in dims_to_agg:
                 if self.kwargs[dim] == 'count':
@@ -95,14 +106,12 @@ class Dashboard(SigSlot):
             graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
 
             if self.has_cartopy and is_geo:
-                feature_map = hv.Overlay()
-                for feature in features:
-                    if feature is not 'None':
-                        feature_map *= getattr(gf, feature)
-                if base_map is not 'None':
-                    graph = base_map * feature_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
-                else:
-                    graph = feature_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
+                graph = feature_map * graph
+
+                # if base_map is not 'None':
+                #     graph = base_map * feature_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
+                # else:
+                #     graph = feature_map * graph.opts(alpha=alpha, active_tools= ['wheel_zoom', 'pan'])
 
             self.create_selectors_players(graph)
 
@@ -219,9 +228,9 @@ class Dashboard(SigSlot):
 
     def cartopy_installed(self):
         try:
-            from cartopy import crs
+            from cartopy import crs as ccrs
             import geoviews.feature as gf
-            global crs, gf
+            global ccrs, gf
             self.has_cartopy = True
         except:
             print("Install Cartopy to view Projection Panel.")

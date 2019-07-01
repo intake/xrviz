@@ -1,9 +1,14 @@
+import inspect
 import panel as pn
 import xarray as xr
 import geoviews as gv
 from geoviews import tile_sources as gvts
+from cartopy import crs as ccrs
 from .sigslot import SigSlot
-from .utils import projections_list
+
+projections = [p for p in dir(ccrs) if inspect.isclass(getattr(ccrs, p)) and issubclass(getattr(ccrs, p), ccrs.Projection) and not p.startswith('_')]
+not_to_include = ['Projection', 'UTM']
+projections_list = sorted([p for p in projections if  p not in not_to_include ])
 
 
 class Projection(SigSlot):
@@ -21,14 +26,16 @@ class Projection(SigSlot):
                                          options=basemap_opts,
                                          value=gvts.OSM)
         self.projection = pn.widgets.Select(name='projection',
-                                            options=['None'] + sorted(projections_list),
+                                            options=projections_list,
                                             value='PlateCarree')
+        self.crs = pn.widgets.Select(name='crs',
+                                     options=[None] + sorted(projections_list),
+                                     value=None)
+        feature_ops = ['None', 'borders', 'coastline', 'grid', 'land', 'lakes',
+                       'ocean', 'rivers']
         self.features = pn.widgets.MultiSelect(name='features',
-                                               options=['None', 'borders',
-                                                        'coastline', 'grid',
-                                                        'land', 'lakes',
-                                                        'ocean', 'rivers'],
-                                               value=['None'])
+                                               options=feature_ops,
+                                               value=feature_ops[1:])
 
         self._register(self.is_geo, 'is_geo_value')
         self._register(self.is_geo, 'is_geo_disabled', 'disabled')
@@ -37,9 +44,10 @@ class Projection(SigSlot):
         self.connect('is_geo_disabled', self.setup)
 
         self.panel = pn.Column(self.is_geo,
-                               self.basemap,
+                               # self.basemap,
                                self.alpha,
                                self.projection,
+                               self.crs,
                                self.features,
                                name='Projection')
         self.setup()

@@ -47,7 +47,7 @@ def player_with_name_and_value(source):
     """
     source: pn.widgets.DiscretePlayer()
     target: consists of source player's name, value and player itself
-    
+
     With pn.widgets.DiscretePlayer, we don't get name and
     value updates in textual form. This method is useful
     in case we want name and continuous value update.
@@ -62,12 +62,3 @@ def player_with_name_and_value(source):
     source.param.watch(callback, ['value'], onlychanged=False)
     target = pn.Column(pn.Row(source.name, mark), source)
     return target
-
-
-projections_list = ['RotatedPole', 'Mercator', 'LambertCylindrical',
-                    'Geostationary', 'AzimuthalEquidistant', 'OSGB',
-                    'EuroPP', 'Gnomonic', 'PlateCarree', 'Mollweide',
-                    'OSNI', 'Miller', 'InterruptedGoodeHomolosine',
-                    'LambertConformal', 'SouthPolarStereo',
-                    'AlbersEqualArea', 'Orthographic',
-                    'NorthPolarStereo', 'Robinson']
