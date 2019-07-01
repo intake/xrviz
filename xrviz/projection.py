@@ -31,6 +31,9 @@ class Projection(SigSlot):
         self.crs = pn.widgets.Select(name='crs',
                                      options=[None] + sorted(projections_list),
                                      value=None)
+        self.rasterize = pn.widgets.Checkbox(name='rasterize', value=True)
+        self.project = pn.widgets.Checkbox(name='project', value=True)
+
         feature_ops = ['None', 'borders', 'coastline', 'grid', 'land', 'lakes',
                        'ocean', 'rivers']
         self.features = pn.widgets.MultiSelect(name='features',
@@ -48,6 +51,8 @@ class Projection(SigSlot):
                                self.alpha,
                                self.projection,
                                self.crs,
+                               self.rasterize,
+                               self.project,
                                self.features,
                                name='Projection')
         self.setup()

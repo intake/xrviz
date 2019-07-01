@@ -77,13 +77,18 @@ class Dashboard(SigSlot):
                 if is_geo:
                     # base_map = self.kwargs['basemap']
                     alpha = self.kwargs['alpha']
+                    project = self.kwargs['project']
+                    rasterize = self.kwargs['rasterize']
                     projection = getattr(ccrs, self.kwargs['projection'])()
                     crs_val = self.kwargs['crs']
                     crs = getattr(ccrs, crs_val)() if crs_val is not None else crs_val
                     geo_ops = {'alpha': alpha,
                                'crs': crs,
                                'projection': projection,
-                               'geo': True}
+                               'geo': True,
+                               'project': project,
+                               'rasterize': rasterize
+                               }
                     graph_opts.update(geo_ops)
 
                     features = self.kwargs['features']
