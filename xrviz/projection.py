@@ -33,6 +33,7 @@ class Projection(SigSlot):
                                      value=None)
         self.rasterize = pn.widgets.Checkbox(name='rasterize', value=True)
         self.project = pn.widgets.Checkbox(name='project', value=True)
+        self.global_extent = pn.widgets.Checkbox(name='global_extent', value=False)
 
         feature_ops = ['None', 'borders', 'coastline', 'grid', 'land', 'lakes',
                        'ocean', 'rivers']
@@ -46,14 +47,14 @@ class Projection(SigSlot):
         self.connect('is_geo_value', self.setup)
         self.connect('is_geo_disabled', self.setup)
 
-        self.panel = pn.Column(self.is_geo,
-                               # self.basemap,
-                               self.alpha,
-                               self.projection,
-                               self.crs,
-                               self.rasterize,
-                               self.project,
-                               self.features,
+        self.panel = pn.Column(pn.Row(self.is_geo),
+                               pn.Row(self.alpha),
+                               pn.Row(self.projection,
+                                      self.crs),
+                               pn.Row(self.rasterize,
+                                      self.project,
+                                      self.global_extent),
+                               pn.Row(self.features),
                                name='Projection')
         self.setup()
 
@@ -63,10 +64,11 @@ class Projection(SigSlot):
             disabled = True
         else:
             disabled = False if self.is_geo.value else True
-        for widget in self.panel[1:]:
-            widget.disabled = disabled
+        for row in self.panel[1:]:
+            for widget in row:
+                widget.disabled = disabled
 
     @property
     def kwargs(self):
-        out = {p.name: p.value for p in self.panel}
+        out = {widget.name: widget.value for row in self.panel for widget in row}
         return out
