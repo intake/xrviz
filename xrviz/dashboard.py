@@ -4,7 +4,7 @@ import hvplot.xarray
 import numpy
 from .sigslot import SigSlot
 from .control import Control
-from .utils import convert_widget, player_with_name_and_value
+from .utils import convert_widget, player_with_name_and_value, is_float
 
 
 class Dashboard(SigSlot):
@@ -98,17 +98,16 @@ class Dashboard(SigSlot):
             if self.var in list(sel_data.coords):  # When a var(coord) is plotted wrt itself
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
-            c_low_val = self.kwargs['cmap lower limit']
-            c_upp_val = self.kwargs['cmap upper limit']
+            c_low_val, c_upp_val = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
+            c_low_val, c_upp_val = (c_low_val, c_upp_val) if is_float(c_low_val) and is_float(c_upp_val) else ('', '')
 
-            # It is better to set initial values as 0.1,0.9 rather than 0,1 i.e. (min, max)
-            # to get a color balanced graph
-            c_lim_lower = float(c_low_val) if c_low_val else sel_data.quantile(0.1)
-            c_lim_upper = float(c_upp_val) if c_upp_val else sel_data.quantile(0.9)
+            # It is better to set initial values as 0.1,0.9 rather than 0,1(min, max)
+            # to get a color balance graph
+            c_lim_lower, c_lim_upper = (float(c_low_val), float(c_upp_val)) if c_low_val and c_upp_val else ([q for q in sel_data.quantile([0.1, 0.9])])
 
             color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
-            if not c_low_val:  # if initial values are empty
+            if not c_low_val:  # if user left blank or initial values are empty
                 self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
                 self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
 
@@ -178,17 +177,16 @@ class Dashboard(SigSlot):
         if sel_data.name in self.data.coords:
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
-        c_low_val = self.kwargs['cmap lower limit']
-        c_upp_val = self.kwargs['cmap upper limit']
+        c_low_val, c_upp_val = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
+        c_low_val, c_upp_val = (c_low_val, c_upp_val) if is_float(c_low_val) and is_float(c_upp_val) else ('', '')
 
         # It is better to set initial values as 0.1,0.9 rather than 0,1(min, max)
         # to get a color balance graph
-        c_lim_lower = float(c_low_val) if c_low_val else sel_data.quantile(0.1)
-        c_lim_upper = float(c_upp_val) if c_upp_val else sel_data.quantile(0.9)
+        c_lim_lower, c_lim_upper = (float(c_low_val), float(c_upp_val)) if c_low_val and c_upp_val else ([q for q in sel_data.quantile([0.1, 0.9])])
 
         color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
-        if not c_low_val:  # if initial values are empty
+        if not c_low_val:  # if user left blank or initial values are empty
             self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
             self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
 

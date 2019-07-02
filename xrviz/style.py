@@ -16,8 +16,7 @@ class Style(SigSlot):
         self.lower_limit = pn.widgets.TextInput(name='cmap lower limit', width=140)
         self.upper_limit = pn.widgets.TextInput(name='cmap upper limit', width=140)
 
-        scaling_ops = ['linear', 'cos', 'exp', 'log', 'reciprocal',
-                       'square', 'sqrt', 'sin', 'tan']
+        scaling_ops = ['linear', 'exp', 'log', 'reciprocal', 'square', 'sqrt']
         self.color_scale = pn.widgets.Select(name='color_scale', value='linear',
                                              options=scaling_ops)
 
