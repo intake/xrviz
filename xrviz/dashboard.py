@@ -76,7 +76,11 @@ class Dashboard(SigSlot):
                 is_geo = self.kwargs['is_geo']
                 if is_geo:
                     # base_map = self.kwargs['basemap']
-                    projection = getattr(ccrs, self.kwargs['projection'])()
+                    proj_params = self.kwargs['proj_params']
+                    proj_ops = {}
+                    for p_param in proj_params:
+                        proj_ops[p_param] = self.kwargs[p_param]
+                    projection = getattr(ccrs, self.kwargs['projection'])(**proj_ops)
                     crs_val = self.kwargs['crs']
                     crs = getattr(ccrs, crs_val)() if crs_val is not None else crs_val
                     geo_ops = {'crs': crs,
