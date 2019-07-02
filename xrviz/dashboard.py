@@ -99,6 +99,9 @@ class Dashboard(SigSlot):
             if self.var in list(sel_data.coords):  # When a var(coord) is plotted wrt itself
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
+            if color_scale is not 'linear':
+                sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
+
             if not use_all_data:
                 # sel the values at first step, to use for cmap limits
                 sels = {dim: 0 for dim in self.kwargs['remaining_dims']}
@@ -118,9 +121,6 @@ class Dashboard(SigSlot):
             if not c_low_val:  # if user left blank or initial values are empty
                 self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
                 self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
-
-            if color_scale is not 'linear':
-                sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
 
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
             graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range)
@@ -189,6 +189,9 @@ class Dashboard(SigSlot):
         if not use_all_data:  # do the selection earlier
             sel_data = sel_data.sel(**selection, drop=True)
 
+        if color_scale is not 'linear':
+            sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
+
         c_low_val, c_upp_val = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
         c_low_val, c_upp_val = (c_low_val, c_upp_val) if is_float(c_low_val) and is_float(c_upp_val) else ('', '')
 
@@ -205,8 +208,6 @@ class Dashboard(SigSlot):
         if use_all_data:  # do the selection later
             sel_data = sel_data.sel(**selection, drop=True)
 
-        if color_scale is not 'linear':
-            sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range)
         self.output[0] = graph

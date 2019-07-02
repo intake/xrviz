@@ -21,8 +21,9 @@ class Style(SigSlot):
         self.color_scale = pn.widgets.Select(name='color_scale', value='linear',
                                              options=scaling_ops)
 
-        self._register(self.use_all_data, 'use_all_data')
-        self.connect('use_all_data', self.setup)
+        self._register(self.use_all_data, 'clear_cmap_limits')
+        self._register(self.color_scale, 'clear_cmap_limits')
+        self.connect('clear_cmap_limits', self.setup)
 
         self.panel = pn.Column(pn.Row(self.height, self.width),
                                pn.Row(self.cmap, self.color_scale),
