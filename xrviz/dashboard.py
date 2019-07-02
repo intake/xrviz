@@ -86,6 +86,7 @@ class Dashboard(SigSlot):
                           'colorbar': self.kwargs['colorbar']}
             color_scale = self.kwargs['color_scale']
             dims_to_agg = self.kwargs['dims_to_agg']
+            use_all_data = self.kwargs['compute min/max from all data']
             sel_data = self.data[self.var]
 
             for dim in dims_to_agg:
@@ -98,12 +99,19 @@ class Dashboard(SigSlot):
             if self.var in list(sel_data.coords):  # When a var(coord) is plotted wrt itself
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
+            if not use_all_data:
+                # sel the values at first step, to use for cmap limits
+                sels = {dim: 0 for dim in self.kwargs['remaining_dims']}
+                sel_data_for_cmap = sel_data.isel(**sels, drop=True)
+            else:
+                sel_data_for_cmap = sel_data
+
             c_low_val, c_upp_val = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
             c_low_val, c_upp_val = (c_low_val, c_upp_val) if is_float(c_low_val) and is_float(c_upp_val) else ('', '')
 
             # It is better to set initial values as 0.1,0.9 rather than 0,1(min, max)
             # to get a color balance graph
-            c_lim_lower, c_lim_upper = (float(c_low_val), float(c_upp_val)) if c_low_val and c_upp_val else ([q for q in sel_data.quantile([0.1, 0.9])])
+            c_lim_lower, c_lim_upper = (float(c_low_val), float(c_upp_val)) if c_low_val and c_upp_val else ([q for q in sel_data_for_cmap.quantile([0.1, 0.9])])
 
             color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
@@ -161,6 +169,7 @@ class Dashboard(SigSlot):
                       'cmap': self.kwargs['cmap'],
                       'colorbar': self.kwargs['colorbar']}
         color_scale = self.kwargs['color_scale']
+        use_all_data = self.kwargs['compute min/max from all data']
 
         sel_data = self.data[self.var]
 
@@ -177,6 +186,9 @@ class Dashboard(SigSlot):
         if sel_data.name in self.data.coords:
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
+        if not use_all_data:  # do the selection earlier
+            sel_data = sel_data.sel(**selection, drop=True)
+
         c_low_val, c_upp_val = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
         c_low_val, c_upp_val = (c_low_val, c_upp_val) if is_float(c_low_val) and is_float(c_upp_val) else ('', '')
 
@@ -190,7 +202,9 @@ class Dashboard(SigSlot):
             self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
             self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
 
-        sel_data = sel_data.sel(**selection, drop=True)
+        if use_all_data:  # do the selection later
+            sel_data = sel_data.sel(**selection, drop=True)
+
         if color_scale is not 'linear':
             sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
