@@ -1,5 +1,6 @@
 import panel as pn
 import xarray as xr
+import metpy.calc as mpcalc
 from .sigslot import SigSlot
 from .utils import convert_widget
 
@@ -54,17 +55,17 @@ class Fields(SigSlot):
         self.non_indexed_coords = set(self.data[var].coords) - self.indexed_coords
         self.sel_options = sorted(self.var_dims + list(self.non_indexed_coords))
 
+        self.x_guess, self.y_guess = self.guess_x_y(self.var)
         x_opts = self.sel_options.copy()
         if len(x_opts):  # to check that data has dim (is not Empty)
             self.x.options = x_opts
-            self.x.value = x_opts[0]
+            self.x.value = self.x_guess if self.x_guess and self.x_guess in x_opts else x_opts[0]
             y_opts = x_opts.copy()
             del y_opts[0]
             if y_opts is None:
                 self.y.options = []
                 self.remaining_dims = []
             else:
-                self.y.options = y_opts
                 self.remaining_dims = [opt for opt in y_opts if opt!=self.y.value]
                 self.change_y()
 
@@ -86,7 +87,10 @@ class Fields(SigSlot):
             values = set(values) - set(self.var_dims)
             #  Plot can be generated for 2 values only if ndims of both match
             valid_values = [val for val in values if self.ndim_matches(x_val, val)]
-        self.y.options = sorted(list(valid_values))
+        y_opts = sorted(list(valid_values))
+        self.y.options = y_opts
+        if len(y_opts):
+            self.y.value = self.y_guess if self.y_guess and self.y_guess in y_opts else y_opts[0]
         self.are_var_coords = self.check_are_var_coords()
         self.change_dim_selectors()
 
@@ -150,3 +154,11 @@ class Fields(SigSlot):
         x = self.x.value
         y = self.y.value
         return True if x in var_coords and y in var_coords else False
+
+    def guess_x_y(self, var):
+        try:
+            parsed_var = self.data.metpy.parse_cf(var)
+            x, y = parsed_var.metpy.coordinates('x', 'y')
+            return [coord.name for coord in (x, y)]
+        except:
+            return [None, None]
