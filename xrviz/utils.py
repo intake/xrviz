@@ -62,3 +62,12 @@ def player_with_name_and_value(source):
     source.param.watch(callback, ['value'], onlychanged=False)
     target = pn.Column(pn.Row(source.name, mark), source)
     return target
+
+
+def is_float(a):
+    # int, 'Nan' are also float
+    try:
+        float(a)
+        return True
+    except:
+        return False

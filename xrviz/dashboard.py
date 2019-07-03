@@ -4,7 +4,7 @@ import hvplot.xarray
 import holoviews as hv
 from .sigslot import SigSlot
 from .control import Control
-from .utils import convert_widget, player_with_name_and_value
+from .utils import convert_widget, player_with_name_and_value, is_float
 
 
 class Dashboard(SigSlot):
@@ -88,7 +88,7 @@ class Dashboard(SigSlot):
                         proj_ops = {}
                         proj_params = self.kwargs['proj_params']
                         for p_param in proj_params:
-                            proj_ops[p_param] = self.kwargs[p_param]
+                            proj_ops[p_param] = float(self.kwargs[p_param]) if is_float(self.kwargs[p_param]) else 0
                         projection = getattr(ccrs, self.kwargs['projection'])(**proj_ops)
                         crs_val = self.kwargs['crs']
                         crs = getattr(ccrs, crs_val)() if crs_val is not None else crs_val
