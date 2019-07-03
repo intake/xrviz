@@ -74,23 +74,28 @@ class Dashboard(SigSlot):
 
             if self.has_cartopy:
                 is_geo = self.kwargs['is_geo']
+                show_map = self.kwargs['show_map']
+                base_map = self.kwargs['basemap']
+
                 if is_geo:
-                    # base_map = self.kwargs['basemap']
-                    proj_params = self.kwargs['proj_params']
-                    proj_ops = {}
-                    for p_param in proj_params:
-                        proj_ops[p_param] = self.kwargs[p_param]
-                    projection = getattr(ccrs, self.kwargs['projection'])(**proj_ops)
-                    crs_val = self.kwargs['crs']
-                    crs = getattr(ccrs, crs_val)() if crs_val is not None else crs_val
-                    geo_ops = {'crs': crs,
-                               'projection': projection,
-                               'alpha': self.kwargs['alpha'],
+                    geo_ops = {'alpha': self.kwargs['alpha'],
                                'project': self.kwargs['project'],
                                'rasterize': self.kwargs['rasterize'],
                                'global_extent': self.kwargs['global_extent'],
-                               'geo': True
-                               }
+                               'geo': True}
+                    if not show_map:
+                        # find projection and crs, add it to geo_ops
+                        proj_ops = {}
+                        proj_params = self.kwargs['proj_params']
+                        for p_param in proj_params:
+                            proj_ops[p_param] = self.kwargs[p_param]
+                        projection = getattr(ccrs, self.kwargs['projection'])(**proj_ops)
+                        crs_val = self.kwargs['crs']
+                        crs = getattr(ccrs, crs_val)() if crs_val is not None else crs_val
+                        projection_ops = {'crs': crs,
+                                          'projection': projection}
+                        geo_ops.update(projection_ops)
+
                     graph_opts.update(geo_ops)
 
                     feature_map = gv.Overlay([getattr(gf, feat) for feat in self.kwargs['features'] if feat is not 'None'])
@@ -110,11 +115,8 @@ class Dashboard(SigSlot):
 
             if self.has_cartopy and is_geo:
                 graph = feature_map * graph
-
-                # if base_map is not 'None':
-                #     graph = base_map * feature_map * graph.opts(alpha=alpha, active_tools=['wheel_zoom', 'pan'])
-                # else:
-                #     graph = feature_map * graph.opts(alpha=alpha, active_tools= ['wheel_zoom', 'pan'])
+                if show_map:
+                    graph = base_map * graph
 
             self.create_selectors_players(graph)
 

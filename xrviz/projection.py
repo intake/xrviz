@@ -18,13 +18,14 @@ class Projection(SigSlot):
         self.is_geo = pn.widgets.Checkbox(name='is_geo', value=False,
                                           disabled=True)
         self.alpha = pn.widgets.FloatSlider(name='alpha', start=0, end=1,
-                                            step=0.01, value=0.7)
+                                            step=0.01, value=0.7, width=180)
 
-        basemap_opts = {'None': 'None'}
-        basemap_opts.update(gvts.tile_sources)
+        self.show_map = pn.widgets.Checkbox(name='show_map', value=False,
+                                            width=100)
         self.basemap = pn.widgets.Select(name='basemap',
-                                         options=basemap_opts,
-                                         value=gvts.OSM)
+                                         options=gvts.tile_sources,
+                                         value=gvts.OSM,
+                                         disabled=True)
         self.projection = pn.widgets.Select(name='projection',
                                             options=projections_list,
                                             value='PlateCarree')
@@ -33,7 +34,8 @@ class Projection(SigSlot):
                                      value=None)
         self.rasterize = pn.widgets.Checkbox(name='rasterize', value=True)
         self.project = pn.widgets.Checkbox(name='project', value=True)
-        self.global_extent = pn.widgets.Checkbox(name='global_extent', value=False)
+        self.global_extent = pn.widgets.Checkbox(name='global_extent',
+                                                 value=False)
         self.proj_params = pn.Row()
 
         feature_ops = ['None', 'borders', 'coastline', 'grid', 'land', 'lakes',
@@ -45,13 +47,15 @@ class Projection(SigSlot):
         self._register(self.is_geo, 'is_geo_value')
         self._register(self.is_geo, 'is_geo_disabled', 'disabled')
         self._register(self.projection, 'add_proj_params')
+        self._register(self.show_map, 'show_basemap')
 
         self.connect('is_geo_value', self.setup)
         self.connect('is_geo_disabled', self.setup)
         self.connect('add_proj_params', self.add_proj_params)
+        self.connect('show_basemap', self.show_basemap)
 
         self.panel = pn.Column(pn.Row(self.is_geo),
-                               pn.Row(self.alpha),
+                               pn.Row(self.alpha, self.show_map, self.basemap),
                                pn.Row(self.projection,
                                       self.crs),
                                self.proj_params,
@@ -72,6 +76,15 @@ class Projection(SigSlot):
         for row in self.panel[1:]:
             for widget in row:
                 widget.disabled = disabled
+        self.show_basemap(self.show_map.value)
+
+    def show_basemap(self, *args):
+        value = args[0]
+        self.basemap.disabled = not value
+        self.projection.disabled = value
+        self.crs.disabled = value
+        for widget in self.proj_params:
+            widget.disabled = value
 
     def add_proj_params(self, *args):
         self.proj_params.clear()
