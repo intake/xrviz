@@ -109,16 +109,16 @@ class Dashboard(SigSlot):
             else:
                 sel_data_for_cmap = sel_data
 
-            c_low_val, c_upp_val = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
-            c_low_val, c_upp_val = (c_low_val, c_upp_val) if is_float(c_low_val) and is_float(c_upp_val) else ('', '')
+            cmin, cmax = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
+            cmin, cmax = (cmin, cmax) if is_float(cmin) and is_float(cmax) else ('', '')
 
             # It is better to set initial values as 0.1,0.9 rather than 0,1(min, max)
             # to get a color balance graph
-            c_lim_lower, c_lim_upper = (float(c_low_val), float(c_upp_val)) if c_low_val and c_upp_val else ([q for q in sel_data_for_cmap.quantile([0.1, 0.9])])
+            c_lim_lower, c_lim_upper = (float(cmin), float(cmax)) if cmin and cmax else ([q for q in sel_data_for_cmap.quantile([0.1, 0.9])])
 
             color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
-            if not c_low_val:  # if user left blank or initial values are empty
+            if not cmin:  # if user left blank or initial values are empty
                 self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
                 self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
 
@@ -192,16 +192,16 @@ class Dashboard(SigSlot):
         if color_scale is not 'linear':
             sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
 
-        c_low_val, c_upp_val = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
-        c_low_val, c_upp_val = (c_low_val, c_upp_val) if is_float(c_low_val) and is_float(c_upp_val) else ('', '')
+        cmin, cmax = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
+        cmin, cmax = (cmin, cmax) if is_float(cmin) and is_float(cmax) else ('', '')
 
         # It is better to set initial values as 0.1,0.9 rather than 0,1(min, max)
         # to get a color balance graph
-        c_lim_lower, c_lim_upper = (float(c_low_val), float(c_upp_val)) if c_low_val and c_upp_val else ([q for q in sel_data.quantile([0.1, 0.9])])
+        c_lim_lower, c_lim_upper = (float(cmin), float(cmax)) if cmin and cmax else ([q for q in sel_data.quantile([0.1, 0.9])])
 
         color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
-        if not c_low_val:  # if user left blank or initial values are empty
+        if not cmin:  # if user left blank or initial values are empty
             self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
             self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
 
