@@ -29,7 +29,7 @@ class Control(SigSlot):
     def __init__(self, data):
         super().__init__()
         self.data = data
-        self.has_cartopy = self.is_cartopy_installed()
+        is_cartopy_installed()
         self.displayer = Display(self.data)
         self.describer = Describe(self.data)
         self.fields = Fields(self.data)
@@ -38,7 +38,7 @@ class Control(SigSlot):
                             self.coord_setter.panel,
                             background=(230, 230, 230), width=1160)
 
-        if self.has_cartopy:
+        if has_cartopy:
             from .projection import Projection
             self.projection = Projection()
             self.tabs.append(self.projection.panel)
@@ -71,13 +71,15 @@ class Control(SigSlot):
     def kwargs(self):
         out = self.displayer.kwargs
         out.update(self.fields.kwargs)
-        if self.has_cartopy:
+        if has_cartopy:
             out.update(self.projection.kwargs)
         return out
 
-    def is_cartopy_installed(self):
-        try:
-            from cartopy import crs
-            return True
-        except:
-            return False
+
+def is_cartopy_installed():
+    global has_cartopy
+    try:
+        import cartopy
+        has_cartopy = True
+    except:
+        has_cartopy = False

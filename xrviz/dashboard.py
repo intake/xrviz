@@ -32,7 +32,7 @@ class Dashboard(SigSlot):
         if not isinstance(data, xr.core.dataarray.DataWithCoords):
             raise ValueError("Input should be an xarray data object, not %s" % type(data))
         self.set_data(data)
-        self.cartopy_installed()
+        cartopy_geoviews_installed()
         self.control = Control(self.data)
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
@@ -73,7 +73,7 @@ class Dashboard(SigSlot):
                           'title': self.var,
                           'cmap': 'Inferno'}
 
-            if self.has_cartopy:
+            if has_cartopy:
                 is_geo = self.kwargs['is_geo']
                 show_map = self.kwargs['show_map']
                 base_map = self.kwargs['basemap']
@@ -112,9 +112,9 @@ class Dashboard(SigSlot):
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'box_zoom'])
+            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
 
-            if self.has_cartopy and is_geo:
+            if has_cartopy and is_geo:
                 graph = feature_map * graph
                 if show_map:
                     graph = base_map * graph
@@ -174,7 +174,7 @@ class Dashboard(SigSlot):
 
         sel_data = sel_data.sel(**selection, drop=True)
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'box_zoom'])
+        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
         self.output[0] = graph
 
     def create_selectors_players(self, graph):
@@ -230,13 +230,15 @@ class Dashboard(SigSlot):
         data = self.data[var[0]]
         self.plot_button.disabled = len(data.dims) <= 1
 
-    def cartopy_installed(self):
-        try:
-            from cartopy import crs as ccrs
-            import geoviews as gv
-            import geoviews.feature as gf
-            global ccrs, gv, gf
-            self.has_cartopy = True
-        except:
-            warnings.warn("Install Cartopy to view Projection Panel.", Warning)
-            self.has_cartopy = False
+
+def cartopy_geoviews_installed():
+    global has_cartopy
+    try:
+        from cartopy import crs as ccrs
+        import geoviews as gv
+        import geoviews.feature as gf
+        has_cartopy = True
+        global ccrs, gv, gf
+    except:
+        warnings.warn("Install Cartopy, Geoviews to view Projection Panel.", Warning)
+        has_cartopy = False
