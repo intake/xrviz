@@ -99,7 +99,7 @@ class Fields(SigSlot):
         self.agg_selectors.clear()
         x = self.x.value
         y = self.y.value
-        used_opts = set([x, y])
+        used_opts = {x, y}
 
         if x in self.var_dims:
             self.remaining_dims = [dim for dim in self.var_dims if dim not in used_opts]
@@ -160,5 +160,5 @@ class Fields(SigSlot):
             parsed_var = self.data.metpy.parse_cf(var)
             x, y = parsed_var.metpy.coordinates('x', 'y')
             return [coord.name for coord in (x, y)]
-        except:
+        except:  # fails when coords have not been set or available.
             return [None, None]

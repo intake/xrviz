@@ -44,13 +44,13 @@ class Projection(SigSlot):
                                                options=feature_ops,
                                                value=feature_ops[1:])
 
-        self._register(self.is_geo, 'is_geo_value')
-        self._register(self.is_geo, 'is_geo_disabled', 'disabled')
+        self._register(self.is_geo, 'geo_changed')
+        self._register(self.is_geo, 'geo_disabled', 'disabled')
         self._register(self.projection, 'add_proj_params')
         self._register(self.show_map, 'show_basemap')
 
-        self.connect('is_geo_value', self.setup)
-        self.connect('is_geo_disabled', self.setup)
+        self.connect('geo_changed', self.setup)
+        self.connect('geo_disabled', self.setup)
         self.connect('add_proj_params', self.add_proj_params)
         self.connect('show_basemap', self.show_basemap)
 

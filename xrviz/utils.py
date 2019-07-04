@@ -65,7 +65,7 @@ def player_with_name_and_value(source):
 
 
 def is_float(a):
-    # int, 'Nan' are also float
+    # int, 'Nan', 'inf' and '-inf' are also float
     try:
         float(a)
         return True

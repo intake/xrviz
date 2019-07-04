@@ -2,6 +2,7 @@ import panel as pn
 import xarray as xr
 import hvplot.xarray
 import holoviews as hv
+import warnings
 from .sigslot import SigSlot
 from .control import Control
 from .utils import convert_widget, player_with_name_and_value, is_float
@@ -111,7 +112,7 @@ class Dashboard(SigSlot):
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
+            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'box_zoom'])
 
             if self.has_cartopy and is_geo:
                 graph = feature_map * graph
@@ -151,14 +152,12 @@ class Dashboard(SigSlot):
         selection = {}  # to collect the value of index selectors
         for i, dim in enumerate(list(self.var_selector_dims)):
             selection[dim] = self.index_selectors[i].value
-        x = self.kwargs['x']
-        y = self.kwargs['y']
         dims_to_agg = self.kwargs['dims_to_agg']
-        graph_opts = {'x': x,
-                      'y': y,
+        sel_data = self.data[self.var]
+        graph_opts = {'x': self.kwargs['x'],
+                      'y': self.kwargs['y'],
                       'title': self.var,
                       'cmap': 'Inferno'}
-        sel_data = self.data[self.var]
 
         for dim in dims_to_agg:
             if self.kwargs[dim] == 'count':
@@ -175,7 +174,7 @@ class Dashboard(SigSlot):
 
         sel_data = sel_data.sel(**selection, drop=True)
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
+        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'box_zoom'])
         self.output[0] = graph
 
     def create_selectors_players(self, graph):
@@ -239,5 +238,5 @@ class Dashboard(SigSlot):
             global ccrs, gv, gf
             self.has_cartopy = True
         except:
-            print("Install Cartopy to view Projection Panel.")
+            warnings.warn("Install Cartopy to view Projection Panel.", Warning)
             self.has_cartopy = False
