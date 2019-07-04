@@ -10,4 +10,4 @@ def control(data):
 
 def test_control_initial(control):
     tabs = [tab.name for tab in control.tabs]
-    assert tabs == ['Set Coords', 'Variables', 'Axes']
+    assert tabs == ['Set Coords', 'Variables', 'Axes', 'Style']
