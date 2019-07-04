@@ -5,6 +5,7 @@ from .display import Display
 from .describe import Describe
 from .fields import Fields
 from .coord_setter import CoordSetter
+from .utils import cartopy_geoviews_installed
 
 
 class Control(SigSlot):
@@ -29,7 +30,7 @@ class Control(SigSlot):
     def __init__(self, data):
         super().__init__()
         self.data = data
-        is_cartopy_installed()
+        self.has_cartopy = cartopy_geoviews_installed()
         self.displayer = Display(self.data)
         self.describer = Describe(self.data)
         self.fields = Fields(self.data)
@@ -38,7 +39,7 @@ class Control(SigSlot):
                             self.coord_setter.panel,
                             background=(230, 230, 230), width=1160)
 
-        if has_cartopy:
+        if self.has_cartopy:
             from .projection import Projection
             self.projection = Projection()
             self.tabs.append(self.projection.panel)
@@ -71,15 +72,6 @@ class Control(SigSlot):
     def kwargs(self):
         out = self.displayer.kwargs
         out.update(self.fields.kwargs)
-        if has_cartopy:
+        if self.has_cartopy:
             out.update(self.projection.kwargs)
         return out
-
-
-def is_cartopy_installed():
-    global has_cartopy
-    try:
-        import cartopy
-        has_cartopy = True
-    except:
-        has_cartopy = False
