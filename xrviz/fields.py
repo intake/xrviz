@@ -1,6 +1,6 @@
 import panel as pn
 import xarray as xr
-import metpy.calc as mpcalc
+import warnings
 from .sigslot import SigSlot
 from .utils import convert_widget
 
@@ -26,6 +26,7 @@ class Fields(SigSlot):
     def __init__(self, data):
         super().__init__()
         self.data = data
+        has_metpy()
         self.x = pn.widgets.Select(name='x', width=200)
         self.y = pn.widgets.Select(name='y', width=200)
         self.agg_selectors = pn.Column()
@@ -55,7 +56,7 @@ class Fields(SigSlot):
         self.non_indexed_coords = set(self.data[var].coords) - self.indexed_coords
         self.sel_options = sorted(self.var_dims + list(self.non_indexed_coords))
 
-        self.x_guess, self.y_guess = self.guess_x_y(self.var)
+        self.x_guess, self.y_guess = self.guess_x_y(self.var) if mpcalc else ['None', 'None']
         x_opts = self.sel_options.copy()
         if len(x_opts):  # to check that data has dim (is not Empty)
             self.x.options = x_opts
@@ -162,3 +163,15 @@ class Fields(SigSlot):
             return [coord.name for coord in (x, y)]
         except:  # fails when coords have not been set or available.
             return [None, None]
+
+
+def has_metpy():
+    global mpcalc
+    try:
+        import metpy.calc as mpcalc
+    except:
+        warnings.warn("""Install Metpy using `pip install metpy` or 
+                        `conda install -c conda-forge metpy pint pooch --no-deps`,
+                        to automatically guess values of x,y""",
+                        Warning)
+        mpcalc = None

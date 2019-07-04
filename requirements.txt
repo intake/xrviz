@@ -2,6 +2,3 @@ panel
 hvplot
 xarray
 netcdf4
-cartopy
-geoviews
-metpy
