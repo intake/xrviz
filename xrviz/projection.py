@@ -38,11 +38,11 @@ class Projection(SigSlot):
                                                  value=False)
         self.proj_params = pn.Row()
 
-        feature_ops = ['None', 'borders', 'coastline', 'grid', 'land', 'lakes',
-                       'ocean', 'rivers']
+        self.feature_ops = ['None', 'borders', 'coastline', 'grid', 'land', 'lakes',
+                            'ocean', 'rivers']
         self.features = pn.widgets.MultiSelect(name='features',
-                                               options=feature_ops,
-                                               value=feature_ops[1:])
+                                               options=self.feature_ops,
+                                               value=self.feature_ops[1:])
 
         self._register(self.is_geo, 'geo_changed')
         self._register(self.is_geo, 'geo_disabled', 'disabled')
@@ -86,6 +86,7 @@ class Projection(SigSlot):
         self.crs.disabled = value
         for widget in self.proj_params:
             widget.disabled = value
+        self.features.value = [self.feature_ops[0]] if value else self.feature_ops[1:]
 
     def add_proj_params(self, *args):
         self.proj_params.clear()
