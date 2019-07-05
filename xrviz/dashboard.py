@@ -153,6 +153,11 @@ class Dashboard(SigSlot):
                 self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
 
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
+            # Following tasks are happening here:
+            # 1. assign_opts: reassignment of coords(if not done result in errors for some of the selections in fields panel)
+            # 2. graph_opts: customise the plot according to selections in style and projection(if available)
+            # 3. color_range: customise the colormap range according to cmap lower and upper limits
+            # 4. active_tools: activate the tools required such as 'wheel_zoom', 'pan'
             graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
 
             if has_cartopy and is_geo:
@@ -300,6 +305,10 @@ class Dashboard(SigSlot):
 
 
 def cartopy_geoviews_installed():
+    """
+    Checks if both cartopy and geoviews are present.
+    Projection panel would be displayed only if both present.
+    """
     global has_cartopy
     try:
         from cartopy import crs as ccrs
