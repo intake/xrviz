@@ -4,6 +4,7 @@ import hvplot.xarray
 import holoviews as hv
 from holoviews import streams
 import warnings
+from itertools import cycle
 import numpy
 from .sigslot import SigSlot
 from .control import Control
@@ -65,6 +66,10 @@ class Dashboard(SigSlot):
         self.taps = []
         self.tapped_locs = []
         self.tap_stream = streams.Tap(transient=True)
+        colors = ['#60fffc', '#6da252', '#ff60d4', '#ff9400', '#f4e322',
+                  '#229cf4', '#af9862', '#629baf', '#7eed5a', '#05040c',
+                  '#e29ec8', '#ff4300']
+        self.color_pool = cycle(colors)
 
     def link_aggregation_selectors(self, *args):
         """
@@ -270,16 +275,22 @@ class Dashboard(SigSlot):
         print(x, y)
         tapped_map = hv.Points([])
         if None not in [x, y]:
-            self.taps.append((x, y))
-            tapped_map = hv.Points(self.taps).opts(size=10)
+            self.taps.append((x, y, next(iter(self.color_pool))))
+            tapped_map = hv.Points(self.taps, vdims=['z']).opts(color='z',
+                                                                marker='s',
+                                                                line_color='black',
+                                                                size=8)
         return tapped_map
 
     def create_series_graph(self, x, y):
         print("create_series_graph")
         tapped_map = hv.Points([])
         if None not in [x, y]:
-            self.taps.append((x, y))
-            tapped_map = hv.Points(self.taps).opts(size=10)
+            self.taps.append((x, y, next(iter(self.color_pool))))
+            tapped_map = hv.Points(self.taps, vdims=['z']).opts(color='z',
+                                                                marker='s',
+                                                                line_color='black',
+                                                                size=8)
         return tapped_map
 
     def create_selectors_players(self, graph):
