@@ -3,6 +3,7 @@ import xarray as xr
 import hvplot.xarray
 import holoviews as hv
 import warnings
+import numpy
 from .sigslot import SigSlot
 from .control import Control
 from .utils import convert_widget, player_with_name_and_value, is_float
@@ -42,10 +43,13 @@ class Dashboard(SigSlot):
         self._register(self.plot_button, 'plot_clicked', 'clicks')
         self.connect('plot_clicked', self.create_plot)
 
-        self._register(self.control.coord_setter.set_coord_button, 'set_coords', 'clicks')
+        self._register(self.control.coord_setter.coord_selector, 'set_coords')
         self.connect("set_coords", self.set_coords)
 
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
+        self.control.displayer.connect('variable_selected', self.link_aggregation_selectors)
+        self.control.fields.connect('x', self.link_aggregation_selectors)
+        self.control.fields.connect('y', self.link_aggregation_selectors)
 
         self.panel = pn.Column(self.control.panel,
                                self.plot_button,
@@ -54,6 +58,15 @@ class Dashboard(SigSlot):
         # To auto-select in case of single variable
         if len(list(self.data.variables)) == 1:
             self.control.displayer.select.value = list(self.data.variables)
+
+    def link_aggregation_selectors(self, *args):
+        """
+        To link aggregation selectors with cmap limits
+        Whenever any aggregation selector changes it value,
+        limits are cleared.
+        """
+        for dim_selector in self.control.kwargs['remaining_dims']:
+            self.control.fields.connect(dim_selector, self.control.style.setup)
 
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
@@ -66,12 +79,17 @@ class Dashboard(SigSlot):
 
         are_var_coords = self.kwargs['are_var_coords']
         if are_var_coords:
-            dims_to_agg = self.kwargs['dims_to_agg']
-            sel_data = self.data[self.var]
             graph_opts = {'x': self.kwargs['x'],
                           'y': self.kwargs['y'],
                           'title': self.var,
-                          'cmap': 'Inferno'}
+                          'height': self.kwargs['height'],
+                          'width': self.kwargs['width'],
+                          'cmap': self.kwargs['cmap'],
+                          'colorbar': self.kwargs['colorbar']}
+            color_scale = self.kwargs['color_scale']
+            dims_to_agg = self.kwargs['dims_to_agg']
+            use_all_data = self.kwargs['compute min/max from all data']
+            sel_data = self.data[self.var]
 
             if has_cartopy:
                 is_geo = self.kwargs['is_geo']
@@ -111,8 +129,31 @@ class Dashboard(SigSlot):
             if self.var in list(sel_data.coords):  # When a var(coord) is plotted wrt itself
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
+            if color_scale is not 'linear':
+                sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
+
+            if not use_all_data:
+                # sel the values at first step, to use for cmap limits
+                sels = {dim: 0 for dim in self.kwargs['remaining_dims']}
+                sel_data_for_cmap = sel_data.isel(**sels, drop=True)
+            else:
+                sel_data_for_cmap = sel_data
+
+            cmin, cmax = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
+            cmin, cmax = (cmin, cmax) if is_float(cmin) and is_float(cmax) else ('', '')
+
+            # It is better to set initial values as 0.1,0.9 rather than 0,1(min, max)
+            # to get a color balance graph
+            c_lim_lower, c_lim_upper = (float(cmin), float(cmax)) if cmin and cmax else ([q for q in sel_data_for_cmap.quantile([0.1, 0.9])])
+
+            color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
+
+            if not cmin:  # if user left blank or initial values are empty
+                self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
+                self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
+
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
+            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
 
             if has_cartopy and is_geo:
                 graph = feature_map * graph
@@ -129,7 +170,7 @@ class Dashboard(SigSlot):
             for dim in self.var_selector_dims:
                 ops = list(self.data[self.var][dim].values)
 
-                if self.kwargs[dim] == 'Select':
+                if self.kwargs[dim] == 'select':
                     selector = pn.widgets.Select(name=dim, options=ops)
                 else:
                     selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
@@ -152,12 +193,18 @@ class Dashboard(SigSlot):
         selection = {}  # to collect the value of index selectors
         for i, dim in enumerate(list(self.var_selector_dims)):
             selection[dim] = self.index_selectors[i].value
-        dims_to_agg = self.kwargs['dims_to_agg']
-        sel_data = self.data[self.var]
         graph_opts = {'x': self.kwargs['x'],
                       'y': self.kwargs['y'],
                       'title': self.var,
-                      'cmap': 'Inferno'}
+                      'height': self.kwargs['height'],
+                      'width': self.kwargs['width'],
+                      'cmap': self.kwargs['cmap'],
+                      'colorbar': self.kwargs['colorbar']}
+        dims_to_agg = self.kwargs['dims_to_agg']
+        color_scale = self.kwargs['color_scale']
+        use_all_data = self.kwargs['compute min/max from all data']
+
+        sel_data = self.data[self.var]
 
         for dim in dims_to_agg:
             if self.kwargs[dim] == 'count':
@@ -172,9 +219,30 @@ class Dashboard(SigSlot):
         if sel_data.name in self.data.coords:
                 sel_data = sel_data.to_dataset(name=f'{sel_data.name}_')
 
-        sel_data = sel_data.sel(**selection, drop=True)
+        if not use_all_data:  # do the selection earlier
+            sel_data = sel_data.sel(**selection, drop=True)
+
+        if color_scale is not 'linear':
+            sel_data = getattr(numpy, color_scale)(sel_data)  # Color Scaling
+
+        cmin, cmax = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
+        cmin, cmax = (cmin, cmax) if is_float(cmin) and is_float(cmax) else ('', '')
+
+        # It is better to set initial values as 0.1,0.9 rather than 0,1(min, max)
+        # to get a color balance graph
+        c_lim_lower, c_lim_upper = (float(cmin), float(cmax)) if cmin and cmax else ([q for q in sel_data.quantile([0.1, 0.9])])
+
+        color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
+
+        if not cmin:  # if user left blank or initial values are empty
+            self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
+            self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
+
+        if use_all_data:  # do the selection later
+            sel_data = sel_data.sel(**selection, drop=True)
+
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).opts(active_tools=['wheel_zoom', 'pan'])
+        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
         self.output[0] = graph
 
     def create_selectors_players(self, graph):
@@ -194,7 +262,7 @@ class Dashboard(SigSlot):
                     for dim in self.kwargs['dims_to_select_animate']:
                         long_name = self.data[dim].long_name if hasattr(self.data[dim], 'long_name') else None
                         if slider.name == dim or slider.name == long_name:
-                            if self.kwargs[dim] == 'Select':
+                            if self.kwargs[dim] == 'select':
                                 selector = convert_widget(slider, pn.widgets.Select())
                             else:
                                 selector = convert_widget(slider, pn.widgets.DiscretePlayer())
@@ -218,7 +286,7 @@ class Dashboard(SigSlot):
         # in coord_selector.value
         self.data = self.data.reset_coords()
         indexed_coords = set(self.data.dims).intersection(set(self.data.coords))
-        new_coords = set(self.control.coord_setter.coord_selector.value).union(indexed_coords)
+        new_coords = set(args[0]).union(indexed_coords)
         self.data = self.data.set_coords(new_coords)  # this `set_coords` belongs to xr.dataset
         self.control.set_coords(self.data)
 

@@ -11,7 +11,8 @@ def control(data):
 
 def test_control_initial(control):
     tabs = [tab.name for tab in control.tabs]
-    if cartopy_geoviews_installed:
-        assert tabs == ['Fields', 'Set Coords', 'Projection']
+    if cartopy_geoviews_installed():
+        assert tabs == ['Set Coords', 'Variables', 'Axes', 'Style',
+                        'Projection']
     else:
-        assert tabs == ['Fields', 'Set Coords']
+        assert tabs == ['Set Coords', 'Variables', 'Axes', 'Style']
