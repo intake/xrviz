@@ -2,6 +2,7 @@ import panel as pn
 import xarray as xr
 import hvplot.xarray
 import holoviews as hv
+from holoviews import streams
 import warnings
 import numpy
 from .sigslot import SigSlot
@@ -37,6 +38,7 @@ class Dashboard(SigSlot):
         self.control = Control(self.data)
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
+        self.series_graph = pn.Row(pn.Spacer(name='Series Graph'))
         self.output = pn.Row(pn.Spacer(name='Graph'),
                              pn.Column(name='Index_selectors'))
 
@@ -53,11 +55,15 @@ class Dashboard(SigSlot):
 
         self.panel = pn.Column(self.control.panel,
                                self.plot_button,
-                               self.output)
+                               self.output,
+                               self.series_graph)
 
         # To auto-select in case of single variable
         if len(list(self.data.variables)) == 1:
             self.control.displayer.select.value = list(self.data.variables)
+
+        self.taps = []
+        self.tap_stream = streams.Tap(transient=True)
 
     def link_aggregation_selectors(self, *args):
         """
@@ -76,6 +82,7 @@ class Dashboard(SigSlot):
                 del selector
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
+        self.taps.clear()
 
         are_var_coords = self.kwargs['are_var_coords']
         if are_var_coords:
@@ -160,11 +167,15 @@ class Dashboard(SigSlot):
             # 4. active_tools: activate the tools required such as 'wheel_zoom', 'pan'
             graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
 
+            self.tap_stream.source = graph
+
             if has_cartopy and is_geo:
-                graph = feature_map * graph
+                graph = feature_map * graph if self.kwargs['features'] != ['None'] else graph
                 if show_map:
                     graph = base_map * graph
+                    self.tap_stream.source = graph
 
+            self.series_graph[0] = gv.DynamicMap(self.create_series_graph, streams=[self.tap_stream])
             self.create_selectors_players(graph)
 
         else:  # if one or both x,y are var_dims
@@ -248,7 +259,17 @@ class Dashboard(SigSlot):
 
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
+        self.tap_stream.source = graph
         self.output[0] = graph
+        self.series_graph[0] = hv.DynamicMap(self.create_series_graph, streams=[self.tap_stream])
+
+    def create_series_graph(self, x, y):
+        print(x, y)
+        tapped_map = hv.Points([])
+        if None not in [x, y]:
+            self.taps.append((x, y))
+            tapped_map = hv.Points(self.taps).opts(size=10)
+        return tapped_map
 
     def create_selectors_players(self, graph):
         """
