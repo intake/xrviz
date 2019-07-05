@@ -63,6 +63,7 @@ class Dashboard(SigSlot):
             self.control.displayer.select.value = list(self.data.variables)
 
         self.taps = []
+        self.tapped_locs = []
         self.tap_stream = streams.Tap(transient=True)
 
     def link_aggregation_selectors(self, *args):
@@ -260,11 +261,21 @@ class Dashboard(SigSlot):
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
         self.tap_stream.source = graph
-        self.output[0] = graph
+        taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
         self.series_graph[0] = hv.DynamicMap(self.create_series_graph, streams=[self.tap_stream])
+        self.output[0] = graph * taps_graph
+
+    def create_taps_graph(self, x, y):
+        print("create_taps_graph")
+        print(x, y)
+        tapped_map = hv.Points([])
+        if None not in [x, y]:
+            self.taps.append((x, y))
+            tapped_map = hv.Points(self.taps).opts(size=10)
+        return tapped_map
 
     def create_series_graph(self, x, y):
-        print(x, y)
+        print("create_series_graph")
         tapped_map = hv.Points([])
         if None not in [x, y]:
             self.taps.append((x, y))
@@ -278,6 +289,7 @@ class Dashboard(SigSlot):
         bottom of graph if they are present and convert them into Selectors,
         Players.
         """
+        graph = graph * hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
         graph = pn.Row(graph)
         try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
             if graph[0][1]:  # if sliders are generated
