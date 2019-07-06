@@ -42,7 +42,9 @@ class Dashboard(SigSlot):
         self.graph = pn.Spacer(name='Graph')
         self.taps_graph = hv.Points([])
         self.series_graph = pn.Row(pn.Spacer(name='Series Graph'))
-        self.clear_series_button = pn.widgets.Button(name='Clear', width=200)
+        self.clear_series_button = pn.widgets.Button(name='Clear',
+                                                     width=200,
+                                                     disabled=True)
         self.output = pn.Row(self.graph,
                              pn.Column(name='Index_selectors'))
 
@@ -280,11 +282,15 @@ class Dashboard(SigSlot):
 
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
-        self.tap_stream.source = graph
-        if len(self.data[self.var].dims) > 2:
-            self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
         self.graph = graph
-        self.output[0] = self.graph * self.taps_graph
+        if len(self.data[self.var].dims) > 2:
+            self.tap_stream.source = graph
+            self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
+            self.output[0] = self.graph * self.taps_graph
+            self.clear_series_button.disabled = False
+        else:
+            self.output[0] = self.graph
+            self.clear_series_button.disabled = True
 
     def create_taps_graph(self, x, y, clear=False):
         print("create_taps_graph")
@@ -304,7 +310,8 @@ class Dashboard(SigSlot):
         print("create_series_graph")
         if None not in [x, y]:
             color = self.taps[-1][-1] if self.taps[-1][-1] else None
-            series_map = self.data[self.var].isel(nx=int(x), ny=int(y)).hvplot()
+            series_map = self.data[self.var].isel(nx=int(x), ny=int(y)).hvplot(height=self.kwargs['height'],
+                                                                               width=self.kwargs['width'])
             self.series = series_map.opts(color=color) * self.series
         return self.series
 
@@ -317,7 +324,10 @@ class Dashboard(SigSlot):
         """
         if len(self.data[self.var].dims) > 2:
             self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
-        graph = graph * self.taps_graph
+            self.clear_series_button.disabled = False
+            graph = graph * self.taps_graph
+        else:
+            self.clear_series_button.disabled = True
         graph = pn.Row(graph)
         try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
             if graph[0][1]:  # if sliders are generated
