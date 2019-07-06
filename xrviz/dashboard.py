@@ -39,8 +39,11 @@ class Dashboard(SigSlot):
         self.control = Control(self.data)
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
+        self.graph = pn.Spacer(name='Graph')
+        self.taps_graph = hv.Points([])
         self.series_graph = pn.Row(pn.Spacer(name='Series Graph'))
-        self.output = pn.Row(pn.Spacer(name='Graph'),
+        self.clear_series_button = pn.widgets.Button(name='Clear', width=200)
+        self.output = pn.Row(self.graph,
                              pn.Column(name='Index_selectors'))
 
         self._register(self.plot_button, 'plot_clicked', 'clicks')
@@ -49,13 +52,17 @@ class Dashboard(SigSlot):
         self._register(self.control.coord_setter.coord_selector, 'set_coords')
         self.connect("set_coords", self.set_coords)
 
+        self._register(self.clear_series_button, 'clear_series', 'clicks')
+        self.connect('clear_series', self.clear_series)
+
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
         self.control.displayer.connect('variable_selected', self.link_aggregation_selectors)
         self.control.fields.connect('x', self.link_aggregation_selectors)
         self.control.fields.connect('y', self.link_aggregation_selectors)
 
         self.panel = pn.Column(self.control.panel,
-                               self.plot_button,
+                               pn.Row(self.plot_button,
+                                      self.clear_series_button),
                                self.output,
                                self.series_graph)
 
@@ -64,12 +71,18 @@ class Dashboard(SigSlot):
             self.control.displayer.select.value = list(self.data.variables)
 
         self.taps = []
-        self.tapped_locs = []
         self.tap_stream = streams.Tap(transient=True)
         colors = ['#60fffc', '#6da252', '#ff60d4', '#ff9400', '#f4e322',
                   '#229cf4', '#af9862', '#629baf', '#7eed5a', '#05040c',
                   '#e29ec8', '#ff4300']
         self.color_pool = cycle(colors)
+
+    def clear_series(self, *args):
+        self.series_graph[0] = pn.Spacer(name='Series Graph')
+        self.series = hv.Points([]).opts(height=self.kwargs['height'],
+                                         width=self.kwargs['width'])
+        self.taps.clear()
+        self.output[0] = self.graph * self.taps_graph
 
     def link_aggregation_selectors(self, *args):
         """
@@ -88,6 +101,9 @@ class Dashboard(SigSlot):
                 del selector
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
+        self.series_graph[0] = pn.Spacer(name='Series Graph')
+        self.series = hv.Points([]).opts(height=self.kwargs['height'],
+                                         width=self.kwargs['width'])
         self.taps.clear()
 
         are_var_coords = self.kwargs['are_var_coords']
@@ -181,7 +197,6 @@ class Dashboard(SigSlot):
                     graph = base_map * graph
                     self.tap_stream.source = graph
 
-            self.series_graph[0] = gv.DynamicMap(self.create_series_graph, streams=[self.tap_stream])
             self.create_selectors_players(graph)
 
         else:  # if one or both x,y are var_dims
@@ -266,32 +281,32 @@ class Dashboard(SigSlot):
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
         self.tap_stream.source = graph
-        taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
-        self.series_graph[0] = hv.DynamicMap(self.create_series_graph, streams=[self.tap_stream])
-        self.output[0] = graph * taps_graph
+        if len(self.data[self.var].dims) > 2:
+            self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
+        self.graph = graph
+        self.output[0] = self.graph * self.taps_graph
 
-    def create_taps_graph(self, x, y):
+    def create_taps_graph(self, x, y, clear=False):
         print("create_taps_graph")
         print(x, y)
-        tapped_map = hv.Points([])
+
+        color = next(iter(self.color_pool))
         if None not in [x, y]:
-            self.taps.append((x, y, next(iter(self.color_pool))))
-            tapped_map = hv.Points(self.taps, vdims=['z']).opts(color='z',
-                                                                marker='s',
-                                                                line_color='black',
-                                                                size=8)
+            self.taps.append((x, y, color))
+        tapped_map = hv.Points(self.taps, vdims=['z']).opts(color='z',
+                                                            marker='s',
+                                                            line_color='black',
+                                                            size=8)
+        self.series_graph[0] = self.create_series_graph(x, y, color)
         return tapped_map
 
-    def create_series_graph(self, x, y):
+    def create_series_graph(self, x, y, color):
         print("create_series_graph")
-        tapped_map = hv.Points([])
         if None not in [x, y]:
-            self.taps.append((x, y, next(iter(self.color_pool))))
-            tapped_map = hv.Points(self.taps, vdims=['z']).opts(color='z',
-                                                                marker='s',
-                                                                line_color='black',
-                                                                size=8)
-        return tapped_map
+            color = self.taps[-1][-1] if self.taps[-1][-1] else None
+            series_map = self.data[self.var].isel(nx=int(x), ny=int(y)).hvplot()
+            self.series = series_map.opts(color=color) * self.series
+        return self.series
 
     def create_selectors_players(self, graph):
         """
@@ -300,7 +315,9 @@ class Dashboard(SigSlot):
         bottom of graph if they are present and convert them into Selectors,
         Players.
         """
-        graph = graph * hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
+        if len(self.data[self.var].dims) > 2:
+            self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
+        graph = graph * self.taps_graph
         graph = pn.Row(graph)
         try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
             if graph[0][1]:  # if sliders are generated
@@ -324,7 +341,8 @@ class Dashboard(SigSlot):
                         player = player_with_name_and_value(selector)
                         self.output[1].append(player)
 
-        except:  # else return simple graph
+        except Exception as e:  # else return simple graph
+            print(e)
             self.output[0] = graph
 
     def set_data(self, data):
