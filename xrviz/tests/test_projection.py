@@ -53,3 +53,49 @@ def test_widget(projection, wid, wid_type, attrs_values):
     assert isinstance(widget, wid_type)
     for attr_val in attrs_values:
         assert getattr(widget, attr_val[0]) == attr_val[1]
+
+
+def test_setup_geo_disabled(projection):
+    disabled_val = True
+    projection.is_geo.disabled = True
+    projection.setup()
+    for row in projection.panel[1:]:
+        for widget in row:
+            assert widget.disabled is True
+    assert projection.show_map.value is False
+    assert projection.basemap.disabled is True
+
+
+def test_setup_geo_changed_to_False(projection):
+    projection.is_geo.disabled = False
+    projection.is_geo.value = False
+    for row in projection.panel[1:]:
+        for widget in row:
+            assert widget.disabled is True
+    assert projection.show_map.value is False
+    assert projection.basemap.disabled is True
+
+
+def test_setup_geo_changed_to_True(projection):
+    projection.is_geo.disabled = False
+    projection.is_geo.value = True
+    for row in projection.panel[1:]:
+        for widget in row:
+            if widget.name == 'basemap':
+                assert widget.disabled is True
+            else:
+                assert widget.disabled is False            # if widget.name == 'basemap':
+
+
+def test_show_basemap(projection):
+    projection.is_geo.disabled = False
+    projection.is_geo.value = True
+    values = [False]
+    for value in values:
+        projection.show_map.value = value
+        assert projection.basemap.disabled is not value
+        assert projection.projection.disabled is value
+        assert projection.crs.disabled is value
+        for widget in projection.proj_params:
+            widget.disabled is value
+        projection.features.value is [projection.feature_ops[0]] if value else projection.feature_ops[1:]
