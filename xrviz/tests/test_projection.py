@@ -1,7 +1,7 @@
 import pytest
 import panel as pn
 from geoviews import tile_sources as gvts
-from xrviz.projection import Projection, projections_list
+from xrviz.projection import Projection, projections_list, accepted_proj_params
 
 
 @pytest.fixture()
@@ -44,9 +44,7 @@ def projection():
                                          'ocean', 'rivers']),
                             ('value', ['borders', 'coastline',
                                        'grid', 'land', 'lakes',
-                                       'ocean', 'rivers'])])
-                         ]
-                        )
+                                       'ocean', 'rivers'])]) ])
 def test_widget(projection, wid, wid_type, attrs_values):
     assert isinstance(projection.is_geo, pn.widgets.Checkbox)
     widget = getattr(projection, wid)
@@ -84,13 +82,13 @@ def test_setup_geo_changed_to_True(projection):
             if widget.name == 'basemap':
                 assert widget.disabled is True
             else:
-                assert widget.disabled is False            # if widget.name == 'basemap':
+                assert widget.disabled is False
 
 
 def test_show_basemap(projection):
     projection.is_geo.disabled = False
     projection.is_geo.value = True
-    values = [False]
+    values = [False, True]
     for value in values:
         projection.show_map.value = value
         assert projection.basemap.disabled is not value
@@ -99,3 +97,14 @@ def test_show_basemap(projection):
         for widget in projection.proj_params:
             widget.disabled is value
         projection.features.value is [projection.feature_ops[0]] if value else projection.feature_ops[1:]
+
+
+def test_add_proj_params(projection):
+    projection.is_geo.disabled = False
+    projection.is_geo.value = False
+    sample_projs = ['PlateCarree', 'Orthographic', 'EuroPP']
+    for proj_value in sample_projs:
+        projection.projection.value = proj_value
+        accepted_params = accepted_proj_params(proj_value)
+        for widget in projection.proj_params:
+            assert widget.name in accepted_params
