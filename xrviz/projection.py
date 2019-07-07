@@ -76,6 +76,8 @@ class Projection(SigSlot):
         for row in self.panel[1:]:
             for widget in row:
                 widget.disabled = disabled
+        for widget in self.proj_params:
+            widget.disabled = disabled
         self.show_map.value = False
         self.basemap.disabled = True
 
