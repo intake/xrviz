@@ -3,7 +3,7 @@ import xarray as xr
 import warnings
 from .sigslot import SigSlot
 from .utils import convert_widget
-from .compatability import mpcalc
+from .compatibility import mpcalc
 
 
 class Fields(SigSlot):

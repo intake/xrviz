@@ -1,7 +1,7 @@
 import pytest
 from xrviz.control import Control
 from . import data
-from ..compatability import has_cartopy
+from ..compatibility import has_cartopy
 
 
 @pytest.fixture()

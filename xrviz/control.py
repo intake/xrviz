@@ -6,7 +6,7 @@ from .describe import Describe
 from .fields import Fields
 from .style import Style
 from .coord_setter import CoordSetter
-from .compatability import has_cartopy
+from .compatibility import has_cartopy
 
 
 class Control(SigSlot):
