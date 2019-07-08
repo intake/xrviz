@@ -7,6 +7,7 @@ import numpy
 from .sigslot import SigSlot
 from .control import Control
 from .utils import convert_widget, player_with_name_and_value, is_float
+from .compatability import ccrs, gv, gf, has_cartopy
 
 
 class Dashboard(SigSlot):
@@ -33,7 +34,6 @@ class Dashboard(SigSlot):
         if not isinstance(data, xr.core.dataarray.DataWithCoords):
             raise ValueError("Input should be an xarray data object, not %s" % type(data))
         self.set_data(data)
-        cartopy_geoviews_installed()
         self.control = Control(self.data)
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
@@ -302,20 +302,3 @@ class Dashboard(SigSlot):
         self.plot_button.disabled = False  # important to enable button once disabled
         data = self.data[var[0]]
         self.plot_button.disabled = len(data.dims) <= 1
-
-
-def cartopy_geoviews_installed():
-    """
-    Checks if both cartopy and geoviews are present.
-    Projection panel would be displayed only if both present.
-    """
-    global has_cartopy
-    try:
-        from cartopy import crs as ccrs
-        import geoviews as gv
-        import geoviews.feature as gf
-        has_cartopy = True
-        global ccrs, gv, gf
-    except:
-        warnings.warn("Install Cartopy, Geoviews to view Projection Panel.", Warning)
-        has_cartopy = False
