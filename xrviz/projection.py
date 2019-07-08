@@ -33,7 +33,7 @@ class Projection(SigSlot):
                                      options=[None] + sorted(projections_list),
                                      value=None)
         self.rasterize = pn.widgets.Checkbox(name='rasterize', value=True)
-        self.project = pn.widgets.Checkbox(name='project', value=True)
+        self.project = pn.widgets.Checkbox(name='project', value=False)
         self.global_extent = pn.widgets.Checkbox(name='global_extent',
                                                  value=False)
         self.proj_params = pn.Row()
@@ -48,11 +48,13 @@ class Projection(SigSlot):
         self._register(self.is_geo, 'geo_disabled', 'disabled')
         self._register(self.projection, 'add_proj_params')
         self._register(self.show_map, 'show_basemap')
+        self._register(self.rasterize, 'set_project')
 
         self.connect('geo_changed', self.setup)
         self.connect('geo_disabled', self.setup)
         self.connect('add_proj_params', self.add_proj_params)
         self.connect('show_basemap', self.show_basemap)
+        self.connect('set_project', self.set_project)
 
         self.panel = pn.Column(pn.Row(self.is_geo),
                                pn.Row(self.alpha, self.show_map, self.basemap),
@@ -97,6 +99,14 @@ class Projection(SigSlot):
             parameter = pn.widgets.TextInput(name='{}'.format(proj),
                                              value='0', width=100)
             self.proj_params.append(parameter)
+
+    def set_project(self, *args):
+        """
+        `project` is valid only when `rasterize` is True.
+        When `rasterize` is False, `project` is disabled.
+        """
+        self.project.disabled = False if self.rasterize.value else True
+        self.project.value = False
 
     @property
     def kwargs(self):
