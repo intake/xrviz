@@ -34,7 +34,7 @@ def projection():
                           ('rasterize', pn.widgets.Checkbox,
                            [('name', 'rasterize'), ('value', True)]),
                           ('project', pn.widgets.Checkbox,
-                           [('name', 'project'), ('value', True)]),
+                           [('name', 'project'), ('value', False)]),
                           ('global_extent', pn.widgets.Checkbox,
                            [('name', 'global_extent'), ('value', False)]),
                           ('features', pn.widgets.MultiSelect,
@@ -88,8 +88,7 @@ def test_setup_geo_changed_to_True(projection):
 def test_show_basemap(projection):
     projection.is_geo.disabled = False
     projection.is_geo.value = True
-    values = [False, True]
-    for value in values:
+    for value in [False, True]:
         projection.show_map.value = value
         assert projection.basemap.disabled is not value
         assert projection.projection.disabled is value
@@ -101,10 +100,17 @@ def test_show_basemap(projection):
 
 def test_add_proj_params(projection):
     projection.is_geo.disabled = False
-    projection.is_geo.value = False
     sample_projs = ['PlateCarree', 'Orthographic', 'EuroPP']
     for proj_value in sample_projs:
         projection.projection.value = proj_value
         accepted_params = accepted_proj_params(proj_value)
         for widget in projection.proj_params:
             assert widget.name in accepted_params
+
+
+def test_set_project(projection):
+    projection.is_geo.disabled = False
+    projection.is_geo.value = True
+    for value in [True, False]:
+        projection.rasterize.value = value
+        assert projection.project.disabled is not value
