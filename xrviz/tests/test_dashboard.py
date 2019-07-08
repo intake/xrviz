@@ -3,7 +3,7 @@ import panel as pn
 from xrviz.dashboard import Dashboard
 import pytest
 from . import data
-from ..utils import _is_coord
+from ..utils import _is_coord, cartopy_geoviews_installed
 
 
 @pytest.fixture(scope='module')
@@ -104,10 +104,77 @@ def test_set_coords(dashboard):
 
 
 def test_animate_wigdet_for_dims(dashboard):
-    dashboard.data.reset_coords()
+    dashboard.control.coord_setter.coord_selector.value = ['time', 'sigma']
     dashboard.control.displayer.select_variable('temp')
     fields = dashboard.control.fields
     agg_selectors = fields.agg_selectors
     agg_selectors[0].value = 'animate'
     dashboard.create_plot()
-    isinstance(dashboard.output[1][0][1], pn.widgets.player.DiscretePlayer)
+    assert isinstance(dashboard.output[0], pn.pane.holoviews.HoloViews)
+    assert isinstance(dashboard.output[1][0][1], pn.widgets.player.DiscretePlayer)
+
+
+@pytest.mark.skipif(not cartopy_geoviews_installed(), reason='cartopy not present')
+def test_with_is_geo_projection(dashboard):
+    dashboard.control.coord_setter.coord_selector.value = ['lat', 'lon']
+    dashboard.control.displayer.select_variable('temp')
+    proj_panel = dashboard.control.projection
+    proj_panel.is_geo.value = True
+    proj_panel.projection.value = 'Orthographic'
+    proj_panel.proj_params[0].value, proj_panel.proj_params[1].value = '-78', '43'
+    proj_panel.global_extent.value = True
+    dashboard.create_plot()
+    assert isinstance(dashboard.output[0], pn.pane.holoviews.HoloViews)
+    assert isinstance(dashboard.output[1][0], pn.widgets.select.Select)
+
+
+@pytest.mark.skipif(not cartopy_geoviews_installed(), reason='cartopy not present')
+def test_with_is_geo_basemap(dashboard):
+    dashboard.control.coord_setter.coord_selector.value = ['lat', 'lon']
+    dashboard.control.displayer.select_variable('temp')
+    proj_panel = dashboard.control.projection
+    proj_panel.is_geo.value = True
+    proj_panel.show_map.value = True
+    dashboard.create_plot()
+    assert isinstance(dashboard.output[0], pn.pane.holoviews.HoloViews)
+    assert isinstance(dashboard.output[1][0], pn.widgets.select.Select)
+
+
+def test_with_aggregations_for_dims(dashboard):
+    dashboard.control.coord_setter.coord_selector.value = ['time', 'sigma']
+    dashboard.control.displayer.select_variable('temp')
+    fields = dashboard.control.fields
+    agg_selectors = fields.agg_selectors
+    agg_selectors[0].value = 'max'
+    agg_selectors[1].value = 'count'
+    dashboard.plot_button.clicks += 1
+    assert isinstance(dashboard.output[0][0], pn.pane.holoviews.HoloViews)
+
+
+def test_with_aggregations_for_coords(dashboard):
+    dashboard.control.displayer.select_variable('temp')
+    dashboard.control.coord_setter.coord_selector.value = ['lat', 'lon']
+    fields = dashboard.control.fields
+    agg_selectors = fields.agg_selectors
+    agg_selectors[0].value = 'max'
+    agg_selectors[1].value = 'count'
+    dashboard.create_plot()
+    assert isinstance(dashboard.output[0][0], pn.pane.holoviews.HoloViews)
+
+
+def test_color_scaling_for_dims(dashboard):
+    dashboard.control.coord_setter.coord_selector.value = ['time', 'sigma']
+    dashboard.control.displayer.select_variable('temp')
+    style = dashboard.control.style
+    style.color_scale.value = 'log'
+    dashboard.create_plot()
+    assert isinstance(dashboard.output[0][0], pn.pane.holoviews.HoloViews)
+
+
+def test_color_scaling_for_coords(dashboard):
+    dashboard.control.coord_setter.coord_selector.value = ['lat', 'lon']
+    dashboard.control.displayer.select_variable('temp')
+    style = dashboard.control.style
+    style.color_scale.value = 'log'
+    dashboard.create_plot()
+    assert isinstance(dashboard.output[0][0], pn.pane.holoviews.HoloViews)
