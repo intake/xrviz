@@ -1,7 +1,12 @@
 import pytest
 import panel as pn
-from geoviews import tile_sources as gvts
-from xrviz.projection import Projection, projections_list, accepted_proj_params
+from ..utils import cartopy_geoviews_installed
+
+if not cartopy_geoviews_installed():
+    pytest.skip("cartopy geoviews not installed", allow_module_level=True)
+else:
+    from geoviews import tile_sources as gvts
+    from xrviz.projection import Projection, projections_list, accepted_proj_params
 
 
 @pytest.fixture()
