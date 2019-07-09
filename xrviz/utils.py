@@ -71,12 +71,3 @@ def is_float(a):
         return True
     except:
         return False
-
-
-def cartopy_geoviews_installed():
-    try:
-        import cartopy
-        import geoviews
-        return True
-    except:
-        return False

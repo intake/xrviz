@@ -26,7 +26,7 @@ class Display(SigSlot):
         super().__init__()
         self.data = data
         self.select = pn.widgets.MultiSelect(size=8, min_width=300,
-                                             height=135,
+                                             height=210,
                                              width_policy='min',
                                              name='Variables')
         # self.set_selection(self.data)

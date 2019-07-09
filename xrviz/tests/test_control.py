@@ -1,7 +1,7 @@
 import pytest
 from xrviz.control import Control
 from . import data
-from ..utils import cartopy_geoviews_installed
+from ..compatibility import has_cartopy
 
 
 @pytest.fixture()
@@ -11,8 +11,8 @@ def control(data):
 
 def test_control_initial(control):
     tabs = [tab.name for tab in control.tabs]
-    if cartopy_geoviews_installed():
-        assert tabs == ['Set Coords', 'Variables', 'Axes', 'Style',
+    if has_cartopy:
+        assert tabs == ['Variables', 'Set Coords', 'Axes', 'Style',
                         'Projection']
     else:
-        assert tabs == ['Set Coords', 'Variables', 'Axes', 'Style']
+        assert tabs == ['Variables', 'Set Coords', 'Axes', 'Style']

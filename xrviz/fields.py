@@ -3,6 +3,7 @@ import xarray as xr
 import warnings
 from .sigslot import SigSlot
 from .utils import convert_widget
+from .compatibility import mpcalc
 
 
 class Fields(SigSlot):
@@ -26,7 +27,6 @@ class Fields(SigSlot):
     def __init__(self, data):
         super().__init__()
         self.data = data
-        has_metpy()
         self.x = pn.widgets.Select(name='x', width=200)
         self.y = pn.widgets.Select(name='y', width=200)
         self.agg_selectors = pn.Column()
@@ -165,15 +165,3 @@ class Fields(SigSlot):
             return [coord.name for coord in (x, y)]
         except:  # fails when coords have not been set or available.
             return [None, None]
-
-
-def has_metpy():
-    global mpcalc
-    try:
-        import metpy.calc as mpcalc
-    except:
-        warnings.warn("""Install Metpy using `pip install metpy` or 
-                      `conda install -c conda-forge metpy pint pooch --no-deps`
-                      to automatically guess values of x,y""",
-                      Warning)
-        mpcalc = None
