@@ -12,7 +12,7 @@ def control(data):
 def test_control_initial(control):
     tabs = [tab.name for tab in control.tabs]
     if has_cartopy:
-        assert tabs == ['Set Coords', 'Variables', 'Axes', 'Style',
+        assert tabs == ['Variables', 'Set Coords', 'Axes', 'Style',
                         'Projection']
     else:
-        assert tabs == ['Set Coords', 'Variables', 'Axes', 'Style']
+        assert tabs == ['Variables', 'Set Coords', 'Axes', 'Style']
