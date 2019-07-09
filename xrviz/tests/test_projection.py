@@ -1,8 +1,8 @@
 import pytest
 import panel as pn
-from ..utils import cartopy_geoviews_installed
+from ..compatibility import has_cartopy
 
-if not cartopy_geoviews_installed():
+if not has_cartopy:
     pytest.skip("cartopy geoviews not installed", allow_module_level=True)
 else:
     from geoviews import tile_sources as gvts

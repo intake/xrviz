@@ -3,7 +3,8 @@ import panel as pn
 from xrviz.dashboard import Dashboard
 import pytest
 from . import data
-from ..utils import _is_coord, cartopy_geoviews_installed
+from ..utils import _is_coord
+from ..compatibility import has_cartopy
 
 
 @pytest.fixture(scope='module')
@@ -114,7 +115,7 @@ def test_animate_wigdet_for_dims(dashboard):
     assert isinstance(dashboard.output[1][0][1], pn.widgets.player.DiscretePlayer)
 
 
-@pytest.mark.skipif(not cartopy_geoviews_installed(), reason='cartopy not present')
+@pytest.mark.skipif(not has_cartopy, reason='cartopy not present')
 def test_with_is_geo_projection(dashboard):
     dashboard.control.coord_setter.coord_selector.value = ['lat', 'lon']
     dashboard.control.displayer.select_variable('temp')
@@ -128,7 +129,7 @@ def test_with_is_geo_projection(dashboard):
     assert isinstance(dashboard.output[1][0], pn.widgets.select.Select)
 
 
-@pytest.mark.skipif(not cartopy_geoviews_installed(), reason='cartopy not present')
+@pytest.mark.skipif(not has_cartopy, reason='cartopy not present')
 def test_with_is_geo_basemap(dashboard):
     dashboard.control.coord_setter.coord_selector.value = ['lat', 'lon']
     dashboard.control.displayer.select_variable('temp')
