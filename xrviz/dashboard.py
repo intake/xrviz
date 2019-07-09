@@ -97,11 +97,14 @@ class Dashboard(SigSlot):
                 base_map = self.kwargs['basemap']
 
                 if is_geo:
+                    crs_val = self.kwargs['crs']
+                    crs = getattr(ccrs, crs_val)() if crs_val is not None else crs_val
                     geo_ops = {'alpha': self.kwargs['alpha'],
                                'project': self.kwargs['project'],
                                'rasterize': self.kwargs['rasterize'],
                                'global_extent': self.kwargs['global_extent'],
-                               'geo': True}
+                               'geo': True,
+                               'crs': crs}
                     if not show_map:
                         # find projection and crs, add it to geo_ops
                         proj_ops = {}
@@ -109,11 +112,7 @@ class Dashboard(SigSlot):
                         for p_param in proj_params:
                             proj_ops[p_param] = float(self.kwargs[p_param]) if is_float(self.kwargs[p_param]) else 0
                         projection = getattr(ccrs, self.kwargs['projection'])(**proj_ops)
-                        crs_val = self.kwargs['crs']
-                        crs = getattr(ccrs, crs_val)() if crs_val is not None else crs_val
-                        projection_ops = {'crs': crs,
-                                          'projection': projection}
-                        geo_ops.update(projection_ops)
+                        geo_ops.update({'projection': projection})
 
                     graph_opts.update(geo_ops)
 

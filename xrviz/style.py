@@ -15,7 +15,7 @@ class Style(SigSlot):
         # colormap_limits
         self.lower_limit = pn.widgets.TextInput(name='cmap lower limit', width=140)
         self.upper_limit = pn.widgets.TextInput(name='cmap upper limit', width=140)
-        self.use_all_data = pn.widgets.Checkbox(name='compute min/max from all data', value=True)
+        self.use_all_data = pn.widgets.Checkbox(name='compute min/max from all data', value=False)
 
         scaling_ops = ['linear', 'exp', 'log', 'reciprocal', 'square', 'sqrt']
         self.color_scale = pn.widgets.Select(name='color_scale', value='linear',

@@ -87,7 +87,7 @@ class Projection(SigSlot):
         value = args[0]
         self.basemap.disabled = not value
         self.projection.disabled = value
-        self.crs.disabled = value
+        # self.crs.disabled = value
         for widget in self.proj_params:
             widget.disabled = value
         self.features.value = [self.feature_ops[0]] if value else self.feature_ops[1:]
