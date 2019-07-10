@@ -57,6 +57,8 @@ class Dashboard(SigSlot):
         self._register(self.clear_series_button, 'clear_series', 'clicks')
         self.connect('clear_series', self.clear_series)
 
+        # self.control.fields.connect('extract_along', self.clear_series)
+
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
         self.control.displayer.connect('variable_selected', self.link_aggregation_selectors)
         self.control.fields.connect('x', self.link_aggregation_selectors)
@@ -97,6 +99,7 @@ class Dashboard(SigSlot):
 
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
+        print('Extract Along', self.kwargs['Extract Along'])
         self.var = self.kwargs['Variables']
         if self.index_selectors:
             for selector in self.index_selectors:
@@ -309,10 +312,23 @@ class Dashboard(SigSlot):
     def create_series_graph(self, x, y, color):
         print("create_series_graph")
         if None not in [x, y]:
-            color = self.taps[-1][-1] if self.taps[-1][-1] else None
-            series_map = self.data[self.var].isel(nx=int(x), ny=int(y)).hvplot(height=self.kwargs['height'],
-                                                                               width=self.kwargs['width'])
-            self.series = series_map.opts(color=color) * self.series
+            if not self.kwargs['are_var_coords']:  # when both x and y are dims
+                color = self.taps[-1][-1] if self.taps[-1][-1] else None
+                extract_along = self.control.kwargs['Extract Along']
+                other_dims = [dim for dim in self.kwargs['remaining_dims'] if dim is not extract_along]
+                print('extract_along', extract_along)
+                print('other_dims', other_dims)
+                series_sel = {self.kwargs['x']: int(x),
+                              self.kwargs['y']: int(y),
+                              }
+                other_dim_sels = {dim: self.data[dim][0].values for dim in other_dims if len(other_dims)}
+                series_sel.update(other_dim_sels)
+                print('series_sel', series_sel)
+                sel_series_data = self.data.sel(**series_sel)
+                series_map = sel_series_data[self.var].hvplot(height=self.kwargs['height'],
+                                                              width=self.kwargs['width'])
+                self.series = series_map.opts(color=color) * self.series
+
         return self.series
 
     def create_selectors_players(self, graph):
