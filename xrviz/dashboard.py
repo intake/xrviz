@@ -77,8 +77,8 @@ class Dashboard(SigSlot):
         self.taps = []
         self.tap_stream = streams.Tap(transient=True)
         colors = ['#60fffc', '#6da252', '#ff60d4', '#ff9400', '#f4e322',
-                  '#229cf4', '#af9862', '#629baf', '#7eed5a', '#05040c',
-                  '#e29ec8', '#ff4300']
+                  '#229cf4', '#af9862', '#629baf', '#7eed5a', '#e29ec8',
+                  '#ff4300']
         self.color_pool = cycle(colors)
 
     def clear_series(self, *args):
@@ -303,7 +303,7 @@ class Dashboard(SigSlot):
         if None not in [x, y]:
             self.taps.append((x, y, color))
         tapped_map = hv.Points(self.taps, vdims=['z']).opts(color='z',
-                                                            marker='s',
+                                                            marker='triangle',
                                                             line_color='black',
                                                             size=8)
         self.series_graph[0] = self.create_series_graph(x, y, color)
@@ -319,9 +319,25 @@ class Dashboard(SigSlot):
                 print('extract_along', extract_along)
                 print('other_dims', other_dims)
                 series_sel = {self.kwargs['x']: int(x),
-                              self.kwargs['y']: int(y),
-                              }
-                other_dim_sels = {dim: self.data[dim][0].values for dim in other_dims if len(other_dims)}
+                              self.kwargs['y']: int(y)}
+                # to use the value selected in index selector for selecting
+                # data to create series. In case of aggregation, plot is
+                # created along 0th val of the dim.
+                if len(other_dims):
+                    other_dim_sels = {}
+                    i_sel_names = [sel.name for sel in self.index_selectors]
+                    for dim in other_dims:
+                        dim_found = False
+                        long_name = self.data[dim].long_name if hasattr(self.data[dim], 'long_name') else None
+                        for dim_sel in self.index_selectors:
+                            if dim_sel.name == long_name or dim_sel.name == dim:
+                                val = dim_sel.value
+                                other_dim_sels.update({dim: val})
+                                dim_found = True
+                        if not dim_found:
+                            val = self.data[dim][0].values
+                            other_dim_sels.update({dim: val})
+
                 series_sel.update(other_dim_sels)
                 print('series_sel', series_sel)
                 sel_series_data = self.data.sel(**series_sel)
