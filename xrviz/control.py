@@ -57,6 +57,8 @@ class Control(SigSlot):
         self.panel = pn.Column(self.tabs)
 
     def setup_initial_values(self, initial_params={}):
+        self.displayer.setup_initial_values(initial_params)
+        self.coord_setter.setup_initial_values(initial_params)
         self.style.setup_initial_values(initial_params)
         if has_cartopy:
             self.projection.setup_initial_values(initial_params)

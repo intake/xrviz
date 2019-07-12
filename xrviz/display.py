@@ -46,6 +46,10 @@ class Display(SigSlot):
             else:
                 print(f"Variable {variable} not present in displayer.")
 
+    def setup_initial_values(self, init_params={}):
+        if 'Variables' in init_params:
+            self.select_variable(init_params['Variables'])
+
     @property
     def kwargs(self):
         """
