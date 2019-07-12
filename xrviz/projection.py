@@ -87,6 +87,15 @@ class Projection(SigSlot):
                 widget.disabled = disabled
         self.proj_params.disabled = disabled
 
+    def setup_initial_values(self, init_params):
+        is_geo_disabled = self.is_geo.disabled  # to restore state of is_geo
+        if init_params:
+            self.is_geo.disabled = False
+            for param in init_params:
+                widget = getattr(self, param)
+                widget.value = init_params[param]
+            self.is_geo.disabled = is_geo_disabled
+
     def show_basemap(self, *args):
         value = False if self.basemap.value is None else True
         self.projection.disabled = value

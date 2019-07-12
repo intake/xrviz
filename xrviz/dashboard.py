@@ -29,11 +29,12 @@ class Dashboard(SigSlot):
     output: Provides access to generated graph.
     """
 
-    def __init__(self, data):
+    def __init__(self, data, initial_params={}):
         super().__init__()
         if not isinstance(data, xr.core.dataarray.DataWithCoords):
             raise ValueError("Input should be an xarray data object, not %s" % type(data))
         self.set_data(data)
+        self.initial_params = initial_params
         self.control = Control(self.data)
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
@@ -58,6 +59,8 @@ class Dashboard(SigSlot):
         # To auto-select in case of single variable
         if len(list(self.data.variables)) == 1:
             self.control.displayer.select.value = list(self.data.variables)
+
+        self.control.setup_initial_values(self.initial_params)
 
     def link_aggregation_selectors(self, *args):
         """

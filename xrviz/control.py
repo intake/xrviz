@@ -56,6 +56,12 @@ class Control(SigSlot):
 
         self.panel = pn.Column(self.tabs)
 
+    def setup_initial_values(self, initial_params):
+        style_params = initial_params.get('style_ops')
+        proj_params = initial_params.get('projection_ops')
+        self.style.setup_initial_values(style_params)
+        self.projection.setup_initial_values(proj_params)
+
     def set_coords(self, data):
         try:  # Upon setting coords before selecting a variable
             var = self.kwargs['Variables']

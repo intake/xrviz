@@ -36,6 +36,9 @@ class Style(SigSlot):
         self.lower_limit.value = None
         self.upper_limit.value = None
 
+    def setup_initial_values(self, init_params):
+        pass
+
     @property
     def kwargs(self):
         out = {widget.name: widget.value for row in self.panel for widget in row}
