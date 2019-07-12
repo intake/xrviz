@@ -19,6 +19,7 @@ class Dashboard(SigSlot):
     ----------
     data: `xarray` instance: `DataSet` or `DataArray`
            datset is used to initialize.
+    initial_params: To pre-set values of widgets.
 
     Attributes
     ----------

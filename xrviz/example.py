@@ -13,20 +13,19 @@ def example(show=True):
         False, the Dashboard instance is returned without being executed.
     """
     from .sample_data import great_lakes
-
-    great_lakes = great_lakes.set_coords(['lat', 'lon'])
-    initial_params = {'Variables': 'temp',
-                      'Set Coords': ['lat', 'lon'],
+    initial_params = {'Variables': 'temp',  # Select Variable
+                      'Set Coords': ['lat', 'lon'],  # Set Coords
+                      # Fields
                       'x': 'lon',
                       'y': 'lat',
                       'sigma': 'animate',
 
                       # style
-                      'height': 400,
-                      'width': 700,
+                      'height': 300,
+                      'width': 650,
                       'colorbar': False,
-                      # projection
 
+                      # projection
                       'is_geo': True,
                       'crs': 'PlateCarree',
                       'projection': 'Orthographic',
