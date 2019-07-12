@@ -60,7 +60,8 @@ class Control(SigSlot):
         style_params = initial_params.get('style_ops')
         proj_params = initial_params.get('projection_ops')
         self.style.setup_initial_values(style_params)
-        self.projection.setup_initial_values(proj_params)
+        if has_cartopy:
+            self.projection.setup_initial_values(proj_params)
 
     def set_coords(self, data):
         try:  # Upon setting coords before selecting a variable
