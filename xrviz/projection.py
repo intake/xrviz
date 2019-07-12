@@ -20,12 +20,11 @@ class Projection(SigSlot):
         self.alpha = pn.widgets.FloatSlider(name='alpha', start=0, end=1,
                                             step=0.01, value=0.7, width=180)
 
-        self.show_map = pn.widgets.Checkbox(name='show_map', value=False,
-                                            width=100)
+        basemap_opts = {None: None}
+        basemap_opts.update(gvts.tile_sources)
         self.basemap = pn.widgets.Select(name='basemap',
-                                         options=gvts.tile_sources,
-                                         value=gvts.OSM,
-                                         disabled=True)
+                                         options=basemap_opts,
+                                         value=None)
         self.projection = pn.widgets.Select(name='projection',
                                             options=[None] + sorted(projections_list),
                                             value=None)
@@ -49,7 +48,7 @@ class Projection(SigSlot):
         self._register(self.is_geo, 'geo_disabled', 'disabled')
         self._register(self.crs, 'add_crs_params')
         self._register(self.projection, 'add_proj_params')
-        self._register(self.show_map, 'show_basemap')
+        self._register(self.basemap, 'show_basemap')
         self._register(self.rasterize, 'set_project')
 
         self.connect('geo_changed', self.setup)
@@ -60,7 +59,7 @@ class Projection(SigSlot):
         self.connect('set_project', self.set_project)
 
         self.panel = pn.Column(pn.Row(self.is_geo),
-                               pn.Row(self.alpha, self.show_map, self.basemap),
+                               pn.Row(self.alpha, self.basemap),
                                pn.Row(self.crs, self.crs_params, name='crs'),
                                pn.Row(self.projection, self.proj_params, name='proj'),
                                pn.Row(self.rasterize,
@@ -83,14 +82,10 @@ class Projection(SigSlot):
                 widget.disabled = disabled
         for widget in self.proj_params:
             widget.disabled = disabled
-        self.show_map.value = False
-        self.basemap.disabled = True
 
     def show_basemap(self, *args):
-        value = args[0]
-        self.basemap.disabled = not value
+        value = False if self.basemap.value is None else True
         self.projection.disabled = value
-        # self.crs.disabled = value
         for widget in self.proj_params:
             widget.disabled = value
         self.features.value = [self.feature_ops[0]] if value else self.feature_ops[1:]

@@ -93,8 +93,8 @@ class Dashboard(SigSlot):
 
             if has_cartopy:
                 is_geo = self.kwargs['is_geo']
-                show_map = self.kwargs['show_map']
                 base_map = self.kwargs['basemap']
+                show_map = True if base_map != None else False
 
                 if is_geo:
                     crs_ops = {}
