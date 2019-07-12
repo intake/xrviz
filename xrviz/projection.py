@@ -87,14 +87,14 @@ class Projection(SigSlot):
                 widget.disabled = disabled
         self.proj_params.disabled = disabled
 
-    def setup_initial_values(self, init_params):
-        is_geo_disabled = self.is_geo.disabled  # to restore state of is_geo
-        if init_params:
+    def setup_initial_values(self, init_params={}):
+        is_geo = init_params.get('is_geo')
+        if is_geo:  # since we need to enable is_geo if True
             self.is_geo.disabled = False
-            for param in init_params:
-                widget = getattr(self, param)
-                widget.value = init_params[param]
-            self.is_geo.disabled = is_geo_disabled
+        for row in self.panel:
+            for widget in row:
+                if widget.name in init_params:
+                    widget.value = init_params[widget.name]
 
     def show_basemap(self, *args):
         value = False if self.basemap.value is None else True
