@@ -5,6 +5,7 @@ import geoviews as gv
 from geoviews import tile_sources as gvts
 from cartopy import crs as ccrs
 from .sigslot import SigSlot
+from .utils import proj_params
 
 projections = [p for p in dir(ccrs) if inspect.isclass(getattr(ccrs, p)) and issubclass(getattr(ccrs, p), ccrs.Projection) and not p.startswith('_')]
 not_to_include = ['Projection', 'UTM']
@@ -35,8 +36,12 @@ class Projection(SigSlot):
         self.project = pn.widgets.Checkbox(name='project', value=False)
         self.global_extent = pn.widgets.Checkbox(name='global_extent',
                                                  value=False)
-        self.crs_params = pn.Row()
-        self.proj_params = pn.Row()
+        self.crs_params = pn.widgets.LiteralInput(name='crs params',
+                                                  value={}, type=dict,
+                                                  width=400)
+        self.proj_params = pn.widgets.LiteralInput(name='projection params',
+                                                   value={}, type=dict,
+                                                   width=400)
 
         self.feature_ops = ['None', 'borders', 'coastline', 'grid', 'land',
                             'lakes', 'ocean', 'rivers']
@@ -80,32 +85,23 @@ class Projection(SigSlot):
         for row in self.panel[1:]:
             for widget in row:
                 widget.disabled = disabled
-        for widget in self.proj_params:
-            widget.disabled = disabled
+        self.proj_params.disabled = disabled
 
     def show_basemap(self, *args):
         value = False if self.basemap.value is None else True
         self.projection.disabled = value
-        for widget in self.proj_params:
-            widget.disabled = value
+        self.proj_params.disabled = value
         self.features.value = [self.feature_ops[0]] if value else self.feature_ops[1:]
 
     def add_crs_params(self, *args):
-        self.crs_params.clear()
-        projs = accepted_proj_params(args[0])
-        for proj in projs:
-            parameter = pn.widgets.TextInput(name='{}'.format(proj),
-                                             value='0', width=100)
-            self.crs_params.append(parameter)
+        if args[0] != None:
+            projs = proj_params(args[0])
+            self.crs_params.value = projs
 
     def add_proj_params(self, *args):
-        self.proj_params.clear()
-        if args[0]:
-            projs = accepted_proj_params(args[0])
-            for proj in projs:
-                parameter = pn.widgets.TextInput(name='{}'.format(proj),
-                                                value='0', width=100)
-                self.proj_params.append(parameter)
+        if args[0] != None:
+            projs = proj_params(args[0])
+            self.proj_params.value = projs
 
     def set_project(self, *args):
         """
@@ -117,20 +113,5 @@ class Projection(SigSlot):
 
     @property
     def kwargs(self):
-        out = {}
-        out = {widget.name: widget.value for row in self.panel for widget in row if row.name not in ['crs', 'proj']}
-        out.update({'crs': self.crs.value, 'projection': self.projection.value})
-        out.update({'crs_params': {widget.name: widget.value for widget in self.crs_params}})
-        out.update({'proj_params': {widget.name: widget.value for widget in self.proj_params}})
+        out = {widget.name: widget.value for row in self.panel for widget in row}
         return out
-
-
-def accepted_proj_params(proj):
-    """
-    Return list consisting of `central_longitude`, `central_latitude`
-    if present in parameters accepted by projection.
-    """
-    proj = getattr(ccrs, proj)
-    params = list(inspect.signature(proj).parameters.keys())
-    req_params = [p for p in params if p in ['central_longitude', 'central_latitude']]
-    return req_params
