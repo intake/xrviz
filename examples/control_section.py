@@ -1,5 +1,5 @@
 import xarray as xr
-import xrviz
+import xrviz.sample_data
 from xrviz.dashboard import Dashboard
 
 ds = xrviz.sample_data.great_lakes
