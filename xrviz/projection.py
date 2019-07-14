@@ -120,6 +120,9 @@ class Projection(SigSlot):
         self.project.disabled = False if self.rasterize.value else True
         self.project.value = False
 
+    def disable_geo(self, value):
+        self.is_geo.disabled = value
+
     @property
     def kwargs(self):
         out = {widget.name: widget.value for row in self.panel for widget in row}

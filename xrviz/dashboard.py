@@ -2,7 +2,6 @@ import panel as pn
 import xarray as xr
 import hvplot.xarray
 import holoviews as hv
-import warnings
 import numpy
 from .sigslot import SigSlot
 from .control import Control

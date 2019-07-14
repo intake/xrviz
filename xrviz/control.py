@@ -76,7 +76,8 @@ class Control(SigSlot):
         self.fields.set_coords(self.data, var)
 
     def check_is_projectable(self, *args):
-        self.projection.is_geo.disabled = not self.fields.kwargs['are_var_coords']
+        value = not self.fields.kwargs['are_var_coords']
+        self.projection.disable_geo(value)
 
     @property
     def kwargs(self):
