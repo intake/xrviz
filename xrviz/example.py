@@ -23,10 +23,11 @@ def example(show=True):
                       # style
                       'height': 300,
                       'width': 650,
-                      'colorbar': False,
+                      'colorbar': True,
 
                       # projection
                       'is_geo': True,
+                      'basemap': 'OSM',
                       'crs': 'PlateCarree',
                       'projection': 'Orthographic',
                       'crs params': {'central_longitude': 0.0},
