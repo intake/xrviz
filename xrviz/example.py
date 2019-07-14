@@ -24,6 +24,7 @@ def example(show=True):
                       'height': 300,
                       'width': 650,
                       'colorbar': True,
+                      'cmap': 'Viridis',
 
                       # projection
                       'is_geo': True,
