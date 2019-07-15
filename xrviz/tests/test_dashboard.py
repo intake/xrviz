@@ -122,7 +122,8 @@ def test_with_is_geo_projection(dashboard):
     proj_panel = dashboard.control.projection
     proj_panel.is_geo.value = True
     proj_panel.projection.value = 'Orthographic'
-    proj_panel.proj_params[0].value, proj_panel.proj_params[1].value = '-78', '43'
+    proj_panel.proj_params.value = {'central_longitude': -78,
+                                    'central_latitude': 43, 'globe': None}
     proj_panel.global_extent.value = True
     dashboard.create_plot()
     assert isinstance(dashboard.output[0], pn.pane.holoviews.HoloViews)
@@ -135,7 +136,6 @@ def test_with_is_geo_basemap(dashboard):
     dashboard.control.displayer.select_variable('temp')
     proj_panel = dashboard.control.projection
     proj_panel.is_geo.value = True
-    proj_panel.show_map.value = True
     dashboard.create_plot()
     assert isinstance(dashboard.output[0], pn.pane.holoviews.HoloViews)
     assert isinstance(dashboard.output[1][0], pn.widgets.select.Select)
@@ -155,11 +155,10 @@ def test_with_aggregations_for_dims(dashboard):
 def test_with_aggregations_for_coords(dashboard):
     dashboard.control.displayer.select_variable('temp')
     dashboard.control.coord_setter.coord_selector.value = ['lat', 'lon']
-    fields = dashboard.control.fields
-    agg_selectors = fields.agg_selectors
+    agg_selectors = dashboard.control.fields.agg_selectors
     agg_selectors[0].value = 'max'
     agg_selectors[1].value = 'count'
-    dashboard.create_plot()
+    dashboard.plot_button.clicks += 1
     assert isinstance(dashboard.output[0][0], pn.pane.holoviews.HoloViews)
 
 

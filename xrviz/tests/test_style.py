@@ -60,7 +60,7 @@ def test_use_all_data(style):
     use_data_widget = style.use_all_data
     assert isinstance(use_data_widget, pn.widgets.Checkbox)
     assert use_data_widget.name == 'compute min/max from all data'
-    assert use_data_widget.value is True
+    assert use_data_widget.value is False
 
 
 def test_color_scale(style):
