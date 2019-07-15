@@ -118,6 +118,11 @@ class Fields(SigSlot):
             self._register(agg_selector, agg_selector.name)
             self.agg_selectors.append(agg_selector)
 
+    def setup_initial_values(self, init_params={}):
+        for widget in [self.x, self.y] + list(self.agg_selectors):
+            if widget.name in init_params:
+                widget.value = init_params[widget.name]
+
     @property
     def kwargs(self):
         # Row(name='Fields')

@@ -1,4 +1,6 @@
+import inspect
 import panel as pn
+from .compatibility import ccrs, has_cartopy
 
 
 def convert_widget(source, target):
@@ -71,3 +73,15 @@ def is_float(a):
         return True
     except:
         return False
+
+if has_cartopy:
+    def proj_params(proj):
+        proj = getattr(ccrs, proj)
+        params = inspect.getfullargspec(proj)
+        out = {}
+        if 'self' in params.args:
+            params.args.remove('self')
+        if len(params.args) and len(params.args) == len(params.defaults):
+            for arg, val in zip(params.args, params.defaults):
+                out.update({arg: val})
+        return out

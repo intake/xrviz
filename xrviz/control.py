@@ -56,6 +56,14 @@ class Control(SigSlot):
 
         self.panel = pn.Column(self.tabs)
 
+    def setup_initial_values(self, initial_params={}):
+        self.displayer.setup_initial_values(initial_params)
+        self.coord_setter.setup_initial_values(initial_params)
+        self.fields.setup_initial_values(initial_params)
+        self.style.setup_initial_values(initial_params)
+        if has_cartopy:
+            self.projection.setup_initial_values(initial_params)
+
     def set_coords(self, data):
         try:  # Upon setting coords before selecting a variable
             var = self.kwargs['Variables']
@@ -68,7 +76,8 @@ class Control(SigSlot):
         self.fields.set_coords(self.data, var)
 
     def check_is_projectable(self, *args):
-        self.projection.is_geo.disabled = not self.fields.kwargs['are_var_coords']
+        value = not self.fields.kwargs['are_var_coords']
+        self.projection.disable_geo(value)
 
     @property
     def kwargs(self):

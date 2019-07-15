@@ -2,7 +2,6 @@ import panel as pn
 import xarray as xr
 import hvplot.xarray
 import holoviews as hv
-import warnings
 import numpy
 from .sigslot import SigSlot
 from .control import Control
@@ -19,6 +18,7 @@ class Dashboard(SigSlot):
     ----------
     data: `xarray` instance: `DataSet` or `DataArray`
            datset is used to initialize.
+    initial_params: To pre-set values of widgets.
 
     Attributes
     ----------
@@ -29,11 +29,12 @@ class Dashboard(SigSlot):
     output: Provides access to generated graph.
     """
 
-    def __init__(self, data):
+    def __init__(self, data, initial_params={}):
         super().__init__()
         if not isinstance(data, xr.core.dataarray.DataWithCoords):
             raise ValueError("Input should be an xarray data object, not %s" % type(data))
         self.set_data(data)
+        self.initial_params = initial_params
         self.control = Control(self.data)
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
@@ -58,6 +59,8 @@ class Dashboard(SigSlot):
         # To auto-select in case of single variable
         if len(list(self.data.variables)) == 1:
             self.control.displayer.select.value = list(self.data.variables)
+
+        self.control.setup_initial_values(self.initial_params)
 
     def link_aggregation_selectors(self, *args):
         """
@@ -93,27 +96,25 @@ class Dashboard(SigSlot):
 
             if has_cartopy:
                 is_geo = self.kwargs['is_geo']
-                show_map = self.kwargs['show_map']
                 base_map = self.kwargs['basemap']
+                show_map = True if base_map != None else False
 
                 if is_geo:
+                    crs_params = self.kwargs['crs params']
+                    crs = getattr(ccrs, self.kwargs['crs'])(**crs_params)
                     geo_ops = {'alpha': self.kwargs['alpha'],
                                'project': self.kwargs['project'],
                                'rasterize': self.kwargs['rasterize'],
                                'global_extent': self.kwargs['global_extent'],
-                               'geo': True}
+                               'geo': True,
+                               'crs': crs}
                     if not show_map:
                         # find projection and crs, add it to geo_ops
-                        proj_ops = {}
-                        proj_params = self.kwargs['proj_params']
-                        for p_param in proj_params:
-                            proj_ops[p_param] = float(self.kwargs[p_param]) if is_float(self.kwargs[p_param]) else 0
-                        projection = getattr(ccrs, self.kwargs['projection'])(**proj_ops)
-                        crs_val = self.kwargs['crs']
-                        crs = getattr(ccrs, crs_val)() if crs_val is not None else crs_val
-                        projection_ops = {'crs': crs,
-                                          'projection': projection}
-                        geo_ops.update(projection_ops)
+                        proj_val = self.kwargs['projection']
+                        if proj_val:
+                            proj_params = self.kwargs['projection params']
+                            projection = getattr(ccrs, self.kwargs['projection'])(**proj_params)
+                            geo_ops.update({'projection': projection})
 
                     graph_opts.update(geo_ops)
 

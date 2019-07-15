@@ -13,8 +13,29 @@ def example(show=True):
         False, the Dashboard instance is returned without being executed.
     """
     from .sample_data import great_lakes
+    initial_params = {'Variables': 'temp',  # Select Variable
+                      'Set Coords': ['lat', 'lon'],  # Set Coords
+                      # Fields
+                      'x': 'lon',
+                      'y': 'lat',
+                      'sigma': 'animate',
 
-    dash = Dashboard(great_lakes)
+                      # style
+                      'height': 300,
+                      'width': 650,
+                      'colorbar': True,
+                      'cmap': 'Viridis',
+
+                      # projection
+                      'is_geo': True,
+                      'basemap': 'OSM',
+                      'crs': 'PlateCarree',
+                      'projection': 'Orthographic',
+                      'crs params': {'central_longitude': 0.0},
+                      'projection params': {'central_longitude': -78,
+                                            'central_latitude': 43,
+                                            'globe': None}}
+    dash = Dashboard(great_lakes, initial_params=initial_params)
     if show:
         dash.show()
     return dash
