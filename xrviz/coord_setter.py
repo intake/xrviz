@@ -16,3 +16,7 @@ class CoordSetter(SigSlot):
     def set_coords(self, data):
         self.data = data
         self.coord_selector.value = list(self.data.coords)
+
+    def setup_initial_values(self, init_params={}):
+        if 'Set Coords' in init_params:
+            self.coord_selector.value = init_params['Set Coords']

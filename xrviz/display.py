@@ -26,7 +26,7 @@ class Display(SigSlot):
         super().__init__()
         self.data = data
         self.select = pn.widgets.MultiSelect(size=8, min_width=300,
-                                             height=135,
+                                             height=210,
                                              width_policy='min',
                                              name='Variables')
         # self.set_selection(self.data)
@@ -45,6 +45,10 @@ class Display(SigSlot):
                 self.select.value = [variable]
             else:
                 print(f"Variable {variable} not present in displayer.")
+
+    def setup_initial_values(self, init_params={}):
+        if 'Variables' in init_params:
+            self.select_variable(init_params['Variables'])
 
     @property
     def kwargs(self):

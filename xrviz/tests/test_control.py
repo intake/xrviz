@@ -1,6 +1,7 @@
 import pytest
 from xrviz.control import Control
 from . import data
+from ..compatibility import has_cartopy
 
 
 @pytest.fixture()
@@ -10,4 +11,8 @@ def control(data):
 
 def test_control_initial(control):
     tabs = [tab.name for tab in control.tabs]
-    assert tabs == ['Set Coords', 'Variables', 'Axes', 'Style']
+    if has_cartopy:
+        assert tabs == ['Variables', 'Set Coords', 'Axes', 'Style',
+                        'Projection']
+    else:
+        assert tabs == ['Variables', 'Set Coords', 'Axes', 'Style']

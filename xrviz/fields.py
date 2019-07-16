@@ -1,7 +1,9 @@
 import panel as pn
 import xarray as xr
+import warnings
 from .sigslot import SigSlot
 from .utils import convert_widget
+from .compatibility import mpcalc
 
 
 class Fields(SigSlot):
@@ -30,6 +32,7 @@ class Fields(SigSlot):
         self.agg_selectors = pn.Column()
         self.agg_opts = ['select', 'animate', 'mean', 'max',
                          'min', 'median', 'std', 'count']
+        self.are_var_coords = False
 
         self._register(self.x, 'x')
         self._register(self.y, 'y')
@@ -53,17 +56,17 @@ class Fields(SigSlot):
         self.non_indexed_coords = set(self.data[var].coords) - self.indexed_coords
         self.sel_options = sorted(self.var_dims + list(self.non_indexed_coords))
 
+        self.x_guess, self.y_guess = self.guess_x_y(self.var) if mpcalc else ['None', 'None']
         x_opts = self.sel_options.copy()
         if len(x_opts):  # to check that data has dim (is not Empty)
             self.x.options = x_opts
-            self.x.value = x_opts[0]
+            self.x.value = self.x_guess if self.x_guess and self.x_guess in x_opts else x_opts[0]
             y_opts = x_opts.copy()
             del y_opts[0]
             if y_opts is None:
                 self.y.options = []
                 self.remaining_dims = []
             else:
-                self.y.options = y_opts
                 self.remaining_dims = [opt for opt in y_opts if opt!=self.y.value]
                 self.change_y()
 
@@ -85,19 +88,27 @@ class Fields(SigSlot):
             values = set(values) - set(self.var_dims)
             #  Plot can be generated for 2 values only if ndims of both match
             valid_values = [val for val in values if self.ndim_matches(x_val, val)]
-        self.y.options = sorted(list(valid_values))
-
+        y_opts = sorted(list(valid_values))
+        self.y.options = y_opts
+        if len(y_opts):
+            self.y.value = self.y_guess if self.y_guess and self.y_guess in y_opts else y_opts[0]
+        self.are_var_coords = self.check_are_var_coords()
         self.change_dim_selectors()
 
     def change_dim_selectors(self, *args):
+        self.are_var_coords = self.check_are_var_coords()
         self.agg_selectors.clear()
-        used_opts = [self.x.value, self.y.value]
+        x = self.x.value
+        y = self.y.value
+        used_opts = {x, y}
 
-        if self.x.value in self.var_dims:
+        if x in self.var_dims:
             self.remaining_dims = [dim for dim in self.var_dims if dim not in used_opts]
         else:  # is a coord
             #  We can't aggregate along dims which are present in x and y.
-            dims_not_to_agg = set(self.data[self.x.value].dims).union(set(self.data[self.y.value].dims)).union(set(used_opts))
+            x_val_dims = set(self.data[x].dims) if x is not None else set()
+            y_val_dims = set(self.data[y].dims) if y is not None else set()
+            dims_not_to_agg = x_val_dims.union(y_val_dims).union(used_opts)
             self.remaining_dims = [dim for dim in self.var_dims if dim not in dims_not_to_agg]
 
         for dim in sorted(self.remaining_dims):
@@ -106,6 +117,11 @@ class Fields(SigSlot):
                                              width=200,)
             self._register(agg_selector, agg_selector.name)
             self.agg_selectors.append(agg_selector)
+
+    def setup_initial_values(self, init_params={}):
+        for widget in [self.x, self.y] + list(self.agg_selectors):
+            if widget.name in init_params:
+                widget.value = init_params[widget.name]
 
     @property
     def kwargs(self):
@@ -126,6 +142,7 @@ class Fields(SigSlot):
         dims_to_agg = [dim for dim in selectors if dim not in dims_to_select_animate]
         out.update({'dims_to_agg': dims_to_agg})
         out.update({'dims_to_select_animate': sorted(dims_to_select_animate)})
+        out.update({'are_var_coords': self.are_var_coords})
         out.update({'remaining_dims': self.remaining_dims})  # dims_to_agg + dims_to_select_animate
         return out
 
@@ -136,3 +153,20 @@ class Fields(SigSlot):
 
     def ndim_matches(self, var1, var2):
         return self.data[var1].ndim == self.data[var2].ndim
+
+    def check_are_var_coords(self):
+        '''
+        Check if both x and y are in variable's coords
+        '''
+        var_coords = list(self.data[self.var].coords)
+        x = self.x.value
+        y = self.y.value
+        return True if x in var_coords and y in var_coords else False
+
+    def guess_x_y(self, var):
+        try:
+            parsed_var = self.data.metpy.parse_cf(var)
+            x, y = parsed_var.metpy.coordinates('x', 'y')
+            return [coord.name for coord in (x, y)]
+        except:  # fails when coords have not been set or available.
+            return [None, None]

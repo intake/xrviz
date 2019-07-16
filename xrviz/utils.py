@@ -1,4 +1,6 @@
+import inspect
 import panel as pn
+from .compatibility import ccrs, has_cartopy
 
 
 def convert_widget(source, target):
@@ -47,7 +49,7 @@ def player_with_name_and_value(source):
     """
     source: pn.widgets.DiscretePlayer()
     target: consists of source player's name, value and player itself
-    
+
     With pn.widgets.DiscretePlayer, we don't get name and
     value updates in textual form. This method is useful
     in case we want name and continuous value update.
@@ -65,9 +67,21 @@ def player_with_name_and_value(source):
 
 
 def is_float(a):
-    # int, 'Nan' are also float
+    # int, 'Nan', 'inf' and '-inf' are also float
     try:
         float(a)
         return True
     except:
         return False
+
+if has_cartopy:
+    def proj_params(proj):
+        proj = getattr(ccrs, proj)
+        params = inspect.getfullargspec(proj)
+        out = {}
+        if 'self' in params.args:
+            params.args.remove('self')
+        if len(params.args) and len(params.args) == len(params.defaults):
+            for arg, val in zip(params.args, params.defaults):
+                out.update({arg: val})
+        return out

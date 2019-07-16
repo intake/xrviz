@@ -16,6 +16,5 @@ pip install git+https://github.com/intake/xrviz
 
 ### Usage
 ```
-cd examples
-python control_section.py
+python -c "import xrviz; xrviz.example()"
 ```
