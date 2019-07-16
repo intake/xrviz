@@ -43,6 +43,7 @@ class Fields(SigSlot):
         self.panel = pn.Row(pn.Column('### Plot Dimensions',
                                       self.x, self.y,
                                       background='rgb(175,175,175)'),
+                            pn.Spacer(),
                             pn.Column('### Aggregations',
                                       self.agg_selectors,
                                       background='rgb(175,175,175)'),
@@ -130,13 +131,14 @@ class Fields(SigSlot):
         #         [0] Markdown(str)     --> self.panel[0][0]
         #         [1] Select(name='x',) --> self.panel[0][1]
         #         [2] Select(name='y',) --> self.panel[0][2]
-        #     [1] Column(background='rgb(175,175,175)')
+        #     [1] Spacer(width=20)
+        #     [2] Column(background='rgb(175,175,175)')
         #         [0] Markdown(str)     --> self.panel[1][0]
         #         [1] Column            --> self.panel[1][1]
         #             [0] Select()
         #             [1] Select()
         out = {p.name: p.value for p in self.panel[0][1:]}  # since panel[0][0] is Markdown
-        selectors = {p.name: p.value for p in self.panel[1][1]}  # remaining_dims
+        selectors = {p.name: p.value for p in self.panel[2][1]}  # remaining_dims
         out.update(selectors)
         dims_to_select_animate = [dim for dim, agg in selectors.items() if agg in ['select', 'animate']]
         dims_to_agg = [dim for dim in selectors if dim not in dims_to_select_animate]
