@@ -325,16 +325,14 @@ class Dashboard(SigSlot):
                 # created along 0th val of the dim.
                 if len(other_dims):
                     other_dim_sels = {}
-                    i_sel_names = [sel.name for sel in self.index_selectors]
                     for dim in other_dims:
                         dim_found = False
-                        long_name = self.data[dim].long_name if hasattr(self.data[dim], 'long_name') else None
                         for dim_sel in self.index_selectors:
-                            if dim_sel.name == long_name or dim_sel.name == dim:
+                            if dim_sel.name == dim:
                                 val = dim_sel.value
                                 other_dim_sels.update({dim: val})
                                 dim_found = True
-                        if not dim_found:
+                        if not dim_found:  # when dim is used for aggregation
                             val = self.data[dim][0].values
                             other_dim_sels.update({dim: val})
 
