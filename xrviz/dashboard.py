@@ -1,6 +1,9 @@
 import panel as pn
+import pandas as pd
+import numpy as np
 import xarray as xr
 import hvplot.xarray
+import hvplot.pandas
 import holoviews as hv
 from holoviews import streams
 import warnings
@@ -318,8 +321,8 @@ class Dashboard(SigSlot):
                 other_dims = [dim for dim in self.kwargs['remaining_dims'] if dim is not extract_along]
                 print('extract_along', extract_along)
                 print('other_dims', other_dims)
-                series_sel = {self.kwargs['x']: int(x),
-                              self.kwargs['y']: int(y)}
+                series_sel = {self.kwargs['x']: self.correct_val(self.kwargs['x'], x),
+                              self.kwargs['y']: self.correct_val(self.kwargs['y'], y)}
                 # to use the value selected in index selector for selecting
                 # data to create series. In case of aggregation, plot is
                 # created along 0th val of the dim.
@@ -335,12 +338,19 @@ class Dashboard(SigSlot):
                         if not dim_found:  # when dim is used for aggregation
                             val = self.data[dim][0].values
                             other_dim_sels.update({dim: val})
+                    series_sel.update(other_dim_sels)
 
-                series_sel.update(other_dim_sels)
                 print('series_sel', series_sel)
-                sel_series_data = self.data.sel(**series_sel)
-                series_map = sel_series_data[self.var].hvplot(height=self.kwargs['height'],
-                                                              width=self.kwargs['width'])
+                sel_series_data = self.data[self.var]
+                for dim, val in series_sel.items():
+                    sel_series_data = sel_val_from_dim(sel_series_data, dim, val)
+
+                series_df = pd.DataFrame({extract_along: self.data[extract_along],
+                                          self.var: np.asarray(sel_series_data)})
+
+                series_map = series_df.hvplot(x=extract_along, y=self.var,
+                                              height=self.kwargs['height'],
+                                              width=self.kwargs['width'])
                 self.series = series_map.opts(color=color) * self.series
 
         return self.series
@@ -404,6 +414,29 @@ class Dashboard(SigSlot):
         self.plot_button.disabled = False  # important to enable button once disabled
         data = self.data[var[0]]
         self.plot_button.disabled = len(data.dims) <= 1
+
+    def correct_val(self, dim, x):
+        """ Since tapped values from graph are in floats,
+            we need to convert them into ints, or pass as it is
+            for time
+        """
+        dtype = str(getattr(self.data[dim], 'dtype'))
+        if 'int' in dtype:
+            return int(x)
+        elif 'float' in dtype:
+            return float(x)
+        else:
+            return str(x)
+
+
+def sel_val_from_dim(data, dim, x):
+    """ To select values from a dim.
+        For some dims method is required while for others it is not
+    """
+    try:
+        return data.sel({dim: x})
+    except:
+        return data.sel({dim: x}, method='nearest')
 
 
 def cartopy_geoviews_installed():
