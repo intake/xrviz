@@ -84,4 +84,4 @@ if has_cartopy:
         if len(params.args) and len(params.args) == len(params.defaults):
             for arg, val in zip(params.args, params.defaults):
                 out.update({arg: val})
-        return out
+        return str(out)

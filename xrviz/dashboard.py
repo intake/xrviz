@@ -1,3 +1,4 @@
+import ast
 import panel as pn
 import xarray as xr
 import hvplot.xarray
@@ -88,7 +89,8 @@ class Dashboard(SigSlot):
                           'height': self.kwargs['height'],
                           'width': self.kwargs['width'],
                           'cmap': self.kwargs['cmap'],
-                          'colorbar': self.kwargs['colorbar']}
+                          'colorbar': self.kwargs['colorbar'],
+                          'rasterize': self.kwargs['rasterize']}
             color_scale = self.kwargs['color_scale']
             dims_to_agg = self.kwargs['dims_to_agg']
             use_all_data = self.kwargs['compute min/max from all data']
@@ -101,10 +103,10 @@ class Dashboard(SigSlot):
 
                 if is_geo:
                     crs_params = self.kwargs['crs params']
+                    crs_params = process_proj_params(crs_params)
                     crs = getattr(ccrs, self.kwargs['crs'])(**crs_params)
                     geo_ops = {'alpha': self.kwargs['alpha'],
                                'project': self.kwargs['project'],
-                               'rasterize': self.kwargs['rasterize'],
                                'global_extent': self.kwargs['global_extent'],
                                'geo': True,
                                'crs': crs}
@@ -113,6 +115,7 @@ class Dashboard(SigSlot):
                         proj_val = self.kwargs['projection']
                         if proj_val:
                             proj_params = self.kwargs['projection params']
+                            proj_params = process_proj_params(proj_params)
                             projection = getattr(ccrs, self.kwargs['projection'])(**proj_params)
                             geo_ops.update({'projection': projection})
 
@@ -205,7 +208,8 @@ class Dashboard(SigSlot):
                       'height': self.kwargs['height'],
                       'width': self.kwargs['width'],
                       'cmap': self.kwargs['cmap'],
-                      'colorbar': self.kwargs['colorbar']}
+                      'colorbar': self.kwargs['colorbar'],
+                      'rasterize': self.kwargs['rasterize']}
         dims_to_agg = self.kwargs['dims_to_agg']
         color_scale = self.kwargs['color_scale']
         use_all_data = self.kwargs['compute min/max from all data']
@@ -303,3 +307,12 @@ class Dashboard(SigSlot):
         self.plot_button.disabled = False  # important to enable button once disabled
         data = self.data[var[0]]
         self.plot_button.disabled = len(data.dims) <= 1
+
+
+def process_proj_params(params):
+    params = ast.literal_eval(params)
+    for k, v in params.items():
+        if k == 'globe' and params['globe']:
+            globe = ccrs.Globe(**v)
+            params.update({'globe': globe})
+    return params

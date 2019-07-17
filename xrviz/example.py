@@ -31,10 +31,9 @@ def example(show=True):
                       'basemap': 'OSM',
                       'crs': 'PlateCarree',
                       'projection': 'Orthographic',
-                      'crs params': {'central_longitude': 0.0},
-                      'projection params': {'central_longitude': -78,
-                                            'central_latitude': 43,
-                                            'globe': None}}
+                      'crs params': "{'central_longitude': 0.0}",
+                      'projection params': "{'central_longitude': -78, 'central_latitude': 43, 'globe': None}"
+                      }
     dash = Dashboard(great_lakes, initial_params=initial_params)
     if show:
         dash.show()
