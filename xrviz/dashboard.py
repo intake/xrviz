@@ -103,7 +103,8 @@ class Dashboard(SigSlot):
 
                 if is_geo:
                     crs_params = self.kwargs['crs params']
-                    crs = getattr(ccrs, self.kwargs['crs'])(**ast.literal_eval(crs_params))
+                    crs_params = process_proj_params(crs_params)
+                    crs = getattr(ccrs, self.kwargs['crs'])(**crs_params)
                     geo_ops = {'alpha': self.kwargs['alpha'],
                                'project': self.kwargs['project'],
                                'global_extent': self.kwargs['global_extent'],
@@ -114,7 +115,8 @@ class Dashboard(SigSlot):
                         proj_val = self.kwargs['projection']
                         if proj_val:
                             proj_params = self.kwargs['projection params']
-                            projection = getattr(ccrs, self.kwargs['projection'])(**ast.literal_eval(proj_params))
+                            proj_params = process_proj_params(proj_params)
+                            projection = getattr(ccrs, self.kwargs['projection'])(**proj_params)
                             geo_ops.update({'projection': projection})
 
                     graph_opts.update(geo_ops)
@@ -305,3 +307,12 @@ class Dashboard(SigSlot):
         self.plot_button.disabled = False  # important to enable button once disabled
         data = self.data[var[0]]
         self.plot_button.disabled = len(data.dims) <= 1
+
+
+def process_proj_params(params):
+    params = ast.literal_eval(params)
+    for k, v in params.items():
+        if k == 'globe' and params['globe']:
+            globe = ccrs.Globe(**v)
+            params.update({'globe': globe})
+    return params
