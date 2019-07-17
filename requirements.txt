@@ -3,3 +3,4 @@ holoviews==1.12.1
 hvplot
 xarray
 netcdf4
+datashader
