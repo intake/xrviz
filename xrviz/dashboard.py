@@ -1,7 +1,13 @@
 import panel as pn
+import pandas as pd
+import numpy as np
 import xarray as xr
 import hvplot.xarray
+import hvplot.pandas
 import holoviews as hv
+from holoviews import streams
+import warnings
+from itertools import cycle
 import numpy
 from .sigslot import SigSlot
 from .control import Control
@@ -38,7 +44,13 @@ class Dashboard(SigSlot):
         self.control = Control(self.data)
         self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
         self.index_selectors = []
-        self.output = pn.Row(pn.Spacer(name='Graph'),
+        self.graph = pn.Spacer(name='Graph')
+        self.taps_graph = hv.Points([])
+        self.series_graph = pn.Row(pn.Spacer(name='Series Graph'))
+        self.clear_series_button = pn.widgets.Button(name='Clear',
+                                                     width=200,
+                                                     disabled=True)
+        self.output = pn.Row(self.graph,
                              pn.Column(name='Index_selectors'))
 
         self._register(self.plot_button, 'plot_clicked', 'clicks')
@@ -47,20 +59,40 @@ class Dashboard(SigSlot):
         self._register(self.control.coord_setter.coord_selector, 'set_coords')
         self.connect("set_coords", self.set_coords)
 
+        self._register(self.clear_series_button, 'clear_series', 'clicks')
+        self.connect('clear_series', self.clear_series)
+
+        # self.control.fields.connect('extract_along', self.clear_series)
+
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
         self.control.displayer.connect('variable_selected', self.link_aggregation_selectors)
         self.control.fields.connect('x', self.link_aggregation_selectors)
         self.control.fields.connect('y', self.link_aggregation_selectors)
 
         self.panel = pn.Column(self.control.panel,
-                               self.plot_button,
-                               self.output)
+                               pn.Row(self.plot_button,
+                                      self.clear_series_button),
+                               self.output,
+                               self.series_graph)
 
         # To auto-select in case of single variable
         if len(list(self.data.variables)) == 1:
             self.control.displayer.select.value = list(self.data.variables)
 
         self.control.setup_initial_values(self.initial_params)
+        self.taps = []
+        self.tap_stream = streams.Tap(transient=True)
+        colors = ['#60fffc', '#6da252', '#ff60d4', '#ff9400', '#f4e322',
+                  '#229cf4', '#af9862', '#629baf', '#7eed5a', '#e29ec8',
+                  '#ff4300']
+        self.color_pool = cycle(colors)
+
+    def clear_series(self, *args):
+        self.series_graph[0] = pn.Spacer(name='Series Graph')
+        self.series = hv.Points([]).opts(height=self.kwargs['height'],
+                                         width=self.kwargs['width'])
+        self.taps.clear()
+        self.output[0] = self.graph * self.taps_graph
 
     def link_aggregation_selectors(self, *args):
         """
@@ -73,12 +105,17 @@ class Dashboard(SigSlot):
 
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
+        print('Extract Along', self.kwargs['Extract Along'])
         self.var = self.kwargs['Variables']
         if self.index_selectors:
             for selector in self.index_selectors:
                 del selector
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
+        self.series_graph[0] = pn.Spacer(name='Series Graph')
+        self.series = hv.Points([]).opts(height=self.kwargs['height'],
+                                         width=self.kwargs['width'])
+        self.taps.clear()
 
         are_var_coords = self.kwargs['are_var_coords']
         if are_var_coords:
@@ -161,10 +198,13 @@ class Dashboard(SigSlot):
             # 4. active_tools: activate the tools required such as 'wheel_zoom', 'pan'
             graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
 
+            self.tap_stream.source = graph
+
             if has_cartopy and is_geo:
-                graph = feature_map * graph
+                graph = feature_map * graph if self.kwargs['features'] != ['None'] else graph
                 if show_map:
                     graph = base_map * graph
+                    self.tap_stream.source = graph
 
             self.create_selectors_players(graph)
 
@@ -249,7 +289,72 @@ class Dashboard(SigSlot):
 
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
-        self.output[0] = graph
+        self.graph = graph
+        if len(self.data[self.var].dims) > 2:
+            self.tap_stream.source = graph
+            self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
+            self.output[0] = self.graph * self.taps_graph
+            self.clear_series_button.disabled = False
+        else:
+            self.output[0] = self.graph
+            self.clear_series_button.disabled = True
+
+    def create_taps_graph(self, x, y, clear=False):
+        print("create_taps_graph")
+        print(x, y)
+
+        color = next(iter(self.color_pool))
+        if None not in [x, y]:
+            self.taps.append((x, y, color))
+        tapped_map = hv.Points(self.taps, vdims=['z']).opts(color='z',
+                                                            marker='triangle',
+                                                            line_color='black',
+                                                            size=8)
+        self.series_graph[0] = self.create_series_graph(x, y, color)
+        return tapped_map
+
+    def create_series_graph(self, x, y, color):
+        print("create_series_graph")
+        if None not in [x, y]:
+            if not self.kwargs['are_var_coords']:  # when both x and y are dims
+                color = self.taps[-1][-1] if self.taps[-1][-1] else None
+                extract_along = self.control.kwargs['Extract Along']
+                other_dims = [dim for dim in self.kwargs['remaining_dims'] if dim is not extract_along]
+                print('extract_along', extract_along)
+                print('other_dims', other_dims)
+                series_sel = {self.kwargs['x']: self.correct_val(self.kwargs['x'], x),
+                              self.kwargs['y']: self.correct_val(self.kwargs['y'], y)}
+                # to use the value selected in index selector for selecting
+                # data to create series. In case of aggregation, plot is
+                # created along 0th val of the dim.
+                if len(other_dims):
+                    other_dim_sels = {}
+                    for dim in other_dims:
+                        dim_found = False
+                        for dim_sel in self.index_selectors:
+                            if dim_sel.name == dim:
+                                val = dim_sel.value
+                                other_dim_sels.update({dim: val})
+                                dim_found = True
+                        if not dim_found:  # when dim is used for aggregation
+                            val = self.data[dim][0].values
+                            other_dim_sels.update({dim: val})
+                    series_sel.update(other_dim_sels)
+
+                print('series_sel', series_sel)
+                sel_series_data = self.data[self.var]
+                for dim, val in series_sel.items():
+                    sel_series_data = sel_val_from_dim(sel_series_data, dim, val)
+
+                series_df = pd.DataFrame({extract_along: self.data[extract_along],
+                                          self.var: np.asarray(sel_series_data)})
+
+                series_map = series_df.hvplot(x=extract_along, y=self.var,
+                                              height=self.kwargs['height'],
+                                              width=self.kwargs['width'])
+                self.series = series_map.opts(color=color) * self.series
+
+        return self.series
 
     def create_selectors_players(self, graph):
         """
@@ -258,6 +363,12 @@ class Dashboard(SigSlot):
         bottom of graph if they are present and convert them into Selectors,
         Players.
         """
+        if len(self.data[self.var].dims) > 2:
+            self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
+            self.clear_series_button.disabled = False
+            graph = graph * self.taps_graph
+        else:
+            self.clear_series_button.disabled = True
         graph = pn.Row(graph)
         try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
             if graph[0][1]:  # if sliders are generated
@@ -303,3 +414,26 @@ class Dashboard(SigSlot):
         self.plot_button.disabled = False  # important to enable button once disabled
         data = self.data[var[0]]
         self.plot_button.disabled = len(data.dims) <= 1
+
+    def correct_val(self, dim, x):
+        """ Since tapped values from graph are in floats,
+            we need to convert them into ints, or pass as it is
+            for time
+        """
+        dtype = str(getattr(self.data[dim], 'dtype'))
+        if 'int' in dtype:
+            return int(x)
+        elif 'float' in dtype:
+            return float(x)
+        else:
+            return str(x)
+
+
+def sel_val_from_dim(data, dim, x):
+    """ To select values from a dim.
+        For some dims method is required while for others it is not
+    """
+    try:
+        return data.sel({dim: x})
+    except:
+        return data.sel({dim: x}, method='nearest')

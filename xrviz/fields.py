@@ -32,6 +32,7 @@ class Fields(SigSlot):
         self.agg_selectors = pn.Column()
         self.agg_opts = ['select', 'animate', 'mean', 'max',
                          'min', 'median', 'std', 'count']
+        self.series_col = pn.Column()
         self.are_var_coords = False
 
         self._register(self.x, 'x')
@@ -47,6 +48,7 @@ class Fields(SigSlot):
                             pn.Column('### Aggregations',
                                       self.agg_selectors,
                                       background='rgb(175,175,175)'),
+                            self.series_col,
                             name='Axes',)
 
     def setup(self, var):
@@ -99,6 +101,7 @@ class Fields(SigSlot):
     def change_dim_selectors(self, *args):
         self.are_var_coords = self.check_are_var_coords()
         self.agg_selectors.clear()
+        self.series_col.clear()
         x = self.x.value
         y = self.y.value
         used_opts = {x, y}
@@ -118,6 +121,12 @@ class Fields(SigSlot):
                                              width=200,)
             self._register(agg_selector, agg_selector.name)
             self.agg_selectors.append(agg_selector)
+
+        self.s_selector = pn.widgets.Select(name='Extract Along',
+                                            options=sorted(self.remaining_dims),
+                                            width=200)
+        self._register(self.s_selector, 'extract_along')
+        self.series_col.append(self.s_selector)
 
     def setup_initial_values(self, init_params={}):
         for widget in [self.x, self.y] + list(self.agg_selectors):
@@ -146,6 +155,7 @@ class Fields(SigSlot):
         out.update({'dims_to_select_animate': sorted(dims_to_select_animate)})
         out.update({'are_var_coords': self.are_var_coords})
         out.update({'remaining_dims': self.remaining_dims})  # dims_to_agg + dims_to_select_animate
+        out.update({p.name: p.value for p in self.series_col})
         return out
 
     def set_coords(self, data, var):
