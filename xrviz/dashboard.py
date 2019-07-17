@@ -88,7 +88,8 @@ class Dashboard(SigSlot):
                           'height': self.kwargs['height'],
                           'width': self.kwargs['width'],
                           'cmap': self.kwargs['cmap'],
-                          'colorbar': self.kwargs['colorbar']}
+                          'colorbar': self.kwargs['colorbar'],
+                          'rasterize': self.kwargs['rasterize']}
             color_scale = self.kwargs['color_scale']
             dims_to_agg = self.kwargs['dims_to_agg']
             use_all_data = self.kwargs['compute min/max from all data']
@@ -104,7 +105,6 @@ class Dashboard(SigSlot):
                     crs = getattr(ccrs, self.kwargs['crs'])(**crs_params)
                     geo_ops = {'alpha': self.kwargs['alpha'],
                                'project': self.kwargs['project'],
-                               'rasterize': self.kwargs['rasterize'],
                                'global_extent': self.kwargs['global_extent'],
                                'geo': True,
                                'crs': crs}
@@ -205,7 +205,8 @@ class Dashboard(SigSlot):
                       'height': self.kwargs['height'],
                       'width': self.kwargs['width'],
                       'cmap': self.kwargs['cmap'],
-                      'colorbar': self.kwargs['colorbar']}
+                      'colorbar': self.kwargs['colorbar'],
+                      'rasterize': self.kwargs['rasterize']}
         dims_to_agg = self.kwargs['dims_to_agg']
         color_scale = self.kwargs['color_scale']
         use_all_data = self.kwargs['compute min/max from all data']

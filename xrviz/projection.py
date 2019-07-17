@@ -32,7 +32,6 @@ class Projection(SigSlot):
         self.crs = pn.widgets.Select(name='crs',
                                      options=sorted(projections_list),
                                      value='PlateCarree')
-        self.rasterize = pn.widgets.Checkbox(name='rasterize', value=True)
         self.project = pn.widgets.Checkbox(name='project', value=False)
         self.global_extent = pn.widgets.Checkbox(name='global_extent',
                                                  value=False)
@@ -54,21 +53,18 @@ class Projection(SigSlot):
         self._register(self.crs, 'add_crs_params')
         self._register(self.projection, 'add_proj_params')
         self._register(self.basemap, 'show_basemap')
-        self._register(self.rasterize, 'set_project')
 
         self.connect('geo_changed', self.setup)
         self.connect('geo_disabled', self.setup)
         self.connect('add_crs_params', self.add_crs_params)
         self.connect('add_proj_params', self.add_proj_params)
         self.connect('show_basemap', self.show_basemap)
-        self.connect('set_project', self.set_project)
 
         self.panel = pn.Column(pn.Row(self.is_geo),
                                pn.Row(self.alpha, self.basemap),
                                pn.Row(self.crs, self.crs_params, name='crs'),
                                pn.Row(self.projection, self.proj_params, name='proj'),
-                               pn.Row(self.rasterize,
-                                      self.project,
+                               pn.Row(self.project,
                                       self.global_extent),
                                pn.Row(self.features),
                                name='Projection')
@@ -116,14 +112,6 @@ class Projection(SigSlot):
         if args[0] != None:
             projs = proj_params(args[0])
             self.proj_params.value = projs
-
-    def set_project(self, *args):
-        """
-        `project` is valid only when `rasterize` is True.
-        When `rasterize` is False, `project` is disabled.
-        """
-        self.project.disabled = False if self.rasterize.value else True
-        self.project.value = False
 
     def disable_geo(self, value):
         self.is_geo.disabled = value
