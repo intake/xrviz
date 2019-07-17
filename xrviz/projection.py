@@ -35,12 +35,10 @@ class Projection(SigSlot):
         self.project = pn.widgets.Checkbox(name='project', value=False)
         self.global_extent = pn.widgets.Checkbox(name='global_extent',
                                                  value=False)
-        self.crs_params = pn.widgets.LiteralInput(name='crs params',
-                                                  value={}, type=dict,
-                                                  width=400)
-        self.proj_params = pn.widgets.LiteralInput(name='projection params',
-                                                   value={}, type=dict,
-                                                   width=400)
+        self.crs_params = pn.widgets.TextInput(name='crs params',
+                                               value="{}", width=400)
+        self.proj_params = pn.widgets.TextInput(name='projection params',
+                                                value="{}", width=400)
 
         self.feature_ops = ['None', 'borders', 'coastline', 'grid', 'land',
                             'lakes', 'ocean', 'rivers']

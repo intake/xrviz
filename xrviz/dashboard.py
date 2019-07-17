@@ -1,3 +1,4 @@
+import ast
 import panel as pn
 import xarray as xr
 import hvplot.xarray
@@ -102,7 +103,7 @@ class Dashboard(SigSlot):
 
                 if is_geo:
                     crs_params = self.kwargs['crs params']
-                    crs = getattr(ccrs, self.kwargs['crs'])(**crs_params)
+                    crs = getattr(ccrs, self.kwargs['crs'])(**ast.literal_eval(crs_params))
                     geo_ops = {'alpha': self.kwargs['alpha'],
                                'project': self.kwargs['project'],
                                'global_extent': self.kwargs['global_extent'],
@@ -113,7 +114,7 @@ class Dashboard(SigSlot):
                         proj_val = self.kwargs['projection']
                         if proj_val:
                             proj_params = self.kwargs['projection params']
-                            projection = getattr(ccrs, self.kwargs['projection'])(**proj_params)
+                            projection = getattr(ccrs, self.kwargs['projection'])(**ast.literal_eval(proj_params))
                             geo_ops.update({'projection': projection})
 
                     graph_opts.update(geo_ops)
