@@ -62,8 +62,6 @@ class Dashboard(SigSlot):
         self._register(self.clear_series_button, 'clear_series', 'clicks')
         self.connect('clear_series', self.clear_series)
 
-        # self.control.fields.connect('extract_along', self.clear_series)
-
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
         self.control.displayer.connect('variable_selected', self.link_aggregation_selectors)
         self.control.fields.connect('x', self.link_aggregation_selectors)
@@ -92,7 +90,7 @@ class Dashboard(SigSlot):
         self.series = hv.Points([]).opts(height=self.kwargs['height'],
                                          width=self.kwargs['width'])
         self.taps.clear()
-        self.output[0] = self.graph * self.taps_graph
+        self.output[0] = self.graph * self.taps_graph if args[0] else self.graph
 
     def link_aggregation_selectors(self, *args):
         """
@@ -116,6 +114,7 @@ class Dashboard(SigSlot):
         self.series = hv.Points([]).opts(height=self.kwargs['height'],
                                          width=self.kwargs['width'])
         self.taps.clear()
+        self.control.fields.connect('extract_along', self.clear_series)
 
         are_var_coords = self.kwargs['are_var_coords']
         if are_var_coords:
