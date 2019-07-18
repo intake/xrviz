@@ -41,15 +41,15 @@ class Fields(SigSlot):
         self.connect('x', self.change_y)
         self.connect('y', self.change_dim_selectors)
 
-        self.panel = pn.Row(pn.Column('### Plot Dimensions',
-                                      self.x, self.y,
-                                      background='rgb(175,175,175)'),
-                            pn.Spacer(),
-                            pn.Column('### Aggregations',
-                                      self.agg_selectors,
-                                      background='rgb(175,175,175)'),
-                            self.series_col,
-                            name='Axes',)
+        self.panel = pn.Column(pn.Row(pn.Column('### Plot Dimensions',
+                                                self.x, self.y,
+                                                background='rgb(175,175,175)'),
+                                      pn.Spacer(),
+                                      pn.Column('### Aggregations',
+                                                self.agg_selectors,
+                                                background='rgb(175,175,175)')),
+                               self.series_col,
+                               name='Axes')
 
     def setup(self, var):
         self.agg_selectors.clear()  # To empty previouly selected value from selector
@@ -135,19 +135,20 @@ class Fields(SigSlot):
 
     @property
     def kwargs(self):
-        # Row(name='Fields')
-        #     [0] Column(background='rgb(175,175,175)')
-        #         [0] Markdown(str)     --> self.panel[0][0]
-        #         [1] Select(name='x',) --> self.panel[0][1]
-        #         [2] Select(name='y',) --> self.panel[0][2]
-        #     [1] Spacer(width=20)
-        #     [2] Column(background='rgb(175,175,175)')
-        #         [0] Markdown(str)     --> self.panel[1][0]
-        #         [1] Column            --> self.panel[1][1]
-        #             [0] Select()
-        #             [1] Select()
-        out = {p.name: p.value for p in self.panel[0][1:]}  # since panel[0][0] is Markdown
-        selectors = {p.name: p.value for p in self.panel[2][1]}  # remaining_dims
+        # Column(name='Axes')
+        #     [0] Row
+        #         [0] Column(background='rgb(175,175,175)')
+        #             [0] Markdown(str)
+        #             [1] Select(name='x', width=200)
+        #             [2] Select(name='y', width=200)
+        #         [1] Spacer()
+        #         [2] Column(background='rgb(175,175,175)')
+        #             [0] Markdown(str)
+        #             [1] Column()
+        #     [1] Column
+        #         [0] Select()
+        out = {p.name: p.value for p in self.panel[0][0][1:]}  # since panel[0][0][1] is Markdown
+        selectors = {p.name: p.value for p in self.panel[0][2][1]}  # remaining_dims
         out.update(selectors)
         dims_to_select_animate = [dim for dim, agg in selectors.items() if agg in ['select', 'animate']]
         dims_to_agg = [dim for dim in selectors if dim not in dims_to_select_animate]
