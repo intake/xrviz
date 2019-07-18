@@ -20,6 +20,7 @@ class Style(SigSlot):
         scaling_ops = ['linear', 'exp', 'log', 'reciprocal', 'square', 'sqrt']
         self.color_scale = pn.widgets.Select(name='color_scale', value='linear',
                                              options=scaling_ops)
+        self.rasterize = pn.widgets.Checkbox(name='rasterize', value=True)
 
         self._register(self.use_all_data, 'clear_cmap_limits')
         self._register(self.color_scale, 'clear_cmap_limits')
@@ -28,7 +29,8 @@ class Style(SigSlot):
         self.panel = pn.Column(pn.Row(self.height, self.width),
                                pn.Row(self.cmap, self.color_scale),
                                pn.Row(self.lower_limit, self.upper_limit),
-                               pn.Row(self.use_all_data, self.colorbar),
+                               pn.Row(self.use_all_data, self.colorbar,
+                                      self.rasterize),
                                name='Style')
 
     def setup(self, *args):
