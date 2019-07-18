@@ -36,8 +36,6 @@ def projection():
                            [('name', 'crs'),
                             ('options', sorted(projections_list)),
                             ('value', 'PlateCarree')]),
-                          ('rasterize', pn.widgets.Checkbox,
-                           [('name', 'rasterize'), ('value', True)]),
                           ('project', pn.widgets.Checkbox,
                            [('name', 'project'), ('value', False)]),
                           ('global_extent', pn.widgets.Checkbox,
@@ -95,11 +93,3 @@ def test_add_proj_params(projection):
         # accepted_params = accepted_proj_params(proj_value)
         # for widget in projection.proj_params:
         #     assert widget.name in accepted_params
-
-
-def test_set_project(projection):
-    projection.is_geo.disabled = False
-    projection.is_geo.value = True
-    for value in [True, False]:
-        projection.rasterize.value = value
-        assert projection.project.disabled is not value

@@ -122,8 +122,7 @@ def test_with_is_geo_projection(dashboard):
     proj_panel = dashboard.control.projection
     proj_panel.is_geo.value = True
     proj_panel.projection.value = 'Orthographic'
-    proj_panel.proj_params.value = {'central_longitude': -78,
-                                    'central_latitude': 43, 'globe': None}
+    proj_panel.proj_params.value = "{'central_longitude': -78, 'central_latitude': 43, 'globe': None}"
     proj_panel.global_extent.value = True
     dashboard.create_plot()
     assert isinstance(dashboard.output[0], pn.pane.holoviews.HoloViews)

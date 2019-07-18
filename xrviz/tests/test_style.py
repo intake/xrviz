@@ -72,6 +72,13 @@ def test_color_scale(style):
     assert cs_widget.options == scaling_ops
 
 
+def test_rasterize(style):
+    raster_wid = style.rasterize
+    assert isinstance(raster_wid, pn.widgets.Checkbox)
+    assert raster_wid.name == 'rasterize'
+    assert raster_wid.value is True
+
+
 def test_setup(style):
     style.lower_limit.value = '123'
     style.upper_limit.value = '123'
