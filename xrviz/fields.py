@@ -123,7 +123,7 @@ class Fields(SigSlot):
             self.agg_selectors.append(agg_selector)
 
         self.s_selector = pn.widgets.Select(name='Extract Along',
-                                            options=sorted(self.remaining_dims),
+                                            options=[None]+sorted(self.remaining_dims),
                                             width=200)
         self._register(self.s_selector, 'extract_along')
         self.series_col.append(self.s_selector)

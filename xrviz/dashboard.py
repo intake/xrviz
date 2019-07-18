@@ -290,7 +290,7 @@ class Dashboard(SigSlot):
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
         self.graph = graph
-        if len(self.data[self.var].dims) > 2:
+        if len(self.data[self.var].dims) > 2 and self.kwargs['Extract Along']:
             self.tap_stream.source = graph
             self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
             self.output[0] = self.graph * self.taps_graph
@@ -363,7 +363,7 @@ class Dashboard(SigSlot):
         bottom of graph if they are present and convert them into Selectors,
         Players.
         """
-        if len(self.data[self.var].dims) > 2:
+        if len(self.data[self.var].dims) > 2 and self.kwargs['Extract Along']:
             self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
             self.clear_series_button.disabled = False
             graph = graph * self.taps_graph
