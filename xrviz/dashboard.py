@@ -1,3 +1,4 @@
+import ast
 import panel as pn
 import pandas as pd
 import numpy as np
@@ -124,7 +125,8 @@ class Dashboard(SigSlot):
                           'height': self.kwargs['height'],
                           'width': self.kwargs['width'],
                           'cmap': self.kwargs['cmap'],
-                          'colorbar': self.kwargs['colorbar']}
+                          'colorbar': self.kwargs['colorbar'],
+                          'rasterize': self.kwargs['rasterize']}
             color_scale = self.kwargs['color_scale']
             dims_to_agg = self.kwargs['dims_to_agg']
             use_all_data = self.kwargs['compute min/max from all data']
@@ -137,10 +139,10 @@ class Dashboard(SigSlot):
 
                 if is_geo:
                     crs_params = self.kwargs['crs params']
+                    crs_params = process_proj_params(crs_params)
                     crs = getattr(ccrs, self.kwargs['crs'])(**crs_params)
                     geo_ops = {'alpha': self.kwargs['alpha'],
                                'project': self.kwargs['project'],
-                               'rasterize': self.kwargs['rasterize'],
                                'global_extent': self.kwargs['global_extent'],
                                'geo': True,
                                'crs': crs}
@@ -149,6 +151,7 @@ class Dashboard(SigSlot):
                         proj_val = self.kwargs['projection']
                         if proj_val:
                             proj_params = self.kwargs['projection params']
+                            proj_params = process_proj_params(proj_params)
                             projection = getattr(ccrs, self.kwargs['projection'])(**proj_params)
                             geo_ops.update({'projection': projection})
 
@@ -244,7 +247,8 @@ class Dashboard(SigSlot):
                       'height': self.kwargs['height'],
                       'width': self.kwargs['width'],
                       'cmap': self.kwargs['cmap'],
-                      'colorbar': self.kwargs['colorbar']}
+                      'colorbar': self.kwargs['colorbar'],
+                      'rasterize': self.kwargs['rasterize']}
         dims_to_agg = self.kwargs['dims_to_agg']
         color_scale = self.kwargs['color_scale']
         use_all_data = self.kwargs['compute min/max from all data']
@@ -436,3 +440,12 @@ def sel_val_from_dim(data, dim, x):
         return data.sel({dim: x})
     except:
         return data.sel({dim: x}, method='nearest')
+
+
+def process_proj_params(params):
+    params = ast.literal_eval(params)
+    for k, v in params.items():
+        if k == 'globe' and params['globe']:
+            globe = ccrs.Globe(**v)
+            params.update({'globe': globe})
+    return params
