@@ -85,13 +85,15 @@ class Dashboard(SigSlot):
                   '#229cf4', '#af9862', '#629baf', '#7eed5a', '#e29ec8',
                   '#ff4300']
         self.color_pool = cycle(colors)
+        self.clear_points = hv.streams.Stream.define('Clear_points', clear=False)(transient=True)
 
     def clear_series(self, *args):
-        self.series_graph[0] = pn.Spacer(name='Series Graph')
-        self.series = hv.Points([]).opts(height=self.kwargs['height'],
-                                         width=self.kwargs['width'])
-        self.taps.clear()
-        self.output[0] = self.graph * self.taps_graph if args[0] else self.graph
+        if not self.clear_series_button.disabled:
+            self.series_graph[0] = pn.Spacer(name='Series Graph')
+            self.series = hv.Points([]).opts(height=self.kwargs['height'],
+                                             width=self.kwargs['width'])
+            self.taps.clear()
+            self.clear_points.event(clear=True)
 
     def link_aggregation_selectors(self, *args):
         """
@@ -295,7 +297,7 @@ class Dashboard(SigSlot):
         self.graph = graph
         if len(self.data[self.var].dims) > 2 and self.kwargs['Extract Along']:
             self.tap_stream.source = graph
-            self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
+            self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream, self.clear_points])
             self.output[0] = self.graph * self.taps_graph
             self.clear_series_button.disabled = False
         else:
@@ -309,19 +311,23 @@ class Dashboard(SigSlot):
         color = next(iter(self.color_pool))
         if None not in [x, y]:
             self.taps.append((x, y, color))
-        tapped_map = hv.Points(self.taps, vdims=['z']).opts(color='z',
-                                                            marker='triangle',
-                                                            line_color='black',
-                                                            size=8)
-        self.series_graph[0] = self.create_series_graph(x, y, color)
+        if self.control.kwargs['Extract Along'] is None:
+            self.taps = []
+        if self.kwargs['is_geo'] and self.control.projection.is_geo.disabled is False:
+            tapped_map = gv.Points(self.taps, vdims=['z'])
+        else:
+            tapped_map = hv.Points(self.taps, vdims=['z'])
+        tapped_map.opts(color='z', marker='triangle', line_color='black',
+                        size=8)
+        self.series_graph[0] = self.create_series_graph(x, y, color, clear)
         return tapped_map
 
-    def create_series_graph(self, x, y, color):
+    def create_series_graph(self, x, y, color, clear=False):
         print("create_series_graph")
-        if None not in [x, y]:
+        extract_along = self.control.kwargs['Extract Along']
+        if None not in [x, y] and extract_along:
             if not self.kwargs['are_var_coords']:  # when both x and y are dims
                 color = self.taps[-1][-1] if self.taps[-1][-1] else None
-                extract_along = self.control.kwargs['Extract Along']
                 other_dims = [dim for dim in self.kwargs['remaining_dims'] if dim is not extract_along]
                 print('extract_along', extract_along)
                 print('other_dims', other_dims)
@@ -367,7 +373,7 @@ class Dashboard(SigSlot):
         Players.
         """
         if len(self.data[self.var].dims) > 2 and self.kwargs['Extract Along']:
-            self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream])
+            self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream, self.clear_points])
             self.clear_series_button.disabled = False
             graph = graph * self.taps_graph
         else:
