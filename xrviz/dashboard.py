@@ -368,6 +368,53 @@ class Dashboard(SigSlot):
                                               height=self.kwargs['height'],
                                               width=self.kwargs['width'])
                 self.series = series_map.opts(color=color) * self.series
+# ######################
+            else:
+                print("Case 2b")
+                color = self.taps[-1][-1] if self.taps[-1][-1] else None
+                other_dims = [dim for dim in self.kwargs['remaining_dims'] if dim is not extract_along]
+                print('extract_along', extract_along)
+                print('other_dims', other_dims)
+                print('self.index_selectors:', self.index_selectors)
+                if len(other_dims):
+                    other_dim_sels = {}
+                    for dim in other_dims:
+                        dim_found = False
+                        for dim_sel in self.index_selectors:
+                            if dim_sel.name == dim:
+                                val = dim_sel.value
+                                other_dim_sels.update({dim: val})
+                                dim_found = True
+                        if not dim_found:  # when dim is used for aggregation
+                            val = self.data[dim][0].values
+                            other_dim_sels.update({dim: val})
+                y_dim, x_dim = self.data[self.kwargs['x']].dims
+                print('y_dim, x_dim', y_dim, x_dim)
+
+                y_mean = self.data[self.kwargs['y']].mean()*np.pi/180.
+                a = (self.data[self.kwargs['y']]-y)**2 + ((self.data[self.kwargs['x']]-x)*np.cos(y_mean))**2
+                j, i = np.unravel_index(a.argmin(), a.shape)
+
+                series_sel = {y_dim: self.correct_val(y_dim, j),
+                              x_dim: self.correct_val(x_dim, i)}
+                print('series_sel', series_sel)
+                # to use the value selected in index selector for selecting
+                # data to create series. In case of aggregation, plot is
+                # created along 0th val of the dim.
+                if len(other_dims):
+                    series_sel.update(other_dim_sels)
+
+                sel_series_data = self.data[self.var]
+                for dim, val in series_sel.items():
+                    sel_series_data = sel_val_from_dim(sel_series_data, dim, val)
+
+                series_df = pd.DataFrame({extract_along: self.data[extract_along],
+                                          self.var: np.asarray(sel_series_data)})
+
+                series_map = series_df.hvplot(x=extract_along, y=self.var,
+                                              height=self.kwargs['height'],
+                                              width=self.kwargs['width'])
+                self.series = series_map.opts(color=color) * self.series
 
         return self.series
 
