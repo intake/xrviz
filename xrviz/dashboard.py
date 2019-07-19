@@ -323,10 +323,16 @@ class Dashboard(SigSlot):
         return tapped_map
 
     def create_series_graph(self, x, y, color, clear=False):
+        # Case 1: When both x and y are NOT coords (i.e. are dims)
+        # Case 2: When both x and y are coords
+        #     2b: Both are 1d
+        #     2b: Both are NOT 1d
+        # Note: 1 and 2a require same code.
         print("create_series_graph")
         extract_along = self.control.kwargs['Extract Along']
         if None not in [x, y] and extract_along:
-            if not self.kwargs['are_var_coords']:  # when both x and y are dims
+            # Case 1 and  2a
+            if not self.kwargs['are_var_coords'] or self.both_coords_1d():
                 color = self.taps[-1][-1] if self.taps[-1][-1] else None
                 other_dims = [dim for dim in self.kwargs['remaining_dims'] if dim is not extract_along]
                 print('extract_along', extract_along)
@@ -436,6 +442,9 @@ class Dashboard(SigSlot):
             return float(x)
         else:
             return str(x)
+
+    def both_coords_1d(self):
+        return len(self.data[self.kwargs['x']].dims) == 1 and len(self.data[self.kwargs['y']].dims) == 1
 
 
 def sel_val_from_dim(data, dim, x):
