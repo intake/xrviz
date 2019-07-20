@@ -7,6 +7,7 @@ import hvplot.xarray
 import hvplot.pandas
 import holoviews as hv
 from holoviews import streams
+from bokeh.models import HoverTool
 import warnings
 from itertools import cycle
 import numpy
@@ -338,7 +339,8 @@ class Dashboard(SigSlot):
                 for dim in other_dims:
                     dim_found = False
                     for dim_sel in self.index_selectors:
-                        if dim_sel.name == dim:
+                        long_name = self.data[dim].long_name if hasattr(self.data[dim], 'long_name') else None
+                        if dim_sel.name == dim or dim_sel.name == long_name:
                             val = dim_sel.value
                             other_dim_sels.update({dim: val})
                             dim_found = True
@@ -375,9 +377,17 @@ class Dashboard(SigSlot):
             series_df = pd.DataFrame({extract_along: self.data[extract_along],
                                       self.var: np.asarray(sel_series_data)})
 
+            tooltips = [(extract_along, f"@{extract_along}"),
+                        (self.var, f"@{self.var}")]
+            if len(other_dims):
+                for dim, val in other_dim_sels.items():
+                    tooltips.append((dim, str(val)))
+            hover = HoverTool(tooltips=tooltips)
+
             series_map = series_df.hvplot(x=extract_along, y=self.var,
                                           height=self.kwargs['height'],
-                                          width=self.kwargs['width'])
+                                          width=self.kwargs['width'],
+                                          tools=[hover])
             self.series = series_map.opts(color=color) * self.series
 
         return self.series
