@@ -10,7 +10,7 @@ class Style(SigSlot):
         self.height = pn.widgets.IntSlider(name='height', value=300, start=100, end=1200)
         self.width = pn.widgets.IntSlider(name='width', value=700, start=100, end=1200)
         self.cmap = pn.widgets.Select(name='cmap', value='Inferno',
-                                      options=list_cmaps(provider='bokeh', reverse = False))
+                                      options=list_cmaps())
         self.colorbar = pn.widgets.Checkbox(name='colorbar', value=True)
         # colormap_limits
         self.lower_limit = pn.widgets.TextInput(name='cmap lower limit', width=140)
