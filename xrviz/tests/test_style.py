@@ -82,6 +82,6 @@ def test_rasterize(style):
 def test_setup(style):
     style.lower_limit.value = '123'
     style.upper_limit.value = '123'
-    style.setup()
+    style._emit('clear_cmap_limits', '')
     assert style.lower_limit.value is None
     assert style.upper_limit.value is None

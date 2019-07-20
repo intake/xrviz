@@ -59,7 +59,7 @@ def test_widget(projection, wid, wid_type, attrs_values):
 def test_setup_geo_disabled(projection):
     disabled_val = True
     projection.is_geo.disabled = True
-    projection.setup()
+    projection._emit('geo_disabled', '')
     for row in projection.panel[1:]:
         for widget in row:
             assert widget.disabled is True
