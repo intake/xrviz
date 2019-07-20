@@ -13,7 +13,7 @@ import numpy
 from .sigslot import SigSlot
 from .control import Control
 from .utils import convert_widget, player_with_name_and_value, is_float
-from .compatibility import ccrs, gv, gf, has_cartopy
+from .compatibility import ccrs, gv, gf, has_cartopy, logger
 
 
 class Dashboard(SigSlot):
@@ -326,7 +326,8 @@ class Dashboard(SigSlot):
         # Case 1: When both x and y are NOT coords (i.e. are dims)
         # Case 2: When both x and y are coords
         #     2b: Both are 1d
-        #     2b: Both are NOT 1d
+        #     2b: Both are 2d with same dims
+        #     2c: 2-dim with diff dims or multi-dim coords: Unable to extract
         # Note: 1 and 2a require same code.
         print("create_series_graph")
         extract_along = self.control.kwargs['Extract Along']
@@ -354,7 +355,7 @@ class Dashboard(SigSlot):
             if not self.kwargs['are_var_coords'] or self.both_coords_1d():
                 series_sel = {self.kwargs['x']: self.correct_val(self.kwargs['x'], x),
                               self.kwargs['y']: self.correct_val(self.kwargs['y'], y)}
-
+            # Case 2b
             elif self.both_coords_2d_with_same_dims():
                 y_dim, x_dim = self.data[self.kwargs['x']].dims
 
@@ -364,8 +365,9 @@ class Dashboard(SigSlot):
 
                 series_sel = {x_dim: self.correct_val(x_dim, i),
                               y_dim: self.correct_val(y_dim, j)}
+            # Case 2c
             else:
-                print("Cannot extract 2d coords with different dims and multi-dimensional coords.")
+                logger.debug("Cannot extract 2d coords with different dims and multi-dimensional coords.")
                 return self.series
 
             if len(other_dims):
@@ -463,7 +465,7 @@ class Dashboard(SigSlot):
     def both_coords_2d_with_same_dims(self):
         x_dims = self.data[self.kwargs['x']].dims
         y_dims = self.data[self.kwargs['y']].dims
-        return len(x_dims) == len(y_dims) and sorted(x_dims)==sorted(y_dims)
+        return len(x_dims) == len(y_dims) == 2 and sorted(x_dims) == sorted(y_dims)
 
 
 def sel_val_from_dim(data, dim, x):
