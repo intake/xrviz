@@ -138,7 +138,7 @@ class Dashboard(SigSlot):
 
             if not use_all_data:
                 # sel the values at first step, to use for cmap limits
-                sels = {dim: 0 for dim in self.kwargs['remaining_dims']}
+                sels = {dim: 0 for dim in self.kwargs['dims_to_select_animate']}
                 sel_data_for_cmap = sel_data.isel(**sels, drop=True)
             else:
                 sel_data_for_cmap = sel_data
