@@ -106,7 +106,6 @@ class Dashboard(SigSlot):
 
     def create_plot(self, *args):
         self.kwargs = self.control.kwargs
-        print('Extract Along', self.kwargs['Extract Along'])
         self.var = self.kwargs['Variables']
         if self.index_selectors:
             for selector in self.index_selectors:
@@ -305,9 +304,6 @@ class Dashboard(SigSlot):
             self.clear_series_button.disabled = True
 
     def create_taps_graph(self, x, y, clear=False):
-        print("create_taps_graph")
-        print(x, y)
-
         color = next(iter(self.color_pool))
         if None not in [x, y]:
             self.taps.append((x, y, color))
@@ -329,7 +325,6 @@ class Dashboard(SigSlot):
         #     2b: Both are 2d with same dims
         #     2c: 2-dim with diff dims or multi-dim coords: Unable to extract
         # Note: 1 and 2a require same code.
-        print("create_series_graph")
         extract_along = self.control.kwargs['Extract Along']
         if None not in [x, y] and extract_along:
             color = self.taps[-1][-1] if self.taps[-1][-1] else None
