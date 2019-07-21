@@ -310,7 +310,11 @@ class Dashboard(SigSlot):
             self.taps.append((x, y, color))
         if self.control.kwargs['extract along'] is None:
             self.taps = []
-        if self.kwargs['is_geo'] and self.control.projection.is_geo.disabled is False:
+        is_geo = self.kwargs['is_geo'] if 'is_geo' in self.kwargs else None
+        geo_disabled = self.control.projection.is_geo.disabled if is_geo else None
+
+        # Choose between gv.Points and hv.Points
+        if is_geo and geo_disabled is False:
             tapped_map = gv.Points(self.taps, vdims=['z'])
         else:
             tapped_map = hv.Points(self.taps, vdims=['z'])

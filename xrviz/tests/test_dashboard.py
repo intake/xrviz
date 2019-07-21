@@ -193,3 +193,21 @@ def test_use_all_data_for_coords(dashboard):
     dashboard.control.style.use_all_data.value = True
     dashboard.create_plot()
     assert isinstance(dashboard.output[0][0], pn.pane.holoviews.HoloViews)
+
+
+def test_create_taps_and_series_graph_for_dims(dashboard):
+    dashboard.control.coord_setter.coord_selector.value = ['time', 'sigma']
+    dashboard.control.displayer.select_variable('temp')
+    dashboard.control.fields.s_selector.value = 'sigma'
+    dashboard.create_plot()
+    dashboard.create_taps_graph(x=35, y=10)
+    assert isinstance(dashboard.series_graph[0], pn.pane.holoviews.HoloViews)
+
+
+def test_create_taps_and_series_graph_for_2d_coords(dashboard):
+    dashboard.control.coord_setter.coord_selector.value = ['lat', 'lon']
+    dashboard.control.displayer.select_variable('temp')
+    dashboard.control.fields.s_selector.value = 'sigma'
+    dashboard.create_plot()
+    dashboard.create_taps_graph(x=-79.232, y=43.273)
+    assert isinstance(dashboard.series_graph[0], pn.pane.holoviews.HoloViews)
