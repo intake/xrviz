@@ -295,7 +295,7 @@ class Dashboard(SigSlot):
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
         graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
         self.graph = graph
-        if len(self.data[self.var].dims) > 2 and self.kwargs['Extract Along']:
+        if len(self.data[self.var].dims) > 2 and self.kwargs['extract along']:
             self.tap_stream.source = graph
             self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream, self.clear_points])
             self.output[0] = self.graph * self.taps_graph
@@ -308,7 +308,7 @@ class Dashboard(SigSlot):
         color = next(iter(self.color_pool))
         if None not in [x, y]:
             self.taps.append((x, y, color))
-        if self.control.kwargs['Extract Along'] is None:
+        if self.control.kwargs['extract along'] is None:
             self.taps = []
         if self.kwargs['is_geo'] and self.control.projection.is_geo.disabled is False:
             tapped_map = gv.Points(self.taps, vdims=['z'])
@@ -326,7 +326,7 @@ class Dashboard(SigSlot):
         #     2b: Both are 2d with same dims
         #     2c: 2-dim with diff dims or multi-dim coords: Unable to extract
         # Note: 1 and 2a require same code.
-        extract_along = self.control.kwargs['Extract Along']
+        extract_along = self.control.kwargs['extract along']
         if None not in [x, y] and extract_along:
             color = self.taps[-1][-1] if self.taps[-1][-1] else None
             other_dims = [dim for dim in self.kwargs['remaining_dims'] if dim is not extract_along]
@@ -399,7 +399,7 @@ class Dashboard(SigSlot):
         bottom of graph if they are present and convert them into Selectors,
         Players.
         """
-        if len(self.data[self.var].dims) > 2 and self.kwargs['Extract Along']:
+        if len(self.data[self.var].dims) > 2 and self.kwargs['extract along']:
             self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream, self.clear_points])
             self.clear_series_button.disabled = False
             graph = graph * self.taps_graph

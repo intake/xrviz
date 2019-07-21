@@ -122,14 +122,14 @@ class Fields(SigSlot):
             self._register(agg_selector, agg_selector.name)
             self.agg_selectors.append(agg_selector)
 
-        self.s_selector = pn.widgets.Select(name='Extract Along',
+        self.s_selector = pn.widgets.Select(name='extract along',
                                             options=[None]+sorted(self.remaining_dims),
                                             width=200)
         self._register(self.s_selector, 'extract_along')
         self.series_col.append(self.s_selector)
 
     def setup_initial_values(self, init_params={}):
-        for widget in [self.x, self.y] + list(self.agg_selectors):
+        for widget in [self.x, self.y] + list(self.agg_selectors) + list(self.series_col):
             if widget.name in init_params:
                 widget.value = init_params[widget.name]
 
