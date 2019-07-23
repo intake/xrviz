@@ -32,7 +32,7 @@ def test_cmap(style):
     assert isinstance(cmap_widget, pn.widgets.Select)
     assert cmap_widget.name == 'cmap'
     assert cmap_widget.value == 'Inferno'
-    assert cmap_widget.options == list_cmaps(provider='bokeh', reverse=False)
+    assert cmap_widget.options == list_cmaps()
 
 
 def test_colorbar(style):

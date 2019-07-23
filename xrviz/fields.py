@@ -32,6 +32,7 @@ class Fields(SigSlot):
         self.agg_selectors = pn.Column()
         self.agg_opts = ['select', 'animate', 'mean', 'max',
                          'min', 'median', 'std', 'count']
+        self.series_col = pn.Column()
         self.are_var_coords = False
 
         self._register(self.x, 'x')
@@ -40,14 +41,15 @@ class Fields(SigSlot):
         self.connect('x', self.change_y)
         self.connect('y', self.change_dim_selectors)
 
-        self.panel = pn.Row(pn.Column('### Plot Dimensions',
-                                      self.x, self.y,
-                                      background='rgb(175,175,175)'),
-                            pn.Spacer(),
-                            pn.Column('### Aggregations',
-                                      self.agg_selectors,
-                                      background='rgb(175,175,175)'),
-                            name='Axes',)
+        self.panel = pn.Column(pn.Row(pn.Column('### Plot Dimensions',
+                                                self.x, self.y,
+                                                background='rgb(175,175,175)'),
+                                      pn.Spacer(),
+                                      pn.Column('### Aggregations',
+                                                self.agg_selectors,
+                                                background='rgb(175,175,175)')),
+                               self.series_col,
+                               name='Axes')
 
     def setup(self, var):
         self.agg_selectors.clear()  # To empty previouly selected value from selector
@@ -99,6 +101,7 @@ class Fields(SigSlot):
     def change_dim_selectors(self, *args):
         self.are_var_coords = self.check_are_var_coords()
         self.agg_selectors.clear()
+        self.series_col.clear()
         x = self.x.value
         y = self.y.value
         used_opts = {x, y}
@@ -119,26 +122,33 @@ class Fields(SigSlot):
             self._register(agg_selector, agg_selector.name)
             self.agg_selectors.append(agg_selector)
 
+        self.s_selector = pn.widgets.Select(name='extract along',
+                                            options=[None]+sorted(self.remaining_dims),
+                                            width=200)
+        self._register(self.s_selector, 'extract_along')
+        self.series_col.append(self.s_selector)
+
     def setup_initial_values(self, init_params={}):
-        for widget in [self.x, self.y] + list(self.agg_selectors):
+        for widget in [self.x, self.y] + list(self.agg_selectors) + list(self.series_col):
             if widget.name in init_params:
                 widget.value = init_params[widget.name]
 
     @property
     def kwargs(self):
-        # Row(name='Fields')
-        #     [0] Column(background='rgb(175,175,175)')
-        #         [0] Markdown(str)     --> self.panel[0][0]
-        #         [1] Select(name='x',) --> self.panel[0][1]
-        #         [2] Select(name='y',) --> self.panel[0][2]
-        #     [1] Spacer(width=20)
-        #     [2] Column(background='rgb(175,175,175)')
-        #         [0] Markdown(str)     --> self.panel[1][0]
-        #         [1] Column            --> self.panel[1][1]
-        #             [0] Select()
-        #             [1] Select()
-        out = {p.name: p.value for p in self.panel[0][1:]}  # since panel[0][0] is Markdown
-        selectors = {p.name: p.value for p in self.panel[2][1]}  # remaining_dims
+        # Column(name='Axes')
+        #     [0] Row
+        #         [0] Column(background='rgb(175,175,175)')
+        #             [0] Markdown(str)
+        #             [1] Select(name='x', width=200)
+        #             [2] Select(name='y', width=200)
+        #         [1] Spacer()
+        #         [2] Column(background='rgb(175,175,175)')
+        #             [0] Markdown(str)
+        #             [1] Column()
+        #     [1] Column
+        #         [0] Select()
+        out = {p.name: p.value for p in self.panel[0][0][1:]}  # since panel[0][0][1] is Markdown
+        selectors = {p.name: p.value for p in self.panel[0][2][1]}  # remaining_dims
         out.update(selectors)
         dims_to_select_animate = [dim for dim, agg in selectors.items() if agg in ['select', 'animate']]
         dims_to_agg = [dim for dim in selectors if dim not in dims_to_select_animate]
@@ -146,6 +156,7 @@ class Fields(SigSlot):
         out.update({'dims_to_select_animate': sorted(dims_to_select_animate)})
         out.update({'are_var_coords': self.are_var_coords})
         out.update({'remaining_dims': self.remaining_dims})  # dims_to_agg + dims_to_select_animate
+        out.update({p.name: p.value for p in self.series_col})
         return out
 
     def set_coords(self, data, var):
