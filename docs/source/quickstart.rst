@@ -34,3 +34,14 @@ See the example dashboard:
 
 .. image:: https://aws-uswest2-binder.pangeo.io/badge_logo.svg
    :target: https://aws-uswest2-binder.pangeo.io/badge_logo.svg)](https://aws-uswest2-binder.pangeo.io/v2/gh/hdsingh/explore_xrviz/master?filepath=01_great_lakes.ipynb
+
+Panels
+------
+
+The following five panels are part of XrViz's interface:
+
+1. :doc:`variables`
+2. :doc:`set_coords`
+3. :doc:`axes`
+4. :doc:`style`
+5. :doc:`projection`

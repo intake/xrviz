@@ -1,8 +1,3 @@
-.. XrViz documentation master file, created by
-   sphinx-quickstart on Wed Jul 24 10:09:04 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 XrViz
 =====
 
@@ -25,7 +20,11 @@ which is also strongly beneficial for the users.
    :caption: Documentation Contents
 
    quickstart.rst
-
+   variables.rst
+   set_coords.rst
+   axes.rst
+   style.rst
+   projection.rst
 
 
 Indices and tables
