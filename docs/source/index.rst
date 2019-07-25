@@ -22,7 +22,9 @@ which is also strongly beneficial for the users.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Documentation Contents
+
+   quickstart.rst
 
 
 
