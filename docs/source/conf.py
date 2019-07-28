@@ -16,13 +16,14 @@
 
 
 # -- Project information -----------------------------------------------------
+import xrviz
 
 project = 'XrViz'
 copyright = '2019, Harman Deep Singh, Rich Signell, Martin Durant'
 author = 'Harman Deep Singh, Rich Signell, Martin Durant'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1'
+release = xrviz.__version__
 
 
 # -- General configuration ---------------------------------------------------
