@@ -20,7 +20,8 @@ It offers the following functionality:
 5. Easy exploration of geographical, meteorological, and oceanographic
    datasets using `Geoviews <http://geoviews.org/>`_.
 6. Automatic guessing of correct coordinates for ``x`` and ``y`` axis using
-   `Metpy <https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.html>`_.
+   `Metpy <https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.html>`_
+   for data following the CF conventions.
 7. Aggregations along remaining dimensions in case of multi-dimensional
    variables.
 8. Extract series for third dimension in a separate graph by clicking on
