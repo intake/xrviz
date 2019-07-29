@@ -5,7 +5,7 @@ Style
 
 This tabs provides the options to customize the style of the output graph.
 
-It provides following options:
+It provides the following options:
 
 1. ``height`` (default `300`):
     To modify the height of main and series graph.

@@ -84,10 +84,13 @@ hovering over it. Also the series would be extracted in accordance to the
 values for which main graph has been created. Upon selecting a new dimension
 to extract along, the previous markers and series graph will clear.
 
-Note that series extraction is independent of aggregation i.e. it is
-possible to aggregate and extract along a same dimension.
-
 .. image:: _static/images/series.png
+
+.. note::
+    1. ``Clear`` button is applicable only for series extraction. It clears the
+       markers and series graph when clicked.
+    2. Series extraction is independent of aggregation i.e. it is
+       possible to aggregate and extract along a same dimension.
 
 .. _Metpy: https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.html
 .. _player: https://panel.pyviz.org/reference/widgets/DiscretePlayer.html
