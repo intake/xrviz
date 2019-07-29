@@ -24,6 +24,9 @@ which user selects a variable to plot. The variables which are coordinates
 are annotated with the  ‘📈’ symbol. You can change which variables are
 considered as coordinates in the :doc:`set_coords` tab.
 
+.. note:: The ``Plot`` button would be disabled if the selected variable is
+   one dimensional.
+
 2. Description section
 ----------------------
 

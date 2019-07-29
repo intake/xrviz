@@ -37,6 +37,7 @@ It offers the following functionality:
    axes.rst
    style.rst
    projection.rst
+   set_initial_parameters
 
 
 Indices and tables
