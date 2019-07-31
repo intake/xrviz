@@ -7,7 +7,6 @@ Installation
 If you are using `Anaconda`_ or Miniconda::
 
     conda install -c conda-forge xrviz
-    pip install git+https://github.com/intake/xrviz --no-deps
 
 If you are using virtualenv/pip::
 
@@ -16,13 +15,19 @@ If you are using virtualenv/pip::
 Note that this will install with the mininum of optional requirements.
 If you want a more complete install, use conda instead.
 
+If you want to develop::
+
+    git clone https://github.com/intake/xrviz
+    cd xrviz
+    python setup.py develop
+
 .. _Anaconda: https://www.anaconda.com/download/
 
 
 Example
 -------
 
-To open a data in the interface:
+To open a local or remote data in the interface:
 
 .. code-block:: python
 
@@ -32,9 +37,14 @@ To open a data in the interface:
     # open data with xarray
     data = xr.tutorial.open_dataset('air_temperature')
 
+    # or open remote data with xarray
+    url = 'http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/LOOFS/MODELS/201907/glofs.loofs.fields.forecast.20190720.t06z.nc'
+    data = xr.open_dataset(url)
+
     # pass the data to Dashboard
     dash = Dashboard(data)
     dash.show()
+
 
 Note that ``dash.show()`` will open a new tab in browser, while
 ``dash.panel`` is applicable only for a jupyter cell.
@@ -65,6 +75,6 @@ in detail in the following sections:
 4. :doc:`style`
 5. :doc:`projection`
 
-The user can interact with the widgets present in these tabs to select
+The user can interact with the widgets present in these panes to select
 desired inputs. Together, they govern the output produced upon pressing
 the ``Plot`` button.

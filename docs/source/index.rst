@@ -17,7 +17,7 @@ It offers the following functionality:
 
 1. Quick visualization of xarray data.
 2. No need to write any custom code thus saves immense time of users.
-3. Different tabs to customize the output graph by interaction with
+3. Different panes to customize the output graph by interaction with
    the widgets.
 4. Easy exploration of data present on cloud using Xarray's ability
    to read remote data.

@@ -3,7 +3,7 @@ Style
 
 .. image:: _static/images/style.png
 
-This tabs provides the options to customize the style of the output graph.
+This pane provides the options to customize the style of the output graph.
 
 It provides the following options:
 

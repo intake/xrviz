@@ -3,10 +3,10 @@ Axes
 
 .. image:: _static/images/axes.png
 
-This tab provides the options to select x,y axes for the main plot,
-axes for aggregation and series extraction from the available
-dimensions/coordinates for a selected data variable. The options available
-in this tab, update upon selection of a new variable.
+This pane controls which array dimensions should be mapped,
+how additional dimensions should be handled, and which dimension
+series plots should be extracted along. The options available
+in this pane, update upon selection of a new variable.
 
 It has three different sub-sections.
 
