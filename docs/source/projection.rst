@@ -49,7 +49,7 @@ It provides the following options:
 .. note::
         1. The widgets in this tab are enabled only if both ``x`` and ``y`` are
            data coordinates.
-        2. `basemap` are `projection` are mutually exclusive options i.e it is not
+        2. `basemap` and `projection` are mutually exclusive options i.e it is not
            possible to have them both enabled simultaneously.
 
 

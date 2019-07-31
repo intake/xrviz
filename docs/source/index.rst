@@ -3,11 +3,15 @@ XrViz
 
 *An interactive visualisation interface for Xarrays*
 
-XrViz is an interactive, in browser visualisation interface for Xarrays backed
-by the full power of the Python ecosystem. It is built on `Xarray <http://xarray.pydata.org>`_,
+XrViz is an interactive graphical user interface(GUI) for visually browsing Xarrays.
+You can view data arrays along various dimensions, examine data values, change
+color maps, extract series, display geographic data on maps and much more.
+It is built on `Xarray <http://xarray.pydata.org>`_,
 `HvPlot <https://hvplot.pyviz.org>`_ and `Panel <https://panel.pyviz.org/>`_.
 It can be used with `Intake <http://intake.readthedocs.io/>`_
 to smoothen the process of investigating and loading datasets.
+
+.. image:: _static/images/dashboard.png
 
 It offers the following functionality:
 

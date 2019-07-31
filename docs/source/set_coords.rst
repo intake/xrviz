@@ -15,6 +15,6 @@ To set variables as coordinates, make selection on left side and click
 will reset the coordinates. Other tabs would update themselves accordingly, in
 response to this change.
 
-.. note::  You cannot reset the default indexed coordinates.
+
 
 .. _`xarray coordinates`: http://xarray.pydata.org/en/stable/data-structures.html#coordinates
