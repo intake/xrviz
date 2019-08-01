@@ -52,6 +52,9 @@ class Fields(SigSlot):
                                name='Axes')
 
     def setup(self, var):
+        """
+        To setup the fields
+        """
         self.agg_selectors.clear()  # To empty previouly selected value from selector
         self.var = var if isinstance(var, str) else var[0]
         self.var_dims = list(self.data[var].dims)
@@ -99,6 +102,9 @@ class Fields(SigSlot):
         self.change_dim_selectors()
 
     def change_dim_selectors(self, *args):
+        """
+        To change the dim selectors
+        """
         self.are_var_coords = self.check_are_var_coords()
         self.agg_selectors.clear()
         self.series_col.clear()
@@ -177,6 +183,9 @@ class Fields(SigSlot):
         return True if x in var_coords and y in var_coords else False
 
     def guess_x_y(self, var):
+        """
+        To guess x,y with metpy
+        """
         try:
             parsed_var = self.data.metpy.parse_cf(var)
             x, y = parsed_var.metpy.coordinates('x', 'y')

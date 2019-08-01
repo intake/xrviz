@@ -42,6 +42,7 @@ It offers the following functionality:
    style.rst
    projection.rst
    set_initial_parameters
+   api
 
 
 Indices and tables

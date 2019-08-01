@@ -96,6 +96,9 @@ class Projection(SigSlot):
                         widget.value = init_params[w_name]
 
     def show_basemap(self, *args):
+        """
+        To show basemap
+        """
         value = False if self.basemap.value is None else True
         self.projection.disabled = value
         self.proj_params.disabled = value

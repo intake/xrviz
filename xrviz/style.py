@@ -39,6 +39,9 @@ class Style(SigSlot):
         self.upper_limit.value = None
 
     def setup_initial_values(self, init_params={}):
+        """
+        To set the initial values
+        """
         for row in self.panel:
             for widget in row:
                 if widget.name in init_params:
