@@ -22,6 +22,23 @@ class Fields(SigSlot):
     x: `panel.widget.Select` for selection of dims along x-axis.
     y: `panel.widget.Select` for selection of dims along y-axis.
     kwargs: provides access to dims selected by `x` and `y`.
+
+    Following options are available for each dimension:
+        1. ``select``: This is the default option. It creates a widget
+            to select the value of dimension, for which the graph would be displayed.
+        2. ``animate``: It creates a `player`_ widget which helps to quickly iterate
+            over all the values for a dimension.
+        3. ``mean``: To create plot for mean of values.
+        4. ``max``: To create plot for maximum of values.
+        5. ``min``: To create plot for minimum of values.
+        6. ``median``: To create plot for median of values.
+        7. ``std``: To create plot for standard deviation of values.
+        8. ``count``: To create plot for non-nan of values.
+
+        Note that for both ``select`` and ``animate``, the plot will update according
+        to the value selected in the generated widget. Also, if a dimension has been
+        aggregated, its select widget would not be available.
+
     """
 
     def __init__(self, data):
