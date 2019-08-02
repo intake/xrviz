@@ -59,8 +59,8 @@ The above line will initialise the interface, which looks as follows:
 .. image:: https://aws-uswest2-binder.pangeo.io/badge_logo.svg
    :target: https://aws-uswest2-binder.pangeo.io/badge_logo.svg)](https://aws-uswest2-binder.pangeo.io/v2/gh/hdsingh/explore_xrviz/master?filepath=01_great_lakes.ipynb
 
-Overrview
----------
+Overview
+--------
 
 .. overview of what the interface is, the structure/layout and purpose.
 
@@ -69,11 +69,11 @@ composed of `Panel widgets <https://panel.pyviz.org/reference/index.html#widgets
 These sub-sections have been arranged in tabs, each of which has been described
 in detail in the following sections:
 
-1. :doc:`variables`
-2. :doc:`set_coords`
-3. :doc:`axes`
-4. :doc:`style`
-5. :doc:`projection`
+1. :ref:`interface:variables`
+2. :ref:`interface:Set_Coords`
+3. :ref:`interface:axes`
+4. :ref:`interface:style`
+5. :ref:`interface:projection`
 
 The user can interact with the widgets present in these panes to select
 desired inputs. Together, they govern the output produced upon pressing

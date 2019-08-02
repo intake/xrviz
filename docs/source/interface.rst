@@ -13,13 +13,14 @@ This pane displays `Xarray variables`_ in the list, with
 for the selected variable and global attributes for the dataset are
 displayed on the right.
 
-More information about this pane.
+More information about this pane in :py:class:`Display<xrviz.display.Display>`
+and :py:class:`Describe<xrviz.describe.Describe>`.
 
 .. _`Xarray Variables`: https://github.com/hdsingh/xrviz/blob/a0fd2fe6e917ff8b8c5be21828b6235cc9248f1a/docs/source/variables.rst#L6
 .. _`coordinate variables`: http://xarray.pydata.org/en/stable/data-structures.html#coordinates
 
 
-Set Coords
+Set_Coords
 ===========
 
 .. image:: _static/images/set_coords.png
@@ -27,7 +28,8 @@ Set Coords
 This pane allows the list of data coordinates to be modified by adding
 or removing variables using the ``<<`` and ``>>`` widgets.
 
-More information about this pane.
+More information about this pane in
+:py:class:`CoordSetter<xrviz.coord_setter.CoordSetter>`.
 
 .. _`xarray coordinates`: http://xarray.pydata.org/en/stable/data-structures.html#coordinates
 
@@ -104,7 +106,8 @@ to extract along, the previous markers and series graph will clear.
 
 .. image:: _static/images/series.png
 
-More information about this pane.
+More information about this pane in in
+:py:class:`Axes<xrviz.fields.Fields>`.
 
 .. note::
     1. ``Clear`` button is applicable only for series extraction. It clears the
@@ -123,7 +126,7 @@ Style
 
 This pane provides the options to customize the style of the output graph.
 
-More information about this pane.
+More information about this pane in :py:class:`Style<xrviz.style.Style>`.
 
 Projection
 ==========
@@ -135,7 +138,8 @@ This pane provides the option to project the data on a map or
 plots are created using `Geoviews`_, hence giving the option to
 visualize geographical, meteorological, and oceanographic datasets.
 
-More information about this pane.
+More information about this pane in
+:py:class:`Projection<xrviz.projection.Projection>`.
 
 .. _`cartopy projection`: https://scitools.org.uk/cartopy/docs/v0.15/crs/projections.html
 .. _`Geoviews`: http://geoviews.org/
