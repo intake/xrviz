@@ -5,4 +5,4 @@ from . import data
 
 def test_describe_initial(data):
     describer = Describe(data)
-    assert describer.panel.object == "Description Area"
+    assert describer.panel.object == "Description Section"

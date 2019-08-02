@@ -25,7 +25,7 @@ class Describe(SigSlot):
         self.data = data
         self.panel = pn.pane.HTML(style={'font-size': '12pt'}, width=400,
                                   height=100)
-        self.panel.object = "Description Area"
+        self.panel.object = "Description Section"
         self._template_load_path = os.path.join(os.path.dirname(__file__),
                                                 "templates")
         self._template_env = Environment(loader=FileSystemLoader(self._template_load_path))

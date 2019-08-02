@@ -36,7 +36,6 @@ class Dashboard(SigSlot):
           kwargs selected in other sub-sections.
     output: Provides access to generated graph.
     """
-
     def __init__(self, data, initial_params={}):
         super().__init__()
         if not isinstance(data, xr.core.dataarray.DataWithCoords):
@@ -106,6 +105,9 @@ class Dashboard(SigSlot):
             self.control.fields.connect(dim_selector, self.control.style.setup)
 
     def create_plot(self, *args):
+        """
+        To create plot.
+        """
         self.kwargs = self.control.kwargs
         self.var = self.kwargs['Variables']
         if self.index_selectors:
@@ -305,6 +307,9 @@ class Dashboard(SigSlot):
             self.clear_series_button.disabled = True
 
     def create_taps_graph(self, x, y, clear=False):
+        """
+        To mark taps
+        """
         color = next(iter(self.color_pool))
         if None not in [x, y]:
             self.taps.append((x, y, color))
@@ -324,6 +329,9 @@ class Dashboard(SigSlot):
         return tapped_map
 
     def create_series_graph(self, x, y, color, clear=False):
+        """
+        Create series graph
+        """
         # Case 1: When both x and y are NOT coords (i.e. are dims)
         # Case 2: When both x and y are coords
         #     2b: Both are 1d

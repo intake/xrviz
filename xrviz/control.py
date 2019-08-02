@@ -65,6 +65,9 @@ class Control(SigSlot):
             self.projection.setup_initial_values(initial_params)
 
     def set_coords(self, data):
+        """
+        To set the data coords
+        """
         try:  # Upon setting coords before selecting a variable
             var = self.kwargs['Variables']
         except:

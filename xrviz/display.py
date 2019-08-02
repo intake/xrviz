@@ -40,6 +40,9 @@ class Display(SigSlot):
         self.select.options = {_is_coord(self.data, name): name for name in list(self.data.variables)}
 
     def select_variable(self, variable):
+        """
+        To select variable
+        """
         if isinstance(variable, str):
             if variable in self.select.options.values():
                 self.select.value = [variable]
