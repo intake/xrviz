@@ -1,3 +1,37 @@
+Interface
+#########
+
+The following five panes are part of XrViz's interface:
+
+Variables
+=========
+
+.. image:: _static/images/variables.png
+
+This pane displays `Xarray variables`_ in the list, with
+`coordinate variables`_ indicated by the graph icon(📈). Attributes
+for the selected variable and global attributes for the dataset are
+displayed on the right.
+
+More information about this pane.
+
+.. _`Xarray Variables`: https://github.com/hdsingh/xrviz/blob/a0fd2fe6e917ff8b8c5be21828b6235cc9248f1a/docs/source/variables.rst#L6
+.. _`coordinate variables`: http://xarray.pydata.org/en/stable/data-structures.html#coordinates
+
+
+Set Coords
+===========
+
+.. image:: _static/images/set_coords.png
+
+This pane allows the list of data coordinates to be modified by adding
+or removing variables using the ``<<`` and ``>>`` widgets.
+
+More information about this pane.
+
+.. _`xarray coordinates`: http://xarray.pydata.org/en/stable/data-structures.html#coordinates
+
+
 Axes
 ====
 
@@ -70,6 +104,8 @@ to extract along, the previous markers and series graph will clear.
 
 .. image:: _static/images/series.png
 
+More information about this pane.
+
 .. note::
     1. ``Clear`` button is applicable only for series extraction. It clears the
        markers and series graph when clicked.
@@ -78,3 +114,28 @@ to extract along, the previous markers and series graph will clear.
 
 .. _Metpy: https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.html
 .. _player: https://panel.pyviz.org/reference/widgets/DiscretePlayer.html
+
+
+Style
+=====
+
+.. image:: _static/images/style.png
+
+This pane provides the options to customize the style of the output graph.
+
+More information about this pane.
+
+Projection
+==========
+
+.. image:: _static/images/projection.png
+
+This pane provides the option to project the data on a map or
+`cartopy projection`_ in case it is geographical. The geographic
+plots are created using `Geoviews`_, hence giving the option to
+visualize geographical, meteorological, and oceanographic datasets.
+
+More information about this pane.
+
+.. _`cartopy projection`: https://scitools.org.uk/cartopy/docs/v0.15/crs/projections.html
+.. _`Geoviews`: http://geoviews.org/

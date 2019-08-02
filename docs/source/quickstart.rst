@@ -19,7 +19,7 @@ If you want to develop::
 
     git clone https://github.com/intake/xrviz
     cd xrviz
-    python setup.py develop
+    pip install -e .
 
 .. _Anaconda: https://www.anaconda.com/download/
 
@@ -59,7 +59,7 @@ The above line will initialise the interface, which looks as follows:
 .. image:: https://aws-uswest2-binder.pangeo.io/badge_logo.svg
    :target: https://aws-uswest2-binder.pangeo.io/badge_logo.svg)](https://aws-uswest2-binder.pangeo.io/v2/gh/hdsingh/explore_xrviz/master?filepath=01_great_lakes.ipynb
 
-Interface
+Overrview
 ---------
 
 .. overview of what the interface is, the structure/layout and purpose.

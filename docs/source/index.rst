@@ -36,11 +36,7 @@ It offers the following functionality:
    :caption: Documentation Contents
 
    quickstart.rst
-   variables.rst
-   set_coords.rst
-   axes.rst
-   style.rst
-   projection.rst
+   interface
    set_initial_parameters
    api
 
