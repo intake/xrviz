@@ -1,0 +1,8 @@
+name: xrviz
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.7
+  - xrviz
+  - sphinx
