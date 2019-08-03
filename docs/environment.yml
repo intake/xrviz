@@ -6,3 +6,4 @@ dependencies:
   - python=3.7
   - xrviz
   - sphinx
+  - sphinx_rtd_theme

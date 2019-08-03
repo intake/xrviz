@@ -5,24 +5,27 @@ from .utils import _is_coord
 
 
 class Display(SigSlot):
-    """
-    This widget takes input as a xarray instance. For each Dataset,
-    its variables are displayed. In case a   DataArray  has been
-    provided only a single variable of that particular array is shown.
-    Variables which are coordinates are annotated with '📈'.
+    """Displays a list of data variables for selection.
+
+    This widget takes input a xarray instance. For each data,
+    its variables are displayed. Variables which are
+    data coordinates are annotated with '📈'.
 
     Parameters
     ----------
-    data: `xarray` instance: `DataSet` or `DataArray`
-           data is used to initialize the DataSelector
+    data: `xr.core.dataarray.DataWithCoords`
+        Is used to initialize the Multiselelct widget's options.
 
     Attributes
     ----------
-    panel: Displays the generated Multiselect object
+    panel:
+        Displays the generated Multiselect object.
 
     """
 
     def __init__(self, data):
+        """ Initializes Display section.
+        """
         super().__init__()
         self.data = data
         self.select = pn.widgets.MultiSelect(size=8, max_width=300,
@@ -41,7 +44,7 @@ class Display(SigSlot):
 
     def select_variable(self, variable):
         """
-        To select variable
+        To select a data variable from the available options.
         """
         if isinstance(variable, str):
             if variable in self.select.options.values():
