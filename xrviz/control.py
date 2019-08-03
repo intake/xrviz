@@ -11,24 +11,29 @@ from .compatibility import has_cartopy
 
 class Control(SigSlot):
     """
-    This section allows the user to control the other subsections,
-    such as displayer, fields.
+    This section arranges all the panes in the form of tabs,
+    hence providing the controls to inteact with all the
+    panes.
 
     Parameters
     ----------
-    data: `xarray` instance: `DataSet` or `DataArray`
-           datset is used to initialize.
+    data: `xr.core.dataarray.DataWithCoords`
+        Data is required for initialization.
 
     Attributes
     ----------
-    panel: Displays the generated template.
-    displayer: Provides access to `Display` sub-section.
-    describer: Provides access to `Describe` sub-section.
-    fields: Provides access to `Fields` sub-section.
-    kwargs: Provides access to kwargs selected in different subsections.
+    1. ``panel``: Displays all the panes arraged in form of tabs.
+    2. ``displayer``: Provides access to `Display` sub-section of `Variables` pane.
+    3. ``describer``: Provides access to `Describe` sub-section of `Variables` pane.
+    4. ``coord_setter``: Provides access to the `Set Coords` pane.
+    5. ``fields``: Provides access to `Axes` pane.
+    6. ``style``: Provides access to `Style` pane.
+    7. ``projection``: Provides access to `Projection` pane (if present).
+    8. ``kwargs``: Provides access to values selected in different panes.
     """
 
     def __init__(self, data):
+        """Initializes the Control pane."""
         super().__init__()
         self.data = data
         self.displayer = Display(self.data)
@@ -66,7 +71,7 @@ class Control(SigSlot):
 
     def set_coords(self, data):
         """
-        To set the data coords
+        To set the data coordinates.
         """
         try:  # Upon setting coords before selecting a variable
             var = self.kwargs['Variables']

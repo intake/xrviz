@@ -42,6 +42,8 @@ class Fields(SigSlot):
     `Extract Along`:
         Series extraction can be done along the remaining dims, which are available
         as options in this select widget.
+    
+    .. _player: https://panel.pyviz.org/reference/widgets/DiscretePlayer.html
     """
 
     def __init__(self, data):

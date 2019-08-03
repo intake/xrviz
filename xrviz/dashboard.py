@@ -20,23 +20,28 @@ from .compatibility import ccrs, gv, gf, has_cartopy, logger
 class Dashboard(SigSlot):
     """
     This section provides access to the complete generated dashboard,
-    consisting of all subsections.
+    consisting of all the panes.
 
     Parameters
     ----------
-    data: `xarray` instance: `DataSet` or `DataArray`
-           datset is used to initialize.
-    initial_params: To pre-set values of widgets.
+    data: `xr.core.dataarray.DataWithCoords`
+        Data is required for initialization.
+    initial_params: `dict`
+        To pre-select values of widgets upon initialization.
 
     Attributes
     ----------
-    panel: Displays the generated dashboard.
-    control: Provides access to the generated control panel.
-    plot: Plot button, upon click generates graph according to
-          kwargs selected in other sub-sections.
-    output: Provides access to generated graph.
+    1. ``panel``: Displays the generated dashboard.
+    2. ``control``: Provides access to the generated control panel.
+    3. ``plot_button``: Upon click generates graph according to kwargs selected in other sub-sections.
+    4. ``graph``: Provides access to the main graph object.
+    5. ``output``: Provides access to generated graph object with the index selectors.
+    6. ``taps_graph``: Provides access to the graph having location of taps.
+    7. ``series_graph``: Provides access to the graph having series extracted.
+    8. ``clear_series_button``: Button to clear the `taps_graph` and `series_graph`.
     """
     def __init__(self, data, initial_params={}):
+        """Initializes the Dashboard."""
         super().__init__()
         if not isinstance(data, xr.core.dataarray.DataWithCoords):
             raise ValueError("Input should be an xarray data object, not %s" % type(data))
@@ -97,16 +102,19 @@ class Dashboard(SigSlot):
 
     def link_aggregation_selectors(self, *args):
         """
-        To link aggregation selectors with cmap limits
+        To link aggregation selectors with cmap limits.
         Whenever any aggregation selector changes it value,
-        limits are cleared.
+        the cmap limits are cleared.
         """
         for dim_selector in self.control.kwargs['remaining_dims']:
             self.control.fields.connect(dim_selector, self.control.style.setup)
 
     def create_plot(self, *args):
         """
-        To create plot.
+        This method creates a plot according to the values selected in the
+        widgets. It handles the following two cases:
+            1. Both `x`, `y` are present in selected variable's coordinates.
+            2. One or both of  `x`, `y` are NOT present in selected variable's coordinates.
         """
         self.kwargs = self.control.kwargs
         self.var = self.kwargs['Variables']
@@ -240,7 +248,8 @@ class Dashboard(SigSlot):
 
     def create_indexed_graph(self, *args):
         """
-        Creates graph for  selected indexes in selectors or players.
+        Creates a graph for the dimensions selected in `x` and `y`. This
+        is used when values selected in `x` and `y` are not data coordinates.
         """
         selection = {}  # to collect the value of index selectors
         for i, dim in enumerate(list(self.var_selector_dims)):
@@ -308,7 +317,10 @@ class Dashboard(SigSlot):
 
     def create_taps_graph(self, x, y, clear=False):
         """
-        To mark taps
+        This method return a graph to record the taps, when
+        a dimension has been selected for series extraction.
+        The `tapped_map` is overlayed on the main graph to display the taps.
+        It also initiates the process of series extraction.
         """
         color = next(iter(self.color_pool))
         if None not in [x, y]:
@@ -330,14 +342,24 @@ class Dashboard(SigSlot):
 
     def create_series_graph(self, x, y, color, clear=False):
         """
-        Create series graph
+        This method extracts a series at the point where user has tapped
+        on the main graph. The series plotted has same color as that of the
+        marker depicting the location of the tap.
+        The extracted series are overlayed on top of each other.
+        The following cases have been handled:
+            `Case 1`:
+                When both x and y are NOT coords (i.e. are dims)
+
+            `Case 2`:
+                When both x and y are coords
+
+                ``2a``: Both are 1-dimensional
+
+                ``2b``: Both are 2-dimensional with same dimensions.
+
+                ``2c``: Both are 2-dimensional with different dims or are multi-dim coordinates. Here we are unable to extract.
+            Note that ``Case 1`` and ``Case 2a`` can be handled with the same code.
         """
-        # Case 1: When both x and y are NOT coords (i.e. are dims)
-        # Case 2: When both x and y are coords
-        #     2b: Both are 1d
-        #     2b: Both are 2d with same dims
-        #     2c: 2-dim with diff dims or multi-dim coords: Unable to extract
-        # Note: 1 and 2a require same code.
         extract_along = self.control.kwargs['extract along']
         if None not in [x, y] and extract_along:
             color = self.taps[-1][-1] if self.taps[-1][-1] else None
@@ -406,10 +428,9 @@ class Dashboard(SigSlot):
 
     def create_selectors_players(self, graph):
         """
-        This function is applicable for when both x and y are in var coords,
-        In case sliders are generated, this function moves the sliders to
-        bottom of graph if they are present and convert them into Selectors,
-        Players.
+        This method is applicable when both `x` and `y` are present in variable
+        coordinates. It converts the sliders generated by hvplot into selectors/players
+        and moves them to the bottom of graph (in case they are present).
         """
         if len(self.data[self.var].dims) > 2 and self.kwargs['extract along']:
             self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream, self.clear_points])
@@ -457,7 +478,8 @@ class Dashboard(SigSlot):
 
     def check_is_plottable(self, var):
         """
-        If a variable is 1-d, disable plot_button for it.
+        Check if a data variable can be plotted or not. If a variable is 1-d,
+        disable plot_button for it.
         """
         self.plot_button.disabled = False  # important to enable button once disabled
         data = self.data[var[0]]
