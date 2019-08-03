@@ -24,7 +24,7 @@ class Display(SigSlot):
     """
 
     def __init__(self, data):
-        """ Initializes Display section.
+        """ Initializes the Display section.
         """
         super().__init__()
         self.data = data

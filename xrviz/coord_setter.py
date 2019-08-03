@@ -3,10 +3,20 @@ from .sigslot import SigSlot
 
 
 class CoordSetter(SigSlot):
+    """
+    To set and reset the data coordinates.
 
+    It uses a `Cross Selector <https://panel.pyviz.org/reference/widgets/CrossSelector.html>`_
+    to display a list of simple and coordinate variables.
+    Simple variables (which are not data coordinates) are available on
+    left side and default coordinates are available on right side.
+    To set variables as coordinates, make selection on left side and click
+    ``>>``. Similarly making selection on right side and clicking ``<<``
+    will reset the coordinates. Other panes would update themselves
+    accordingly, in response to this change.
+    """
     def __init__(self, data):
-        """
-        To intialize
+        """ Initializes the CoordSetter object.
         """
         super().__init__()
         self.data = data
@@ -18,7 +28,7 @@ class CoordSetter(SigSlot):
 
     def set_coords(self, data):
         """
-        to set the coords
+        To set the coords
         """
         self.data = data
         self.coord_selector.value = list(self.data.coords)

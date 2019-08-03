@@ -14,7 +14,7 @@ Set_Coords
 ----------
 
 .. autoclass:: xrviz.coord_setter.CoordSetter
-   :members: __init__, set_coords, setup_initial_values
+   :members: __init__
 
 Axes
 ----

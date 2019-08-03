@@ -8,40 +8,45 @@ from .compatibility import mpcalc
 
 class Fields(SigSlot):
     """
-    This section provides the user with a fields selection panel.
-    Upon selection of a variable in `Display` panel, its dimensions
-    are available as options in `x` and `y` Select widget.
+    This pane controls which array dimensions should be mapped,
+    how additional dimensions should be handled, and which dimension
+    series plots should be extracted along.
 
     Parameters
     ----------
-    data: `xarray` instance: `DataSet` or `DataArray`
-           datset is used to initialize.
+    data: `xr.core.dataarray.DataWithCoords`
+        Is used to initialize the Multiselelct widget's options.
 
     Attributes
     ----------
-    x: `panel.widget.Select` for selection of dims along x-axis.
-    y: `panel.widget.Select` for selection of dims along y-axis.
-    kwargs: provides access to dims selected by `x` and `y`.
+    `x`:
+        To select which of the available dimensions/coordinates in the data is assigned to the plot’s x (horizontal) axis.
+    `y`:
+        To select which of the available dimensions/coordinates in the data is assigned to the plot’s y (vertical) axis.
 
-    Following options are available for each dimension:
-        1. ``select``: This is the default option. It creates a widget
-            to select the value of dimension, for which the graph would be displayed.
-        2. ``animate``: It creates a `player`_ widget which helps to quickly iterate
-            over all the values for a dimension.
-        3. ``mean``: To create plot for mean of values.
-        4. ``max``: To create plot for maximum of values.
-        5. ``min``: To create plot for minimum of values.
-        6. ``median``: To create plot for median of values.
-        7. ``std``: To create plot for standard deviation of values.
-        8. ``count``: To create plot for non-nan of values.
+    `Remaining Dims`:
+        Any one of the following aggregations can be applied on each of remaining dimensions:
+            1. ``select``: This is the default option. It creates a widget to select the value of dimension, for which the graph would be displayed.
+            2. ``animate``: It creates a `player`_ widget which helps to quickly iterate over all the values for a dimension.
+            3. ``mean``: To create plot for mean of the values.
+            4. ``max``: To create plot for maximum of the values.
+            5. ``min``: To create plot for minimum of the values.
+            6. ``median``: To create plot for median of the values.
+            7. ``std``: To create plot for standard deviation of the values.
+            8. ``count``: To create plot for non-nan of the values.
 
         Note that for both ``select`` and ``animate``, the plot will update according
         to the value selected in the generated widget. Also, if a dimension has been
         aggregated, its select widget would not be available.
 
+    `Extract Along`:
+        Series extraction can be done along the remaining dims, which are available
+        as options in this select widget.
     """
 
     def __init__(self, data):
+        """ Initializes the Axes pane.
+        """
         super().__init__()
         self.data = data
         self.x = pn.widgets.Select(name='x', width=200)
@@ -70,7 +75,7 @@ class Fields(SigSlot):
 
     def setup(self, var):
         """
-        To setup the fields
+        To setup the generated widgets by filling the available options.
         """
         self.agg_selectors.clear()  # To empty previouly selected value from selector
         self.var = var if isinstance(var, str) else var[0]
@@ -95,8 +100,8 @@ class Fields(SigSlot):
 
     def change_y(self, value=None):
         """
-        Updates the options of y, by removing option selected in x (value),
-        from all the variable dimensions available as options.
+        Updates the options of `y`, by removing the value of `x`,
+        from the available options.
         """
         # if x belong to var_dims replace the y with remaining var_dims
         # else if x belong to non_indexed_coords, replace y with remaining
@@ -120,7 +125,8 @@ class Fields(SigSlot):
 
     def change_dim_selectors(self, *args):
         """
-        To change the dim selectors
+        Updates the dimensions available for `Aggregation` and `Extract Along`,
+        upon change in value of `y`.
         """
         self.are_var_coords = self.check_are_var_coords()
         self.agg_selectors.clear()
@@ -192,7 +198,7 @@ class Fields(SigSlot):
 
     def check_are_var_coords(self):
         '''
-        Check if both x and y are in variable's coords
+        Check if both `x` and `y` are coordinates of the selected variable.
         '''
         var_coords = list(self.data[self.var].coords)
         x = self.x.value
@@ -201,7 +207,11 @@ class Fields(SigSlot):
 
     def guess_x_y(self, var):
         """
-        To guess x,y with metpy
+        To guess the value of `x` and `y` with `metpy.parse_cf`_.
+        This is applicable only for the case when both `x` and `y` are data
+        coordinates.
+
+        .. _`metpy.parse_cf`: https://github.com/Unidata/MetPy/blob/master/metpy/xarray.py#L335
         """
         try:
             parsed_var = self.data.metpy.parse_cf(var)
