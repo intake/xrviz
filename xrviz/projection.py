@@ -43,20 +43,18 @@ class Projection(SigSlot):
             selection. It allows the user to customize certain aspects of the
             projections by providing extra parameters such as ``central_longitude``
             and ``central_latitude``.
-        8. ``project`` (default=`False`):
+        8. ``project`` (default `False`):
             Whether to project the data before plotting (adds initial overhead
             but avoids projecting data when plot is dynamically updated).
-        9. ``global_extent`` (default=`False`):
+        9. ``global_extent`` (default `False`):
             Whether to expand the plot extent to span the whole globe.
         10. ``features`` (default=all except `None`):
             To select a set of basic geographic features to overlay behind the data
             in the plot.
 
         .. note::
-                1. The widgets in this tab are enabled only if both ``x`` and ``y`` are
-                data coordinates.
-                2. `basemap` and `projection` are mutually exclusive options i.e it is not
-                possible to have them both enabled simultaneously.
+            1. The widgets in this tab are enabled only if both ``x`` and ``y`` are data coordinates.
+            2. `basemap` and `projection` are mutually exclusive options i.e it is not possible to have them both enabled simultaneously.
 
 
         .. _`cartopy projection`: https://scitools.org.uk/cartopy/docs/v0.15/crs/projections.html
@@ -67,6 +65,7 @@ class Projection(SigSlot):
     """
 
     def __init__(self):
+        """Initializes the Projection pane."""
         super().__init__()
         self.is_geo = pn.widgets.Checkbox(name='is_geo', value=False,
                                           disabled=True)

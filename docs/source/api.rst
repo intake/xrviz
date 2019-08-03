@@ -32,7 +32,7 @@ Projection
 ----------
 
 .. autoclass:: xrviz.projection.Projection
-   :members: __init__, setup, setup_initial_values, show_basemap
+   :members: __init__, setup, setup_initial_values
 
 Control
 -------

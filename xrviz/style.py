@@ -23,20 +23,15 @@ class Style(SigSlot):
             plotting a variable. In case not filled by user, automatic filling
             of limits happen.
 
-            - ``lower limit``: auto-filled value equals ``quantile(0.1)`` of values
-            to be plotted.
-
-            - ``upper limit``: auto-filled value equals ``quantile(0.9)`` of values
-            to be plotted.
+            - ``lower limit``: auto-filled value equals ``quantile(0.1)`` of values to be plotted.
+            - ``upper limit``: auto-filled value equals ``quantile(0.9)`` of values to be plotted.
 
             Note that these values are filled with respect to color scaled values.
             Also these limits clear upon change in variable or color scaling.
 
         6. ``compute min/max from all data`` (default `False`):
-            - `True`: all values present in a data variable are used to compute
-            upper and lower colormap limits.
-            - `False`: only values necessary to create first step/instance
-            of graph are used.
+            - ``True``: all values present in a data variable are used to compute upper and lower colormap limits.
+            - ``False``: only values necessary to create first step/instance of graph are used.
 
             It is better to have its value `False` for larger datasets, to save
             computation time.
@@ -48,6 +43,7 @@ class Style(SigSlot):
     """
 
     def __init__(self):
+        """Initializes the Style pane."""
         super().__init__()
         self.height = pn.widgets.IntSlider(name='height', value=300, start=100, end=1200)
         self.width = pn.widgets.IntSlider(name='width', value=700, start=100, end=1200)
