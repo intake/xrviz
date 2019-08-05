@@ -35,7 +35,7 @@ class CoordSetter(SigSlot):
 
     def setup_initial_values(self, init_params={}):
         """
-        To display the values passed as coordinates.
+        To set the variables, whose names have been passed, as coordinates.
         """
         if 'Set Coords' in init_params:
             self.coord_selector.value = init_params['Set Coords']

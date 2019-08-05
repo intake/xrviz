@@ -1,8 +1,8 @@
 # Source: https://github.com/martindurant/dfviz/blob/master/dfviz/widget.py
 import contextlib
 import logging
+from .compatibility import logger
 
-logger = logging.getLogger('dfviz')
 logger.setLevel('DEBUG')
 
 

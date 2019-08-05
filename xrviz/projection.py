@@ -135,6 +135,9 @@ class Projection(SigSlot):
         self.proj_params.disabled = disabled
 
     def setup_initial_values(self, init_params={}):
+        """
+        To select initial values for the widgets in this pane.
+        """
         is_geo = init_params.get('is_geo')
         if is_geo:  # since we need to enable is_geo if True
             self.is_geo.disabled = False
@@ -149,9 +152,6 @@ class Projection(SigSlot):
                         widget.value = init_params[w_name]
 
     def show_basemap(self, *args):
-        """
-        To show basemap
-        """
         value = False if self.basemap.value is None else True
         self.projection.disabled = value
         self.proj_params.disabled = value

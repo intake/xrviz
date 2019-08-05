@@ -16,7 +16,7 @@ class Control(SigSlot):
 
     Parameters
     ----------
-    data: ``xarray.DataSet`` or ``xarray.DataArray``
+    data: data: xarray.DataSet or xarray.DataArray
         Is passed to the user input panes for initialisation.
 
     Attributes
@@ -91,6 +91,12 @@ class Control(SigSlot):
         self.fields.set_coords(self.data, var)
 
     def check_is_projectable(self, *args):
+        """
+        Check if the selected variable can be  projected geographically.
+
+        This is possible only when both `x` and `y` are present in selected
+        variable's coordinates.
+        """
         value = not self.fields.kwargs['are_var_coords']
         self.projection.disable_geo(value)
 

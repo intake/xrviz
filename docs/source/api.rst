@@ -32,13 +32,13 @@ Projection
 ----------
 
 .. autoclass:: xrviz.projection.Projection
-   :members: setup, setup_initial_values
+   :members: setup_initial_values
 
 Control
 -------
 
 .. autoclass:: xrviz.control.Control
-   :members: setup_initial_values, set_coords
+   :members: set_coords, check_is_projectable
 
 Dashboard
 ---------

@@ -13,17 +13,19 @@ class Describe(SigSlot):
     This section has two tables as output. The first table shows
     `Variable attributes` and the second table shows `Global Attributes`.
     Upon selection of a new variable in the Display widget, the first table
-    updates to itself with properties of the new seletion,
+    updates itself with properties of the new selection,
     while the second table stays same.
 
     Parameters
     ----------
-    data: ``xarray.DataSet`` or ``xarray.DataArray``
-        Is used to initialize Multiselelct widget's options.
+
+    data: xarray.DataSet or xarray.DataArray
 
     Attributes
     ----------
-    panel: Displays the generated tables arranged next to each other.
+
+    panel:
+        A ``panel.pane.HTML`` instance which displays the tables arranged next to each other.
 
     """
     def __init__(self, data):
@@ -41,6 +43,9 @@ class Describe(SigSlot):
         self.panel.object = self.variable_pane_for_dataset(var)
 
     def variable_pane_for_dataset(self, var):
+        """
+        Returns HTML template describing variable and global attributes.
+        """
         if var is not None:
             var = var if isinstance(var, str) else var[0]
             var_attrs = [(k, v) for k, v in self.data[var].attrs.items()]

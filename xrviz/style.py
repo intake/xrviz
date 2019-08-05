@@ -79,7 +79,7 @@ class Style(SigSlot):
 
     def setup_initial_values(self, init_params={}):
         """
-        To set the initial values
+        To select initial values for the widgets in this pane.
         """
         for row in self.panel:
             for widget in row:

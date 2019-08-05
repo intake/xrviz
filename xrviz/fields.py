@@ -8,41 +8,40 @@ from .compatibility import mpcalc
 
 class Fields(SigSlot):
     """
+    To select the fields to plot along.
+
     This pane controls which array dimensions should be mapped,
     how additional dimensions should be handled, and which dimension
     series plots should be extracted along.
 
     Parameters
     ----------
-    data: ``xarray.DataSet`` or ``xarray.DataArray``
+    data: xarray.DataSet or xarray.DataArray
 
     Attributes
     ----------
-    `x`:
+    x:
         To select which of the available dimensions/coordinates in the data is assigned to the plot’s x (horizontal) axis.
-    `y`:
+    y:
         To select which of the available dimensions/coordinates in the data is assigned to the plot’s y (vertical) axis.
 
-    `Remaining Dims`:
+    Remaining Dims:
         Any one of the following aggregations can be applied on each of remaining dimensions:
-            1. ``select``: This is the default option. It creates a widget to select the value of dimension, for which the graph would be displayed.
-            2. ``animate``: It creates a `player`_ widget which helps to quickly iterate over all the values for a dimension.
-            3. ``mean``: To create plot for mean of the values.
-            4. ``max``: To create plot for maximum of the values.
-            5. ``min``: To create plot for minimum of the values.
-            6. ``median``: To create plot for median of the values.
-            7. ``std``: To create plot for standard deviation of the values.
-            8. ``count``: To create plot for non-nan of the values.
+            1. ``select``: It creates a ``pn.widgets.Select``, to select the value of dimension, for which the graph would be displayed.
+            2. ``animate``: It creates a ``panel.widgets.DiscretePlayer`` which helps to quickly iterate over all the values for a dimension.
+            3. ``mean``: Creates plot along mean of the selected dimension.
+            4. ``max``: Creates plot along maximum of the selected dimension.
+            5. ``min``: Creates plot along minimum of the selected dimension.
+            6. ``median``: Creates plot along median of the selected dimension.
+            7. ``std``: Creates plot along standard deviation of the selected dimension.
+            8. ``count``: Creates plot along non-nan values of the selected dimension.
 
         Note that for both ``select`` and ``animate``, the plot will update according
         to the value selected in the generated widget. Also, if a dimension has been
         aggregated, its select widget would not be available.
 
-    `Extract Along`:
-        Series extraction can be done along the remaining dims, which are available
-        as options in this select widget.
-    
-    .. _player: https://panel.pyviz.org/reference/widgets/DiscretePlayer.html
+    Extract Along:
+        This selector provides the option to select the dimension along which to create a series graph. 
     """
 
     def __init__(self, data):
@@ -74,7 +73,7 @@ class Fields(SigSlot):
 
     def setup(self, var):
         """
-        To setup the generated widgets by filling the available options.
+        Sets up the widgets by filling available options for the selected variable.
         """
         self.agg_selectors.clear()  # To empty previouly selected value from selector
         self.var = var if isinstance(var, str) else var[0]
@@ -99,8 +98,7 @@ class Fields(SigSlot):
 
     def change_y(self, value=None):
         """
-        Updates the options of `y`, by removing the value of `x`,
-        from the available options.
+        Updates the options of ``y``, by removing the value of ``x``, from the available options.
         """
         # if x belong to var_dims replace the y with remaining var_dims
         # else if x belong to non_indexed_coords, replace y with remaining
@@ -124,8 +122,7 @@ class Fields(SigSlot):
 
     def change_dim_selectors(self, *args):
         """
-        Updates the dimensions available for `Aggregation` and `Extract Along`,
-        upon change in value of `y`.
+        Updates the dimensions available for `Aggregation` and `Extract Along` upon change in value of ``y``.
         """
         self.are_var_coords = self.check_are_var_coords()
         self.agg_selectors.clear()
@@ -196,9 +193,9 @@ class Fields(SigSlot):
         return self.data[var1].ndim == self.data[var2].ndim
 
     def check_are_var_coords(self):
-        '''
-        Check if both `x` and `y` are coordinates of the selected variable.
-        '''
+        """
+        Check if both ``x`` and ``y`` are coordinates of the selected variable.
+        """
         var_coords = list(self.data[self.var].coords)
         x = self.x.value
         y = self.y.value
@@ -206,7 +203,7 @@ class Fields(SigSlot):
 
     def guess_x_y(self, var):
         """
-        To guess the value of `x` and `y` with `metpy.parse_cf`_.
+        To guess the value of ``x`` and ``y`` with `metpy.parse_cf`_.
         This is applicable only for the case when both `x` and `y` are data
         coordinates.
 

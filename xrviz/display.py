@@ -7,20 +7,19 @@ from .utils import _is_coord
 class Display(SigSlot):
     """Displays a list of data variables for selection.
 
-    This widget takes input a xarray instance. For each data,
-    its variables are displayed. Variables which are
-    data coordinates are annotated with '📈'.
+    For each data, its variables are displayed in ``pn.widgets.MultiSelect``.
+    Variables which are data coordinates are annotated with '📈'.
 
     Parameters
     ----------
 
-    data: ``xarray.DataSet`` or ``xarray.DataArray``
+    data: xarray.DataSet or xarray.DataArray
 
     Attributes
     ----------
 
     panel:
-        Displays the generated Multiselect object.
+        A ``panel.Row`` instance which displays the Multiselect widget.
 
     """
 
@@ -31,7 +30,6 @@ class Display(SigSlot):
                                              height=210,
                                              width_policy='max',
                                              name='Variables')
-        # self.set_selection(self.data)
         self.set_variables()
 
         self._register(self.select, "variable_selected")
@@ -43,7 +41,7 @@ class Display(SigSlot):
 
     def select_variable(self, variable):
         """
-        To select a data variable from the available options.
+        Select a data variable in the multiselect widget from the available options.
         """
         if isinstance(variable, str):
             if variable in self.select.options.values():
@@ -57,9 +55,7 @@ class Display(SigSlot):
 
     @property
     def kwargs(self):
-        """
-        Select only the first value from the selected variables.
-        """
+        # Select only the first value from the selected variables.
         out = {p.name: p.value[0] for p in self.panel}
         return out
 
