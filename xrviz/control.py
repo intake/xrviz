@@ -16,7 +16,7 @@ class Control(SigSlot):
 
     Parameters
     ----------
-    data: data: xarray.DataSet or xarray.DataArray
+    data: xarray.DataSet or xarray.DataArray
         Is passed to the user input panes for initialisation.
 
     Attributes
@@ -30,11 +30,11 @@ class Control(SigSlot):
     4. coord_setter:
             A ``SigSlot`` instance for choosing which variables are considered coordinates.
     5. fields:
-            Provides access to `Axes` pane.
+            A ``SigSlot`` instance to select the fields to plot along.
     6. style:
-            Provides access to `Style` pane.
+            A ``SigSlot`` instance to customise styling of the graphs.
     7. projection:
-            Provides access to `Projection` pane (if present).
+            A ``SigSlot`` instance to customise the projection of geographical data.
     8. kwargs:
             A dictionary gathered from the widgets of the input Panes,
             of a form which can be passed to the plotting function as kwargs.
@@ -91,6 +91,24 @@ class Control(SigSlot):
         self.fields.set_coords(self.data, var)
 
     def check_is_projectable(self, *args):
+        """
+        Check if the selected variable can be  projected geographically.
+
+        This is possible only when both `x` and `y` are present in selected
+        variable's coordinates.
+        """
+        """
+        Check if the selected variable can be  projected geographically.
+
+        This is possible only when both `x` and `y` are present in selected
+        variable's coordinates.
+        """
+        """
+        Check if the selected variable can be  projected geographically.
+
+        This is possible only when both `x` and `y` are present in selected
+        variable's coordinates.
+        """
         """
         Check if the selected variable can be  projected geographically.
 
