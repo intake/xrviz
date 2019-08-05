@@ -18,7 +18,7 @@ class Describe(SigSlot):
 
     Parameters
     ----------
-    data: `xr.core.dataarray.DataWithCoords`
+    data: ``xarray.DataSet`` or ``xarray.DataArray``
         Is used to initialize Multiselelct widget's options.
 
     Attributes
@@ -27,8 +27,6 @@ class Describe(SigSlot):
 
     """
     def __init__(self, data):
-        """ Initializes Describe section.
-        """
         super().__init__()
         self.data = data
         self.panel = pn.pane.HTML(style={'font-size': '12pt'}, width=400,

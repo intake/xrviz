@@ -14,6 +14,8 @@ projections_list = sorted([p for p in projections if p not in not_to_include ])
 
 class Projection(SigSlot):
     """
+    A pane to customise the projection of geographical data.
+
     The following options are available in this pane:
 
         1. ``is_geo`` (default `False`):

@@ -110,7 +110,7 @@ def test_animate_wigdet_for_dims(dashboard):
     fields = dashboard.control.fields
     agg_selectors = fields.agg_selectors
     agg_selectors[0].value = 'animate'
-    dashboard.create_plot()
+    dashboard.create_graph()
     assert isinstance(dashboard.output[0], pn.pane.holoviews.HoloViews)
     assert isinstance(dashboard.output[1][0][1], pn.widgets.player.DiscretePlayer)
 
@@ -124,7 +124,7 @@ def test_with_is_geo_projection(dashboard):
     proj_panel.projection.value = 'Orthographic'
     proj_panel.proj_params.value = "{'central_longitude': -78, 'central_latitude': 43, 'globe': None}"
     proj_panel.global_extent.value = True
-    dashboard.create_plot()
+    dashboard.create_graph()
     assert isinstance(dashboard.output[0], pn.pane.holoviews.HoloViews)
     assert isinstance(dashboard.output[1][0], pn.widgets.select.Select)
 
@@ -135,7 +135,7 @@ def test_with_is_geo_basemap(dashboard):
     dashboard.control.displayer.select_variable('temp')
     proj_panel = dashboard.control.projection
     proj_panel.is_geo.value = True
-    dashboard.create_plot()
+    dashboard.create_graph()
     assert isinstance(dashboard.output[0], pn.pane.holoviews.HoloViews)
     assert isinstance(dashboard.output[1][0], pn.widgets.select.Select)
 
@@ -166,7 +166,7 @@ def test_color_scaling_for_dims(dashboard):
     dashboard.control.displayer.select_variable('temp')
     style = dashboard.control.style
     style.color_scale.value = 'log'
-    dashboard.create_plot()
+    dashboard.create_graph()
     assert isinstance(dashboard.output[0][0], pn.pane.holoviews.HoloViews)
 
 
@@ -175,7 +175,7 @@ def test_color_scaling_for_coords(dashboard):
     dashboard.control.displayer.select_variable('temp')
     style = dashboard.control.style
     style.color_scale.value = 'log'
-    dashboard.create_plot()
+    dashboard.create_graph()
     assert isinstance(dashboard.output[0][0], pn.pane.holoviews.HoloViews)
 
 
@@ -183,7 +183,7 @@ def test_use_all_data_for_dims(dashboard):
     dashboard.control.coord_setter.coord_selector.value = ['time', 'sigma']
     dashboard.control.displayer.select_variable('temp')
     dashboard.control.style.use_all_data.value = True
-    dashboard.create_plot()
+    dashboard.create_graph()
     assert isinstance(dashboard.output[0][0], pn.pane.holoviews.HoloViews)
 
 
@@ -191,7 +191,7 @@ def test_use_all_data_for_coords(dashboard):
     dashboard.control.coord_setter.coord_selector.value = ['lat', 'lon']
     dashboard.control.displayer.select_variable('temp')
     dashboard.control.style.use_all_data.value = True
-    dashboard.create_plot()
+    dashboard.create_graph()
     assert isinstance(dashboard.output[0][0], pn.pane.holoviews.HoloViews)
 
 
@@ -199,7 +199,7 @@ def test_create_taps_and_series_graph_for_dims(dashboard):
     dashboard.control.coord_setter.coord_selector.value = ['time', 'sigma']
     dashboard.control.displayer.select_variable('temp')
     dashboard.control.fields.s_selector.value = 'sigma'
-    dashboard.create_plot()
+    dashboard.create_graph()
     dashboard.create_taps_graph(x=35, y=10)
     assert isinstance(dashboard.series_graph[0], pn.pane.holoviews.HoloViews)
 
@@ -208,6 +208,6 @@ def test_create_taps_and_series_graph_for_2d_coords(dashboard):
     dashboard.control.coord_setter.coord_selector.value = ['lat', 'lon']
     dashboard.control.displayer.select_variable('temp')
     dashboard.control.fields.s_selector.value = 'sigma'
-    dashboard.create_plot()
+    dashboard.create_graph()
     dashboard.create_taps_graph(x=-79.232, y=43.273)
     assert isinstance(dashboard.series_graph[0], pn.pane.holoviews.HoloViews)

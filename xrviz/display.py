@@ -13,19 +13,18 @@ class Display(SigSlot):
 
     Parameters
     ----------
-    data: `xr.core.dataarray.DataWithCoords`
-        Is used to initialize the Multiselelct widget's options.
+
+    data: ``xarray.DataSet`` or ``xarray.DataArray``
 
     Attributes
     ----------
+
     panel:
         Displays the generated Multiselect object.
 
     """
 
     def __init__(self, data):
-        """ Initializes the Display section.
-        """
         super().__init__()
         self.data = data
         self.select = pn.widgets.MultiSelect(size=8, max_width=300,

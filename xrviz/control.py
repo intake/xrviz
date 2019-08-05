@@ -12,28 +12,35 @@ from .compatibility import has_cartopy
 class Control(SigSlot):
     """
     This section arranges all the panes in the form of tabs,
-    hence providing the controls to inteact with all the
-    panes.
+    hence providing the control for interaction.
 
     Parameters
     ----------
-    data: `xr.core.dataarray.DataWithCoords`
-        Data is required for initialization.
+    data: ``xarray.DataSet`` or ``xarray.DataArray``
+        Is passed to the user input panes for initialisation.
 
     Attributes
     ----------
-    1. ``panel``: Displays all the panes arraged in form of tabs.
-    2. ``displayer``: Provides access to `Display` sub-section of `Variables` pane.
-    3. ``describer``: Provides access to `Describe` sub-section of `Variables` pane.
-    4. ``coord_setter``: Provides access to the `Set Coords` pane.
-    5. ``fields``: Provides access to `Axes` pane.
-    6. ``style``: Provides access to `Style` pane.
-    7. ``projection``: Provides access to `Projection` pane (if present).
-    8. ``kwargs``: Provides access to values selected in different panes.
+    1. panel:
+            A ``panel.Tabs`` instance containing the user input panes of the interface.
+    2. displayer:
+            A ``SigSlot`` instance which displays a list of data variables for selection.
+    3. describer:
+            A ``SigSlot`` instance which describes the property selected in the ``displayer``.
+    4. coord_setter:
+            A ``SigSlot`` instance for choosing which variables are considered coordinates.
+    5. fields:
+            Provides access to `Axes` pane.
+    6. style:
+            Provides access to `Style` pane.
+    7. projection:
+            Provides access to `Projection` pane (if present).
+    8. kwargs:
+            A dictionary gathered from the widgets of the input Panes,
+            of a form which can be passed to the plotting function as kwargs.
     """
 
     def __init__(self, data):
-        """Initializes the Control pane."""
         super().__init__()
         self.data = data
         self.displayer = Display(self.data)
@@ -71,7 +78,7 @@ class Control(SigSlot):
 
     def set_coords(self, data):
         """
-        To set the data coordinates.
+        Called after coordinates have been set/reset, to update the other input panes.
         """
         try:  # Upon setting coords before selecting a variable
             var = self.kwargs['Variables']

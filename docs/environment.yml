@@ -7,3 +7,4 @@ dependencies:
   - xrviz
   - sphinx
   - sphinx_rtd_theme
+  - numpydoc

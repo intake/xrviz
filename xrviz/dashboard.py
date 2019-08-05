@@ -19,29 +19,38 @@ from .compatibility import ccrs, gv, gf, has_cartopy, logger
 
 class Dashboard(SigSlot):
     """
-    This section provides access to the complete generated dashboard,
-    consisting of all the panes.
+    Main entry point to XrViz, and generates an interactive GUI for a given dataset.
 
     Parameters
     ----------
-    data: `xr.core.dataarray.DataWithCoords`
-        Data is required for initialization.
+    data: ``xarray.DataSet`` or ``xarray.DataArray``
+        
+
     initial_params: `dict`
         To pre-select values of widgets upon initialization.
+        For more details refer `Set Initial Parameters <../html/set_initial_parameters.html>`_ .
 
     Attributes
     ----------
-    1. ``panel``: Displays the generated dashboard.
-    2. ``control``: Provides access to the generated control panel.
-    3. ``plot_button``: Upon click generates graph according to kwargs selected in other sub-sections.
-    4. ``graph``: Provides access to the main graph object.
-    5. ``output``: Provides access to generated graph object with the index selectors.
-    6. ``taps_graph``: Provides access to the graph having location of taps.
-    7. ``series_graph``: Provides access to the graph having series extracted.
-    8. ``clear_series_button``: Button to clear the `taps_graph` and `series_graph`.
+
+    1. panel:
+            A ``panel.Tabs`` instance containing the user input panes and output graphs of the interface.
+    2. control:
+            A ``panel.Tabs`` instance containing the user input panes (control panel).
+    3. plot_button:
+            A ``pn.widgets.Button`` that generates graph according to values selected in input panes, upon click.
+    4. graph``:
+            A ``HoloViews(DynamicMap)`` instance containing the main graph.
+    5. output:
+            The ``graph`` along with the select widgets for index selection.
+    6. taps_graph:
+            A ``holoviews.Points`` instance to record the location of taps.
+    7. series_graph:
+            A ``HoloViews(Overlay)`` instance having series extracted.
+    8. clear_series_button:
+            A ``pn.widgets.Button`` to clear the `taps_graph` and `series_graph`.
     """
     def __init__(self, data, initial_params={}):
-        """Initializes the Dashboard."""
         super().__init__()
         if not isinstance(data, xr.core.dataarray.DataWithCoords):
             raise ValueError("Input should be an xarray data object, not %s" % type(data))
@@ -60,7 +69,7 @@ class Dashboard(SigSlot):
                              pn.Column(name='Index_selectors'))
 
         self._register(self.plot_button, 'plot_clicked', 'clicks')
-        self.connect('plot_clicked', self.create_plot)
+        self.connect('plot_clicked', self.create_graph)
 
         self._register(self.control.coord_setter.coord_selector, 'set_coords')
         self.connect("set_coords", self.set_coords)
@@ -69,9 +78,9 @@ class Dashboard(SigSlot):
         self.connect('clear_series', self.clear_series)
 
         self.control.displayer.connect('variable_selected', self.check_is_plottable)
-        self.control.displayer.connect('variable_selected', self.link_aggregation_selectors)
-        self.control.fields.connect('x', self.link_aggregation_selectors)
-        self.control.fields.connect('y', self.link_aggregation_selectors)
+        self.control.displayer.connect('variable_selected', self._link_aggregation_selectors)
+        self.control.fields.connect('x', self._link_aggregation_selectors)
+        self.control.fields.connect('y', self._link_aggregation_selectors)
 
         self.panel = pn.Column(self.control.panel,
                                pn.Row(self.plot_button,
@@ -93,6 +102,9 @@ class Dashboard(SigSlot):
         self.clear_points = hv.streams.Stream.define('Clear_points', clear=False)(transient=True)
 
     def clear_series(self, *args):
+        """
+        Clears the locations tapped and the extracted series.
+        """
         if not self.clear_series_button.disabled:
             self.series_graph[0] = pn.Spacer(name='Series Graph')
             self.series = hv.Points([]).opts(height=self.kwargs['height'],
@@ -100,19 +112,15 @@ class Dashboard(SigSlot):
             self.taps.clear()
             self.clear_points.event(clear=True)
 
-    def link_aggregation_selectors(self, *args):
-        """
-        To link aggregation selectors with cmap limits.
-        Whenever any aggregation selector changes it value,
-        the cmap limits are cleared.
-        """
+    def _link_aggregation_selectors(self, *args):
         for dim_selector in self.control.kwargs['remaining_dims']:
             self.control.fields.connect(dim_selector, self.control.style.setup)
 
-    def create_plot(self, *args):
+    def create_graph(self, *args):
         """
-        This method creates a plot according to the values selected in the
-        widgets. It handles the following two cases:
+        Creates a graph according to the values selected in the widgets.
+
+        It handles the following two cases:
             1. Both `x`, `y` are present in selected variable's coordinates.
             2. One or both of  `x`, `y` are NOT present in selected variable's coordinates.
         """
@@ -317,10 +325,10 @@ class Dashboard(SigSlot):
 
     def create_taps_graph(self, x, y, clear=False):
         """
-        This method return a graph to record the taps, when
-        a dimension has been selected for series extraction.
-        The `tapped_map` is overlayed on the main graph to display the taps.
-        It also initiates the process of series extraction.
+        Create an output layer in the graph which responds to taps from the user.
+
+        Whenever the user taps (or clicks) the graph, a glyph will be overlaid, 
+        and a series is extracted at that point.
         """
         color = next(iter(self.color_pool))
         if None not in [x, y]:
@@ -342,9 +350,9 @@ class Dashboard(SigSlot):
 
     def create_series_graph(self, x, y, color, clear=False):
         """
-        This method extracts a series at the point where user has tapped
-        on the main graph. The series plotted has same color as that of the
-        marker depicting the location of the tap.
+        Extract a series at a given point, and plot it.
+
+        The series plotted has same color as that of the marker depicting the location of the tap.
         The extracted series are overlayed on top of each other.
         The following cases have been handled:
             `Case 1`:

@@ -14,8 +14,7 @@ class Fields(SigSlot):
 
     Parameters
     ----------
-    data: `xr.core.dataarray.DataWithCoords`
-        Is used to initialize the Multiselelct widget's options.
+    data: ``xarray.DataSet`` or ``xarray.DataArray``
 
     Attributes
     ----------
@@ -47,8 +46,6 @@ class Fields(SigSlot):
     """
 
     def __init__(self, data):
-        """ Initializes the Axes pane.
-        """
         super().__init__()
         self.data = data
         self.x = pn.widgets.Select(name='x', width=200)
