@@ -97,24 +97,6 @@ class Control(SigSlot):
         This is possible only when both `x` and `y` are present in selected
         variable's coordinates.
         """
-        """
-        Check if the selected variable can be  projected geographically.
-
-        This is possible only when both `x` and `y` are present in selected
-        variable's coordinates.
-        """
-        """
-        Check if the selected variable can be  projected geographically.
-
-        This is possible only when both `x` and `y` are present in selected
-        variable's coordinates.
-        """
-        """
-        Check if the selected variable can be  projected geographically.
-
-        This is possible only when both `x` and `y` are present in selected
-        variable's coordinates.
-        """
         value = not self.fields.kwargs['are_var_coords']
         self.projection.disable_geo(value)
 
