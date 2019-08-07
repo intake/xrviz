@@ -8,7 +8,8 @@ def example(show=True):
     Parameters
     ----------
     show: bool (True)
-        ``True``: A new browser tab will be opened, and the function will block until interrupted.
+        ``True``: A new browser tab will be opened, and the function will block
+                  until interrupted.
         ``False``: The Dashboard instance is returned without being executed.
     """
     from .sample_data import great_lakes

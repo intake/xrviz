@@ -16,17 +16,20 @@ class Fields(SigSlot):
 
     Parameters
     ----------
-    data: xarray.DataSet or xarray.DataArray
+    data: xarray.DataSet
 
     Attributes
     ----------
     x:
-        To select which of the available dimensions/coordinates in the data is assigned to the plot’s x (horizontal) axis.
+        To select which of the available dimensions/coordinates in the data is
+        assigned to the plot’s x (horizontal) axis.
     y:
-        To select which of the available dimensions/coordinates in the data is assigned to the plot’s y (vertical) axis.
+        To select which of the available dimensions/coordinates in the data is
+        assigned to the plot’s y (vertical) axis.
 
     Remaining Dims:
-        Any one of the following aggregations can be applied on each of remaining dimensions:
+        Any one of the following aggregations can be applied on each of remaining
+        dimensions:
             1. ``select``: It creates a ``pn.widgets.Select``, to select the value of dimension, for which the graph would be displayed.
             2. ``animate``: It creates a ``panel.widgets.DiscretePlayer`` which helps to quickly iterate over all the values for a dimension.
             3. ``mean``: Creates plot along mean of the selected dimension.
@@ -41,7 +44,8 @@ class Fields(SigSlot):
         aggregated, its select widget would not be available.
 
     Extract Along:
-        This selector provides the option to select the dimension along which to create a series graph. 
+        This selector provides the option to select the dimension along which to
+        create a series graph.
     """
 
     def __init__(self, data):
@@ -73,7 +77,7 @@ class Fields(SigSlot):
 
     def setup(self, var):
         """
-        Sets up the widgets by filling available options for the selected variable.
+        Fill available options for the selected variable.
         """
         self.agg_selectors.clear()  # To empty previouly selected value from selector
         self.var = var if isinstance(var, str) else var[0]
@@ -98,7 +102,7 @@ class Fields(SigSlot):
 
     def change_y(self, value=None):
         """
-        Updates the options of ``y``, by removing the value of ``x``, from the available options.
+        Updates ``y`` by removing the value of ``x``, from the available options
         """
         # if x belong to var_dims replace the y with remaining var_dims
         # else if x belong to non_indexed_coords, replace y with remaining

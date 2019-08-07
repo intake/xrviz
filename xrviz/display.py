@@ -13,7 +13,7 @@ class Display(SigSlot):
     Parameters
     ----------
 
-    data: xarray.DataSet or xarray.DataArray
+    data: xarray.DataSet
 
     Attributes
     ----------
@@ -37,11 +37,14 @@ class Display(SigSlot):
         self.panel = pn.Row(self.select)
 
     def set_variables(self,):
-        self.select.options = {_is_coord(self.data, name): name for name in list(self.data.variables)}
+        self.select.options = {
+            _is_coord(self.data, name): name
+            for name in list(self.data.variables)
+        }
 
     def select_variable(self, variable):
         """
-        Select a data variable in the multiselect widget from the available options.
+        Select a data variable from the available options.
         """
         if isinstance(variable, str):
             if variable in self.select.options.values():

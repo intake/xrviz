@@ -8,7 +8,7 @@ from .sigslot import SigSlot
 
 class Describe(SigSlot):
     """
-    Describes the property selected in the Display section.
+    Displays the properties of the variable selected in the Display section.
 
     This section has two tables as output. The first table shows
     `Variable attributes` and the second table shows `Global Attributes`.
@@ -19,13 +19,14 @@ class Describe(SigSlot):
     Parameters
     ----------
 
-    data: xarray.DataSet or xarray.DataArray
+    data: xarray.DataSet
 
     Attributes
     ----------
 
     panel:
-        A ``panel.pane.HTML`` instance which displays the tables arranged next to each other.
+        A ``panel.pane.HTML`` instance which displays the tables arranged
+        next to each other.
 
     """
     def __init__(self, data):

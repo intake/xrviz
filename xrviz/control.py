@@ -11,30 +11,34 @@ from .compatibility import has_cartopy
 
 class Control(SigSlot):
     """
-    This section arranges all the panes in the form of tabs,
-    hence providing the control for interaction.
+    The user input part of the interface
 
     Parameters
     ----------
-    data: xarray.DataSet or xarray.DataArray
-        Is passed to the user input panes for initialisation.
+    data: xarray.DataSet
+        The data to be visualised. Here, we are mostly concerned with displaying
+        the variables, their attributes, and assigning coordinates to
+        roles upon plotting.
 
     Attributes
     ----------
     1. panel:
-            A ``panel.Tabs`` instance containing the user input panes of the interface.
+            A ``panel.Tabs`` instance containing the user input panes
     2. displayer:
-            A ``SigSlot`` instance which displays a list of data variables for selection.
+            A ``Display``, a list of data variables for selection.
     3. describer:
-            A ``SigSlot`` instance which describes the property selected in the ``displayer``.
+            A ``Describe``, describes the properties of the variable
+            selected in the ``displayer``.
     4. coord_setter:
-            A ``SigSlot`` instance for choosing which variables are considered coordinates.
+            A ``CoordSetter`` instance for choosing which variables are
+            considered coordinates.
     5. fields:
-            A ``SigSlot`` instance to select the fields to plot along.
+            A ``Fields`` instance to select the axes to plot with.
     6. style:
-            A ``SigSlot`` instance to customise styling of the graphs.
+            A ``Style`` instance to customise styling of the graphs.
     7. projection:
-            A ``SigSlot`` instance to customise the projection of geographical data.
+            A ``Projection`` instance to customise the projection of
+            geographical data.
     8. kwargs:
             A dictionary gathered from the widgets of the input Panes,
             of a form which can be passed to the plotting function as kwargs.
@@ -78,7 +82,7 @@ class Control(SigSlot):
 
     def set_coords(self, data):
         """
-        Called after coordinates have been set/reset, to update the other input panes.
+        Called after coordinates have been set, to update the other input panes.
         """
         try:  # Upon setting coords before selecting a variable
             var = self.kwargs['Variables']
