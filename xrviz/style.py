@@ -28,8 +28,9 @@ class Style(SigSlot):
             - ``lower limit``: auto-filled value equals ``quantile(0.1)`` of values to be plotted.
             - ``upper limit``: auto-filled value equals ``quantile(0.9)`` of values to be plotted.
 
-            Note that these values are filled with respect to color scaled values.
-            Also these limits clear upon change in variable or color scaling.
+            Note that these values are filled with respect to color scaled
+            values. Also these limits clear upon change in variable or
+            color scaling.
 
         6. ``compute min/max from all data`` (default `False`):
             - ``True``: all values present in a data variable are used to compute upper and lower colormap limits.
@@ -41,23 +42,29 @@ class Style(SigSlot):
             Provides option to display/hide colorbar.
         8. ``rasterize`` (default `True`):
             Provides option to use `data shading <http://datashader.org/>`_ .
-            It is better to have its value `True`, to get highly optimized rendering.
+            It is better to have its value `True`, to get highly optimized
+            rendering.
     """
 
     def __init__(self):
         super().__init__()
-        self.height = pn.widgets.IntSlider(name='height', value=300, start=100, end=1200)
-        self.width = pn.widgets.IntSlider(name='width', value=700, start=100, end=1200)
+        self.height = pn.widgets.IntSlider(name='height', value=300, start=100,
+                                           end=1200)
+        self.width = pn.widgets.IntSlider(name='width', value=700, start=100,
+                                          end=1200)
         self.cmap = pn.widgets.Select(name='cmap', value='Inferno',
                                       options=list_cmaps())
         self.colorbar = pn.widgets.Checkbox(name='colorbar', value=True)
         # colormap_limits
-        self.lower_limit = pn.widgets.TextInput(name='cmap lower limit', width=140)
-        self.upper_limit = pn.widgets.TextInput(name='cmap upper limit', width=140)
+        self.lower_limit = pn.widgets.TextInput(name='cmap lower limit',
+                                                width=140)
+        self.upper_limit = pn.widgets.TextInput(name='cmap upper limit',
+                                                width=140)
         self.use_all_data = pn.widgets.Checkbox(name='compute min/max from all data', value=False)
 
         scaling_ops = ['linear', 'exp', 'log', 'reciprocal', 'square', 'sqrt']
-        self.color_scale = pn.widgets.Select(name='color_scale', value='linear',
+        self.color_scale = pn.widgets.Select(name='color_scale',
+                                             value='linear',
                                              options=scaling_ops)
         self.rasterize = pn.widgets.Checkbox(name='rasterize', value=True)
 
@@ -88,5 +95,6 @@ class Style(SigSlot):
 
     @property
     def kwargs(self):
-        out = {widget.name: widget.value for row in self.panel for widget in row}
+        out = {widget.name: widget.value
+               for row in self.panel for widget in row}
         return out

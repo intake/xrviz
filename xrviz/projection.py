@@ -7,9 +7,11 @@ from cartopy import crs as ccrs
 from .sigslot import SigSlot
 from .utils import proj_params
 
-projections = [p for p in dir(ccrs) if inspect.isclass(getattr(ccrs, p)) and issubclass(getattr(ccrs, p), ccrs.Projection) and not p.startswith('_')]
+projections = [p for p in dir(ccrs) if inspect.isclass(getattr(ccrs, p)) and
+               issubclass(getattr(ccrs, p), ccrs.Projection) and
+               not p.startswith('_')]
 not_to_include = ['Projection', 'UTM']
-projections_list = sorted([p for p in projections if p not in not_to_include ])
+projections_list = sorted([p for p in projections if p not in not_to_include])
 
 
 class Projection(SigSlot):
@@ -20,7 +22,8 @@ class Projection(SigSlot):
 
         1. ``is_geo`` (default `False`):
             Allows the user to decide whether or not to geographically
-            project the data. If `True`, the other options in this tab are enabled.
+            project the data. If `True`, the other options in this tab are
+            enabled.
         2. ``alpha`` (default 0.7):
             To adjust the opacity of the quadmesh on the map or projection.
         3. ``basemap`` (default `None`):
@@ -28,31 +31,32 @@ class Projection(SigSlot):
         4. ``crs`` (default `PlateCarree`):
             Here `crs` refers to `cartopy coordinate reference system`_, which
             declares the coordinate system of the data. It specifies the input
-            projection, i.e. it declares how to interpret the incoming data values.
-            It allows the user to select the `crs` in which data is present.
+            projection, i.e. it declares how to interpret the incoming data
+            values. It allows the user to select the `crs` in which data is
+            present.
         5. ``crs params``:
             The default input parameters for each `crs` are auto filled upon
             selection. It allows the user to customize certain aspects of the
-            projections by providing extra parameters such as ``central_longitude``
-            and ``central_latitude``. For more details refer to
-            `cartopy coordinate reference system`_.
+            projections by providing extra parameters such as
+            ``central_longitude`` and ``central_latitude``. For more details
+            refer to `cartopy coordinate reference system`_.
         6. ``projection`` (default `None`):
             To select what coordinate system to display the data in.
-            We can also state it as output projection, i.e. how you want to map the
-            data points onto the screen for display.
+            We can also state it as output projection, i.e. how you want to
+            map the data points onto the screen for display.
         7. ``projection params``:
-            The default input parameters for each `projection` are auto filled upon
-            selection. It allows the user to customize certain aspects of the
-            projections by providing extra parameters such as ``central_longitude``
-            and ``central_latitude``.
+            The default input parameters for each `projection` are auto filled
+            upon selection. It allows the user to customize certain aspects of
+            the projections by providing extra parameters such as
+            ``central_longitude`` and ``central_latitude``.
         8. ``project`` (default `False`):
             Whether to project the data before plotting (adds initial overhead
             but avoids projecting data when plot is dynamically updated).
         9. ``global_extent`` (default `False`):
             Whether to expand the plot extent to span the whole globe.
         10. ``features`` (default=all except `None`):
-            To select a set of basic geographic features to overlay behind the data
-            in the plot.
+            To select a set of basic geographic features to overlay behind the
+            data in the plot.
 
         .. note::
             1. The widgets in this tab are enabled only if both ``x`` and ``y`` are data coordinates.
@@ -114,7 +118,8 @@ class Projection(SigSlot):
         self.panel = pn.Column(pn.Row(self.is_geo),
                                pn.Row(self.alpha, self.basemap),
                                pn.Row(self.crs, self.crs_params, name='crs'),
-                               pn.Row(self.projection, self.proj_params, name='proj'),
+                               pn.Row(self.projection, self.proj_params,
+                                      name='proj'),
                                pn.Row(self.project,
                                       self.global_extent),
                                pn.Row(self.features),
@@ -172,5 +177,6 @@ class Projection(SigSlot):
 
     @property
     def kwargs(self):
-        out = {widget.name: widget.value for row in self.panel for widget in row}
+        out = {widget.name: widget.value
+               for row in self.panel for widget in row}
         return out

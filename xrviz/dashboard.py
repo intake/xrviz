@@ -23,7 +23,7 @@ class Dashboard(SigSlot):
 
     Parameters
     ----------
-    data: xarray.DataSet or xarray.DataArray
+    data: xarray.DataSet
         The data to be visualised
 
     initial_params: `dict`
@@ -52,7 +52,8 @@ class Dashboard(SigSlot):
     7. series_graph:
             A ``HoloViews(Overlay)`` instance having series extracted.
     8. clear_series_button:
-            A ``pn.widgets.Button`` to clear the `taps_graph` and `series_graph`.
+            A ``pn.widgets.Button`` to clear the `taps_graph` and
+            `series_graph`.
     """
     def __init__(self, data, initial_params={}):
         super().__init__()
@@ -132,14 +133,14 @@ class Dashboard(SigSlot):
 
         It handles the following two cases:
 
-            1. Both `x`, `y` are present in selected variable's coordinates. Geographic
-            projection is possible only in this case. It uses ``create_selectors_players`` method
-            for creation of the graph.
+            1. Both `x`, `y` are present in selected variable's coordinates.
+            Geographic projection is possible only in this case. It uses
+            ``create_selectors_players`` method for creation of the graph.
             Here the selectors generated automatically by hvplot are used.
 
-            2. One or both of  `x`, `y` are NOT present in selected variable's coordinates (both
-            `x` and `y` are considered as dimensions). It uses ``create_indexed_graph`` method
-            for creation of the graph.
+            2. One or both of  `x`, `y` are NOT present in selected variable's
+            coordinates (both `x` and `y` are considered as dimensions). It
+            uses ``create_indexed_graph`` method for creation of the graph.
             The selectors are created and linked with graph by XrViz.
         """
         self.kwargs = self.control.kwargs
@@ -273,10 +274,12 @@ class Dashboard(SigSlot):
                 if self.kwargs[dim] == 'select':
                     selector = pn.widgets.Select(name=dim, options=ops)
                 else:
-                    selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
+                    selector = pn.widgets.DiscretePlayer(name=dim,
+                                                         value=ops[0],
+                                                         options=ops)
                 self.index_selectors.append(selector)
                 self._register(selector, selector.name)
-                self.connect(selector.name, self.create_indexed_graph )
+                self.connect(selector.name, self.create_indexed_graph)
 
             self.create_indexed_graph()
             for selector in self.index_selectors:
@@ -368,7 +371,7 @@ class Dashboard(SigSlot):
         """
         Create an output layer in the graph which responds to taps
 
-        Whenever the user taps (or clicks) the graph, a glyph will be overlaid, 
+        Whenever the user taps (or clicks) the graph, a glyph will be overlaid,
         and a series is extracted at that point.
         """
         color = next(iter(self.color_pool))
@@ -407,8 +410,9 @@ class Dashboard(SigSlot):
 
                 ``2b``: Both are 2-dimensional with same dimensions.
 
-                ``2c``: Both are 2-dimensional with different dims or are multi-dim coordinates. Here we are unable to extract.
-            Note that ``Case 1`` and ``Case 2a`` can be handled with the same code.
+                ``2c``: Both are 2-dimensional with different dims or are multi-dimcoordinates. Here we are unable to extract.
+            Note that ``Case 1`` and ``Case 2a`` can be handled with the same
+            code.
         """
         extract_along = self.control.kwargs['extract along']
         if None not in [x, y] and extract_along:

@@ -28,8 +28,8 @@ class Fields(SigSlot):
         assigned to the plot’s y (vertical) axis.
 
     Remaining Dims:
-        Any one of the following aggregations can be applied on each of remaining
-        dimensions:
+        Any one of the following aggregations can be applied on each of
+        remaining dimensions:
             1. ``select``: It creates a ``pn.widgets.Select``, to select the value of dimension, for which the graph would be displayed.
             2. ``animate``: It creates a ``panel.widgets.DiscretePlayer`` which helps to quickly iterate over all the values for a dimension.
             3. ``mean``: Creates plot along mean of the selected dimension.
@@ -39,9 +39,10 @@ class Fields(SigSlot):
             7. ``std``: Creates plot along standard deviation of the selected dimension.
             8. ``count``: Creates plot along non-nan values of the selected dimension.
 
-        Note that for both ``select`` and ``animate``, the plot will update according
-        to the value selected in the generated widget. Also, if a dimension has been
-        aggregated, its select widget would not be available.
+        Note that for both ``select`` and ``animate``, the plot will update
+        according to the value selected in the generated widget. Also, if a
+        dimension has been aggregated, its select widget would not be
+        available.
 
     Extract Along:
         This selector provides the option to select the dimension along which to
@@ -71,9 +72,8 @@ class Fields(SigSlot):
                                       pn.Spacer(),
                                       pn.Column('### Aggregations',
                                                 self.agg_selectors,
-                                                background='rgb(175,175,175)')),
-                               self.series_col,
-                               name='Axes')
+                                                background='rgb(175,175,175)')
+                                      ), self.series_col, name='Axes')
 
     def setup(self, var):
         """
@@ -97,7 +97,8 @@ class Fields(SigSlot):
                 self.y.options = []
                 self.remaining_dims = []
             else:
-                self.remaining_dims = [opt for opt in y_opts if opt!=self.y.value]
+                self.remaining_dims = [opt for opt in y_opts
+                                       if opt != self.y.value]
                 self.change_y()
 
     def change_y(self, value=None):
@@ -116,7 +117,8 @@ class Fields(SigSlot):
         else:  # x_val belong to non_indexed_coords
             values = set(values) - set(self.var_dims)
             #  Plot can be generated for 2 values only if ndims of both match
-            valid_values = [val for val in values if self.ndim_matches(x_val, val)]
+            valid_values = [val
+                            for val in values if self.ndim_matches(x_val, val)]
         y_opts = sorted(list(valid_values))
         self.y.options = y_opts
         if len(y_opts):
@@ -136,13 +138,15 @@ class Fields(SigSlot):
         used_opts = {x, y}
 
         if x in self.var_dims:
-            self.remaining_dims = [dim for dim in self.var_dims if dim not in used_opts]
+            self.remaining_dims = [dim for dim in self.var_dims
+                                   if dim not in used_opts]
         else:  # is a coord
             #  We can't aggregate along dims which are present in x and y.
             x_val_dims = set(self.data[x].dims) if x is not None else set()
             y_val_dims = set(self.data[y].dims) if y is not None else set()
             dims_not_to_agg = x_val_dims.union(y_val_dims).union(used_opts)
-            self.remaining_dims = [dim for dim in self.var_dims if dim not in dims_not_to_agg]
+            self.remaining_dims = [dim for dim in self.var_dims
+                                   if dim not in dims_not_to_agg]
 
         for dim in sorted(self.remaining_dims):
             agg_selector = pn.widgets.Select(name=dim,
@@ -180,11 +184,13 @@ class Fields(SigSlot):
         selectors = {p.name: p.value for p in self.panel[0][2][1]}  # remaining_dims
         out.update(selectors)
         dims_to_select_animate = [dim for dim, agg in selectors.items() if agg in ['select', 'animate']]
-        dims_to_agg = [dim for dim in selectors if dim not in dims_to_select_animate]
+        dims_to_agg = [dim for dim in selectors
+                       if dim not in dims_to_select_animate]
         out.update({'dims_to_agg': dims_to_agg})
         out.update({'dims_to_select_animate': sorted(dims_to_select_animate)})
         out.update({'are_var_coords': self.are_var_coords})
-        out.update({'remaining_dims': self.remaining_dims})  # dims_to_agg + dims_to_select_animate
+        # remaining_dims = dims_to_agg + dims_to_select_animate
+        out.update({'remaining_dims': self.remaining_dims})
         out.update({p.name: p.value for p in self.series_col})
         return out
 

@@ -16,18 +16,18 @@ class Control(SigSlot):
     Parameters
     ----------
     data: xarray.DataSet
-        The data to be visualised. Here, we are mostly concerned with displaying
-        the variables, their attributes, and assigning coordinates to
-        roles upon plotting.
+        The data to be visualised. Here, we are mostly concerned with
+        displaying the variables, their attributes, and assigning coordinates
+        to roles upon plotting.
 
     Attributes
     ----------
     1. panel:
             A ``panel.Tabs`` instance containing the user input panes
     2. displayer:
-            A ``Display``, a list of data variables for selection.
+            A ``Display`` instance, displays a list of data variables for selection.
     3. describer:
-            A ``Describe``, describes the properties of the variable
+            A ``Describe`` instance, describes the properties of the variable
             selected in the ``displayer``.
     4. coord_setter:
             A ``CoordSetter`` instance for choosing which variables are
