@@ -188,7 +188,7 @@ class Dashboard(SigSlot):
 
             # It is better to set initial values as 0.1,0.9 rather than 0,1(min, max)
             # to get a color balance graph
-            c_lim_lower, c_lim_upper = (float(cmin), float(cmax)) if cmin and cmax else ([q for q in sel_data_for_cmap.quantile([0.1, 0.9])])
+            c_lim_lower, c_lim_upper = (float(cmin), float(cmax)) if cmin and cmax else ([q for q in sel_data_for_cmap.compute().quantile([0.1, 0.9])])
 
             color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
@@ -283,7 +283,7 @@ class Dashboard(SigSlot):
 
         # It is better to set initial values as 0.1,0.9 rather than 0,1(min, max)
         # to get a color balance graph
-        c_lim_lower, c_lim_upper = (float(cmin), float(cmax)) if cmin and cmax else ([q for q in sel_data.quantile([0.1, 0.9])])
+        c_lim_lower, c_lim_upper = (float(cmin), float(cmax)) if cmin and cmax else ([q for q in sel_data.compute().quantile([0.1, 0.9])])
 
         color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
