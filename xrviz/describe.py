@@ -8,16 +8,25 @@ from .sigslot import SigSlot
 
 class Describe(SigSlot):
     """
-    This section describes the property selected in the Display section.
+    Displays the properties of the variable selected in the Display section.
+
+    This section has two tables as output. The first table shows
+    `Variable attributes` and the second table shows `Global Attributes`.
+    Upon selection of a new variable in the Display widget, the first table
+    updates itself with properties of the new selection,
+    while the second table stays same.
 
     Parameters
     ----------
-    data: `xarray` instance: `DataSet` or `DataArray`
-        datset is used to initialize the DataSelector
+
+    data: xarray.DataSet
 
     Attributes
     ----------
-    panel: Displays the generated template
+
+    panel:
+        A ``panel.pane.HTML`` instance which displays the tables arranged
+        next to each other.
 
     """
     def __init__(self, data):
@@ -35,6 +44,9 @@ class Describe(SigSlot):
         self.panel.object = self.variable_pane_for_dataset(var)
 
     def variable_pane_for_dataset(self, var):
+        """
+        Returns HTML template describing variable and global attributes.
+        """
         if var is not None:
             var = var if isinstance(var, str) else var[0]
             var_attrs = [(k, v) for k, v in self.data[var].attrs.items()]
