@@ -19,22 +19,41 @@ from .compatibility import ccrs, gv, gf, has_cartopy, logger
 
 class Dashboard(SigSlot):
     """
-    This section provides access to the complete generated dashboard,
-    consisting of all subsections.
+    Main entry point to XrViz, an interactive GUI for a given dataset.
 
     Parameters
     ----------
-    data: `xarray` instance: `DataSet` or `DataArray`
-           datset is used to initialize.
-    initial_params: To pre-set values of widgets.
+    data: xarray.DataSet
+        The data to be visualised
+
+    initial_params: `dict`
+        To pre-select values of widgets upon initialization. The keys are
+        generally names of widgets within the input area of the interface.
+        For more details, refer to
+        `Set Initial Parameters <../html/set_initial_parameters.html>`_ .
 
     Attributes
     ----------
-    panel: Displays the generated dashboard.
-    control: Provides access to the generated control panel.
-    plot: Plot button, upon click generates graph according to
-          kwargs selected in other sub-sections.
-    output: Provides access to generated graph.
+
+    1. panel:
+            A ``panel.Tabs`` instance containing the user input panes and
+            output graphs of the interface.
+    2. control:
+            A ``Control`` instance responsible for input panes (control panel).
+    3. plot_button:
+            A ``pn.widgets.Button`` that generates graph according to values
+            selected in input panes, upon click.
+    4. graph:
+            A ``HoloViews(DynamicMap)`` instance containing the main graph.
+    5. output:
+            The ``graph`` along with the select widgets for index selection.
+    6. taps_graph:
+            A ``holoviews.Points`` instance to record the location of taps.
+    7. series_graph:
+            A ``HoloViews(Overlay)`` instance having series extracted.
+    8. clear_series_button:
+            A ``pn.widgets.Button`` to clear the `taps_graph` and
+            `series_graph`.
     """
     def __init__(self, data, initial_params={}):
         super().__init__()
@@ -43,7 +62,8 @@ class Dashboard(SigSlot):
         self.set_data(data)
         self.initial_params = initial_params
         self.control = Control(self.data)
-        self.plot_button = pn.widgets.Button(name='Plot', width=200, disabled=True)
+        self.plot_button = pn.widgets.Button(name='Plot', width=200,
+                                             disabled=True)
         self.index_selectors = []
         self.graph = pn.Spacer(name='Graph')
         self.taps_graph = hv.Points([])
@@ -55,7 +75,7 @@ class Dashboard(SigSlot):
                              pn.Column(name='Index_selectors'))
 
         self._register(self.plot_button, 'plot_clicked', 'clicks')
-        self.connect('plot_clicked', self.create_plot)
+        self.connect('plot_clicked', self.create_graph)
 
         self._register(self.control.coord_setter.coord_selector, 'set_coords')
         self.connect("set_coords", self.set_coords)
@@ -63,10 +83,12 @@ class Dashboard(SigSlot):
         self._register(self.clear_series_button, 'clear_series', 'clicks')
         self.connect('clear_series', self.clear_series)
 
-        self.control.displayer.connect('variable_selected', self.check_is_plottable)
-        self.control.displayer.connect('variable_selected', self.link_aggregation_selectors)
-        self.control.fields.connect('x', self.link_aggregation_selectors)
-        self.control.fields.connect('y', self.link_aggregation_selectors)
+        self.control.displayer.connect('variable_selected',
+                                       self.check_is_plottable)
+        self.control.displayer.connect('variable_selected',
+                                       self._link_aggregation_selectors)
+        self.control.fields.connect('x', self._link_aggregation_selectors)
+        self.control.fields.connect('y', self._link_aggregation_selectors)
 
         self.panel = pn.Column(self.control.panel,
                                pn.Row(self.plot_button,
@@ -85,9 +107,13 @@ class Dashboard(SigSlot):
                   '#229cf4', '#af9862', '#629baf', '#7eed5a', '#e29ec8',
                   '#ff4300']
         self.color_pool = cycle(colors)
-        self.clear_points = hv.streams.Stream.define('Clear_points', clear=False)(transient=True)
+        self.clear_points = hv.streams.Stream.define(
+            'Clear_points', clear=False)(transient=True)
 
     def clear_series(self, *args):
+        """
+        Clears the markers on the image, and the extracted series.
+        """
         if not self.clear_series_button.disabled:
             self.series_graph[0] = pn.Spacer(name='Series Graph')
             self.series = hv.Points([]).opts(height=self.kwargs['height'],
@@ -95,18 +121,27 @@ class Dashboard(SigSlot):
             self.taps.clear()
             self.clear_points.event(clear=True)
 
-    def link_aggregation_selectors(self, *args):
-        """
-        To link aggregation selectors with cmap limits
-        Whenever any aggregation selector changes it value,
-        limits are cleared.
-        """
+    def _link_aggregation_selectors(self, *args):
         for dim_selector in self.control.kwargs['remaining_dims']:
             self.control.fields.connect(dim_selector, self.control.style.setup)
 
-    def create_plot(self, *args):
+    def create_graph(self, *args):
         """
-        To create plot.
+        Creates a graph according to the values selected in the widgets.
+
+        This method is usually invoked by the user clicking "Plot"
+
+        It handles the following two cases:
+
+            1. Both `x`, `y` are present in selected variable's coordinates.
+            Geographic projection is possible only in this case. It uses
+            ``create_selectors_players`` method for creation of the graph.
+            Here the selectors generated automatically by hvplot are used.
+
+            2. One or both of  `x`, `y` are NOT present in selected variable's
+            coordinates (both `x` and `y` are considered as dimensions). It
+            uses ``create_indexed_graph`` method for creation of the graph.
+            The selectors are created and linked with graph by XrViz.
         """
         self.kwargs = self.control.kwargs
         self.var = self.kwargs['Variables']
@@ -186,9 +221,12 @@ class Dashboard(SigSlot):
             cmin, cmax = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
             cmin, cmax = (cmin, cmax) if is_float(cmin) and is_float(cmax) else ('', '')
 
-            # It is better to set initial values as 0.1,0.9 rather than 0,1(min, max)
-            # to get a color balance graph
-            c_lim_lower, c_lim_upper = (float(cmin), float(cmax)) if cmin and cmax else ([q for q in sel_data_for_cmap.compute().quantile([0.1, 0.9])])
+            # It is better to set initial values as 0.1,0.9 rather than
+            # 0,1(min, max) to get a color balance graph
+            c_lim_lower, c_lim_upper = (
+                (float(cmin), float(cmax)) if cmin and cmax
+                else ([q for q in sel_data_for_cmap.quantile([0.1, 0.9])])
+            )
 
             color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
@@ -198,16 +236,26 @@ class Dashboard(SigSlot):
 
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
             # Following tasks are happening here:
-            # 1. assign_opts: reassignment of coords(if not done result in errors for some of the selections in fields panel)
-            # 2. graph_opts: customise the plot according to selections in style and projection(if available)
-            # 3. color_range: customise the colormap range according to cmap lower and upper limits
-            # 4. active_tools: activate the tools required such as 'wheel_zoom', 'pan'
-            graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
+            # 1. assign_opts: reassignment of coords(if not done result in
+            # errors for some of the selections in fields panel)
+            # 2. graph_opts: customise the plot according to selections in
+            # style and projection(if available)
+            # 3. color_range: customise the colormap range according to cmap
+            # lower and upper limits
+            # 4. active_tools: activate the tools required such as 'wheel_zoom',
+            # 'pan'
+            graph = sel_data.assign_coords(
+                **assign_opts).hvplot.quadmesh(
+                **graph_opts).redim.range(**color_range).opts(
+                active_tools=['wheel_zoom', 'pan'])
 
             self.tap_stream.source = graph
 
             if has_cartopy and is_geo:
-                graph = feature_map * graph if self.kwargs['features'] != ['None'] else graph
+                graph = (
+                    feature_map * graph
+                    if self.kwargs['features'] != ['None'] else graph
+                )
                 if show_map:
                     graph = base_map * graph
                     self.tap_stream.source = graph
@@ -216,7 +264,8 @@ class Dashboard(SigSlot):
 
         else:  # if one or both x,y are var_dims
             self.var_dims = list(self.data[self.var].dims)
-            #  var_selector_dims refers to dims for which index_selectors would be created
+            #  var_selector_dims refers to dims for which index_selectors
+            #  would be created
             self.var_selector_dims = self.kwargs['dims_to_select_animate']
 
             for dim in self.var_selector_dims:
@@ -225,10 +274,12 @@ class Dashboard(SigSlot):
                 if self.kwargs[dim] == 'select':
                     selector = pn.widgets.Select(name=dim, options=ops)
                 else:
-                    selector = pn.widgets.DiscretePlayer(name=dim, value=ops[0], options=ops)
+                    selector = pn.widgets.DiscretePlayer(name=dim,
+                                                         value=ops[0],
+                                                         options=ops)
                 self.index_selectors.append(selector)
                 self._register(selector, selector.name)
-                self.connect(selector.name, self.create_indexed_graph )
+                self.connect(selector.name, self.create_indexed_graph)
 
             self.create_indexed_graph()
             for selector in self.index_selectors:
@@ -240,7 +291,10 @@ class Dashboard(SigSlot):
 
     def create_indexed_graph(self, *args):
         """
-        Creates graph for  selected indexes in selectors or players.
+        Creates a graph for the dimensions selected in widgets `x` and `y`.
+
+        This is used when values selected in `x` and `y` are not data
+        coordinates (i.e. one or both values are data dimensions).
         """
         selection = {}  # to collect the value of index selectors
         for i, dim in enumerate(list(self.var_selector_dims)):
@@ -281,9 +335,12 @@ class Dashboard(SigSlot):
         cmin, cmax = self.kwargs['cmap lower limit'], self.kwargs['cmap upper limit']
         cmin, cmax = (cmin, cmax) if is_float(cmin) and is_float(cmax) else ('', '')
 
-        # It is better to set initial values as 0.1,0.9 rather than 0,1(min, max)
-        # to get a color balance graph
-        c_lim_lower, c_lim_upper = (float(cmin), float(cmax)) if cmin and cmax else ([q for q in sel_data.compute().quantile([0.1, 0.9])])
+        # It is better to set initial values as 0.1,0.9 rather than
+        # 0,1(min, max) to get a color balance graph
+        c_lim_lower, c_lim_upper = (
+            (float(cmin), float(cmax)) if cmin and cmax
+            else ([q for q in sel_data.quantile([0.1, 0.9])])
+        )
 
         color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
@@ -295,11 +352,15 @@ class Dashboard(SigSlot):
             sel_data = sel_data.sel(**selection, drop=True)
 
         assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
-        graph = sel_data.assign_coords(**assign_opts).hvplot.quadmesh(**graph_opts).redim.range(**color_range).opts(active_tools=['wheel_zoom', 'pan'])
+        graph = sel_data.assign_coords(
+            **assign_opts).hvplot.quadmesh(**graph_opts).redim.range(
+            **color_range).opts(active_tools=['wheel_zoom', 'pan'])
         self.graph = graph
         if len(self.data[self.var].dims) > 2 and self.kwargs['extract along']:
             self.tap_stream.source = graph
-            self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream, self.clear_points])
+            self.taps_graph = hv.DynamicMap(
+                self.create_taps_graph,
+                streams=[self.tap_stream, self.clear_points])
             self.output[0] = self.graph * self.taps_graph
             self.clear_series_button.disabled = False
         else:
@@ -308,7 +369,10 @@ class Dashboard(SigSlot):
 
     def create_taps_graph(self, x, y, clear=False):
         """
-        To mark taps
+        Create an output layer in the graph which responds to taps
+
+        Whenever the user taps (or clicks) the graph, a glyph will be overlaid,
+        and a series is extracted at that point.
         """
         color = next(iter(self.color_pool))
         if None not in [x, y]:
@@ -330,18 +394,31 @@ class Dashboard(SigSlot):
 
     def create_series_graph(self, x, y, color, clear=False):
         """
-        Create series graph
+        Extract a series at a given point, and plot it.
+
+        The series plotted has same color as that of the marker depicting the
+        location of the tap.
+
+        The following cases have been handled:
+            `Case 1`:
+                When both x and y are NOT coords (i.e. are dims)
+
+            `Case 2`:
+                When both x and y are coords
+
+                ``2a``: Both are 1-dimensional
+
+                ``2b``: Both are 2-dimensional with same dimensions.
+
+                ``2c``: Both are 2-dimensional with different dims or are multi-dimcoordinates. Here we are unable to extract.
+            Note that ``Case 1`` and ``Case 2a`` can be handled with the same
+            code.
         """
-        # Case 1: When both x and y are NOT coords (i.e. are dims)
-        # Case 2: When both x and y are coords
-        #     2b: Both are 1d
-        #     2b: Both are 2d with same dims
-        #     2c: 2-dim with diff dims or multi-dim coords: Unable to extract
-        # Note: 1 and 2a require same code.
         extract_along = self.control.kwargs['extract along']
         if None not in [x, y] and extract_along:
             color = self.taps[-1][-1] if self.taps[-1][-1] else None
-            other_dims = [dim for dim in self.kwargs['remaining_dims'] if dim is not extract_along]
+            other_dims = [dim for dim in self.kwargs['remaining_dims'] if
+                          dim is not extract_along]
 
             # to use the value selected in index selector for selecting
             # data to create series. In case of aggregation, plot is
@@ -351,7 +428,8 @@ class Dashboard(SigSlot):
                 for dim in other_dims:
                     dim_found = False
                     for dim_sel in self.index_selectors:
-                        long_name = self.data[dim].long_name if hasattr(self.data[dim], 'long_name') else None
+                        long_name = self.data[dim].long_name if hasattr(
+                            self.data[dim], 'long_name') else None
                         if dim_sel.name == dim or dim_sel.name == long_name:
                             val = dim_sel.value
                             other_dim_sels.update({dim: val})
@@ -362,21 +440,25 @@ class Dashboard(SigSlot):
 
             # Case 1 and  2a
             if not self.kwargs['are_var_coords'] or self.both_coords_1d():
-                series_sel = {self.kwargs['x']: self.correct_val(self.kwargs['x'], x),
-                              self.kwargs['y']: self.correct_val(self.kwargs['y'], y)}
+                series_sel = {
+                    self.kwargs['x']: self.correct_val(self.kwargs['x'], x),
+                    self.kwargs['y']: self.correct_val(self.kwargs['y'], y)}
             # Case 2b
             elif self.both_coords_2d_with_same_dims():
                 y_dim, x_dim = self.data[self.kwargs['x']].dims
 
-                y_mean = self.data[self.kwargs['y']].mean()*np.pi/180.
-                a = (self.data[self.kwargs['y']]-y)**2 + ((self.data[self.kwargs['x']]-x)*np.cos(y_mean))**2
+                y_mean = self.data[self.kwargs['y']].mean() * np.pi / 180.
+                a = (self.data[self.kwargs['y']] - y) ** 2 + (
+                            (self.data[self.kwargs['x']] - x) * np.cos(
+                        y_mean)) ** 2
                 j, i = np.unravel_index(a.argmin(), a.shape)
 
                 series_sel = {x_dim: self.correct_val(x_dim, i),
                               y_dim: self.correct_val(y_dim, j)}
             # Case 2c
             else:
-                logger.debug("Cannot extract 2d coords with different dims and multi-dimensional coords.")
+                logger.debug("Cannot extract 2d coords with different dims and"
+                             " multi-dimensional coords.")
                 return self.series
 
             if len(other_dims):
@@ -406,31 +488,37 @@ class Dashboard(SigSlot):
 
     def create_selectors_players(self, graph):
         """
-        This function is applicable for when both x and y are in var coords,
-        In case sliders are generated, this function moves the sliders to
-        bottom of graph if they are present and convert them into Selectors,
-        Players.
+        Converts the sliders generated by hvplot into selectors/players.
+
+        This is applicable only when both `x` and `y` are present in variable
+        coordinates. It converts any sliders generated by hvplot into
+        selectors/players and moves them to the bottom of graph.
         """
         if len(self.data[self.var].dims) > 2 and self.kwargs['extract along']:
-            self.taps_graph = hv.DynamicMap(self.create_taps_graph, streams=[self.tap_stream, self.clear_points])
+            self.taps_graph = hv.DynamicMap(self.create_taps_graph,
+                                            streams=[self.tap_stream,
+                                                     self.clear_points])
             self.clear_series_button.disabled = False
             graph = graph * self.taps_graph
         else:
             self.clear_series_button.disabled = True
         graph = pn.Row(graph)
-        try:  # `if graph[0][1]` or `len(graph[0][1])` results in error in case it is not present
+        try:
             if graph[0][1]:  # if sliders are generated
                 self.output[0] = graph[0][0]
 
                 # link the generated slider with agg selector in fields
                 for slider in graph[0][1]:
                     for dim in self.kwargs['dims_to_select_animate']:
-                        long_name = self.data[dim].long_name if hasattr(self.data[dim], 'long_name') else None
+                        long_name = self.data[dim].long_name if hasattr(
+                            self.data[dim], 'long_name') else None
                         if slider.name == dim or slider.name == long_name:
                             if self.kwargs[dim] == 'select':
-                                selector = convert_widget(slider, pn.widgets.Select())
+                                selector = convert_widget(slider,
+                                                          pn.widgets.Select())
                             else:
-                                selector = convert_widget(slider, pn.widgets.DiscretePlayer())
+                                selector = convert_widget(
+                                    slider, pn.widgets.DiscretePlayer())
                             self.index_selectors.append(selector)
 
                 for selector in self.index_selectors:
@@ -444,7 +532,10 @@ class Dashboard(SigSlot):
             self.output[0] = graph
 
     def set_data(self, data):
-        self.data = xr.Dataset({f'{data.name}': data}, attrs=data.attrs) if isinstance(data, xr.DataArray) else data
+        self.data = (
+            xr.Dataset({f'{data.name}': data})
+            if isinstance(data, xr.DataArray) else data
+        )
 
     def set_coords(self, *args):
         # We can't reset indexed coordinates so add them every time
@@ -457,6 +548,8 @@ class Dashboard(SigSlot):
 
     def check_is_plottable(self, var):
         """
+        Check if a data variable can be plotted.
+
         If a variable is 1-d, disable plot_button for it.
         """
         self.plot_button.disabled = False  # important to enable button once disabled
@@ -464,14 +557,12 @@ class Dashboard(SigSlot):
         self.plot_button.disabled = len(data.dims) <= 1
 
     def correct_val(self, dim, x):
-        """ Since tapped values from graph are in floats,
-            we need to convert them into ints, or pass as it is
-            for time
+        """ Convert tapped coordinates to int, if not time-type
         """
-        dtype = str(getattr(self.data[dim], 'dtype'))
-        if 'int' in dtype:
+        dtype = self.data[dim].dtype.kind
+        if dtype == 'i':
             return int(x)
-        elif 'float' in dtype:
+        elif dtype == 'f':
             return float(x)
         else:
             return str(x)
@@ -486,8 +577,7 @@ class Dashboard(SigSlot):
 
 
 def sel_val_from_dim(data, dim, x):
-    """ To select values from a dim.
-        For some dims method is required while for others it is not
+    """ Select values from a dim.
     """
     try:
         return data.sel({dim: x})

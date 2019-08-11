@@ -8,37 +8,45 @@ from .compatibility import mpcalc
 
 class Fields(SigSlot):
     """
-    This section provides the user with a fields selection panel.
-    Upon selection of a variable in `Display` panel, its dimensions
-    are available as options in `x` and `y` Select widget.
+    To select the fields to plot along.
+
+    This pane controls which array dimensions should be mapped,
+    how additional dimensions should be handled, and which dimension
+    series plots should be extracted along.
 
     Parameters
     ----------
-    data: `xarray` instance: `DataSet` or `DataArray`
-           datset is used to initialize.
+    data: xarray.DataSet
 
     Attributes
     ----------
-    x: `panel.widget.Select` for selection of dims along x-axis.
-    y: `panel.widget.Select` for selection of dims along y-axis.
-    kwargs: provides access to dims selected by `x` and `y`.
+    x:
+        To select which of the available dimensions/coordinates in the data is
+        assigned to the plot’s x (horizontal) axis.
+    y:
+        To select which of the available dimensions/coordinates in the data is
+        assigned to the plot’s y (vertical) axis.
 
-    Following options are available for each dimension:
-        1. ``select``: This is the default option. It creates a widget
-            to select the value of dimension, for which the graph would be displayed.
-        2. ``animate``: It creates a `player`_ widget which helps to quickly iterate
-            over all the values for a dimension.
-        3. ``mean``: To create plot for mean of values.
-        4. ``max``: To create plot for maximum of values.
-        5. ``min``: To create plot for minimum of values.
-        6. ``median``: To create plot for median of values.
-        7. ``std``: To create plot for standard deviation of values.
-        8. ``count``: To create plot for non-nan of values.
+    Remaining Dims:
+        Any one of the following aggregations can be applied on each of
+        remaining dimensions:
+            1. ``select``: It creates a ``pn.widgets.Select``, to select the value of dimension, for which the graph would be displayed.
+            2. ``animate``: It creates a ``panel.widgets.DiscretePlayer`` which helps to quickly iterate over all the values for a dimension.
+            3. ``mean``: Creates plot along mean of the selected dimension.
+            4. ``max``: Creates plot along maximum of the selected dimension.
+            5. ``min``: Creates plot along minimum of the selected dimension.
+            6. ``median``: Creates plot along median of the selected dimension.
+            7. ``std``: Creates plot along standard deviation of the selected dimension.
+            8. ``count``: Creates plot along non-nan values of the selected dimension.
 
-        Note that for both ``select`` and ``animate``, the plot will update according
-        to the value selected in the generated widget. Also, if a dimension has been
-        aggregated, its select widget would not be available.
+        Note that for both ``select`` and ``animate``, the plot will update
+        according to the value selected in the generated widget. Also, if a
+        dimension has been aggregated, its select widget would not be
+        available.
 
+    Extract Along:
+        This selector provides the option to select the dimension along which to
+        create a series graph.
     """
 
     def __init__(self, data):
@@ -64,13 +72,12 @@ class Fields(SigSlot):
                                       pn.Spacer(),
                                       pn.Column('### Aggregations',
                                                 self.agg_selectors,
-                                                background='rgb(175,175,175)')),
-                               self.series_col,
-                               name='Axes')
+                                                background='rgb(175,175,175)')
+                                      ), self.series_col, name='Axes')
 
     def setup(self, var):
         """
-        To setup the fields
+        Fill available options for the selected variable.
         """
         self.agg_selectors.clear()  # To empty previouly selected value from selector
         self.var = var if isinstance(var, str) else var[0]
@@ -90,13 +97,13 @@ class Fields(SigSlot):
                 self.y.options = []
                 self.remaining_dims = []
             else:
-                self.remaining_dims = [opt for opt in y_opts if opt!=self.y.value]
+                self.remaining_dims = [opt for opt in y_opts
+                                       if opt != self.y.value]
                 self.change_y()
 
     def change_y(self, value=None):
         """
-        Updates the options of y, by removing option selected in x (value),
-        from all the variable dimensions available as options.
+        Updates ``y`` by removing the value of ``x``, from the available options
         """
         # if x belong to var_dims replace the y with remaining var_dims
         # else if x belong to non_indexed_coords, replace y with remaining
@@ -110,7 +117,8 @@ class Fields(SigSlot):
         else:  # x_val belong to non_indexed_coords
             values = set(values) - set(self.var_dims)
             #  Plot can be generated for 2 values only if ndims of both match
-            valid_values = [val for val in values if self.ndim_matches(x_val, val)]
+            valid_values = [val
+                            for val in values if self.ndim_matches(x_val, val)]
         y_opts = sorted(list(valid_values))
         self.y.options = y_opts
         if len(y_opts):
@@ -120,7 +128,7 @@ class Fields(SigSlot):
 
     def change_dim_selectors(self, *args):
         """
-        To change the dim selectors
+        Updates the dimensions available for `Aggregation` and `Extract Along` upon change in value of ``y``.
         """
         self.are_var_coords = self.check_are_var_coords()
         self.agg_selectors.clear()
@@ -130,13 +138,15 @@ class Fields(SigSlot):
         used_opts = {x, y}
 
         if x in self.var_dims:
-            self.remaining_dims = [dim for dim in self.var_dims if dim not in used_opts]
+            self.remaining_dims = [dim for dim in self.var_dims
+                                   if dim not in used_opts]
         else:  # is a coord
             #  We can't aggregate along dims which are present in x and y.
             x_val_dims = set(self.data[x].dims) if x is not None else set()
             y_val_dims = set(self.data[y].dims) if y is not None else set()
             dims_not_to_agg = x_val_dims.union(y_val_dims).union(used_opts)
-            self.remaining_dims = [dim for dim in self.var_dims if dim not in dims_not_to_agg]
+            self.remaining_dims = [dim for dim in self.var_dims
+                                   if dim not in dims_not_to_agg]
 
         for dim in sorted(self.remaining_dims):
             agg_selector = pn.widgets.Select(name=dim,
@@ -174,11 +184,13 @@ class Fields(SigSlot):
         selectors = {p.name: p.value for p in self.panel[0][2][1]}  # remaining_dims
         out.update(selectors)
         dims_to_select_animate = [dim for dim, agg in selectors.items() if agg in ['select', 'animate']]
-        dims_to_agg = [dim for dim in selectors if dim not in dims_to_select_animate]
+        dims_to_agg = [dim for dim in selectors
+                       if dim not in dims_to_select_animate]
         out.update({'dims_to_agg': dims_to_agg})
         out.update({'dims_to_select_animate': sorted(dims_to_select_animate)})
         out.update({'are_var_coords': self.are_var_coords})
-        out.update({'remaining_dims': self.remaining_dims})  # dims_to_agg + dims_to_select_animate
+        # remaining_dims = dims_to_agg + dims_to_select_animate
+        out.update({'remaining_dims': self.remaining_dims})
         out.update({p.name: p.value for p in self.series_col})
         return out
 
@@ -191,9 +203,9 @@ class Fields(SigSlot):
         return self.data[var1].ndim == self.data[var2].ndim
 
     def check_are_var_coords(self):
-        '''
-        Check if both x and y are in variable's coords
-        '''
+        """
+        Check if both ``x`` and ``y`` are coordinates of the selected variable.
+        """
         var_coords = list(self.data[self.var].coords)
         x = self.x.value
         y = self.y.value
@@ -201,7 +213,11 @@ class Fields(SigSlot):
 
     def guess_x_y(self, var):
         """
-        To guess x,y with metpy
+        To guess the value of ``x`` and ``y`` with `metpy.parse_cf`_.
+        This is applicable only for the case when both `x` and `y` are data
+        coordinates.
+
+        .. _`metpy.parse_cf`: https://github.com/Unidata/MetPy/blob/master/metpy/xarray.py#L335
         """
         try:
             parsed_var = self.data.metpy.parse_cf(var)
