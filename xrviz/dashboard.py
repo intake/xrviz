@@ -1,4 +1,5 @@
 import ast
+import dask
 import panel as pn
 import pandas as pd
 import numpy as np
@@ -225,14 +226,13 @@ class Dashboard(SigSlot):
             # 0,1(min, max) to get a color balance graph
             c_lim_lower, c_lim_upper = (
                 (float(cmin), float(cmax)) if cmin and cmax
-                else ([q for q in sel_data_for_cmap.quantile([0.1, 0.9])])
-            )
+                else find_cmap_limits(sel_data_for_cmap))
 
             color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
             if not cmin:  # if user left blank or initial values are empty
-                self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
-                self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
+                self.control.style.lower_limit.value = str(round(c_lim_lower, 5))
+                self.control.style.upper_limit.value = str(round(c_lim_upper, 5))
 
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
             # Following tasks are happening here:
@@ -339,14 +339,13 @@ class Dashboard(SigSlot):
         # 0,1(min, max) to get a color balance graph
         c_lim_lower, c_lim_upper = (
             (float(cmin), float(cmax)) if cmin and cmax
-            else ([q for q in sel_data.quantile([0.1, 0.9])])
-        )
+            else find_cmap_limits(sel_data))
 
         color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
         if not cmin:  # if user left blank or initial values are empty
-            self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
-            self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
+            self.control.style.lower_limit.value = str(round(c_lim_lower, 5))
+            self.control.style.upper_limit.value = str(round(c_lim_upper, 5))
 
         if use_all_data:  # do the selection later
             sel_data = sel_data.sel(**selection, drop=True)
@@ -574,6 +573,13 @@ class Dashboard(SigSlot):
         x_dims = self.data[self.kwargs['x']].dims
         y_dims = self.data[self.kwargs['y']].dims
         return len(x_dims) == len(y_dims) == 2 and sorted(x_dims) == sorted(y_dims)
+
+
+def find_cmap_limits(sel_data):
+    if isinstance(sel_data.data, dask.array.core.Array):
+        return dask.array.percentile(sel_data.data.ravel(), (10, 90)).compute()
+    else:  # if sel_data.data is numpy.ndarray
+        return [float(q) for q in sel_data.quantile([0.1, 0.9])]
 
 
 def sel_val_from_dim(data, dim, x):
