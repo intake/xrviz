@@ -15,7 +15,7 @@ import numpy
 from .sigslot import SigSlot
 from .control import Control
 from .utils import convert_widget, player_with_name_and_value, is_float
-from .compatibility import ccrs, gv, gf, has_cartopy, logger
+from .compatibility import ccrs, gv, gf, has_cartopy, logger, has_crick
 
 
 class Dashboard(SigSlot):
@@ -578,7 +578,9 @@ class Dashboard(SigSlot):
 
 def find_cmap_limits(sel_data):
     if isinstance(sel_data.data, dask.array.core.Array):
-        return dask.array.percentile(sel_data.data.ravel(), (10, 90)).compute()
+        method = 'tdigest' if has_crick else 'default'
+        return dask.array.percentile(sel_data.data.ravel(), (10, 90),
+                                     method=method).compute()
     else:  # if sel_data.data is numpy.ndarray
         return [float(q) for q in sel_data.quantile([0.1, 0.9])]
 
