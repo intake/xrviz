@@ -25,3 +25,10 @@ except ImportError:
         `conda install -c conda-forge metpy pint pooch --no-deps`
     """)
     mpcalc = None
+
+try:
+    import crick.tdigest
+    has_crick_tdigest = True
+except ImportError:
+    logger.debug("Install crick to use tdigest method for finding cmap limits.")
+    has_crick_tdigest = False

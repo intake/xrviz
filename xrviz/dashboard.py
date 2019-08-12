@@ -1,4 +1,5 @@
 import ast
+import dask
 import panel as pn
 import pandas as pd
 import numpy as np
@@ -14,7 +15,7 @@ import numpy
 from .sigslot import SigSlot
 from .control import Control
 from .utils import convert_widget, player_with_name_and_value, is_float
-from .compatibility import ccrs, gv, gf, has_cartopy, logger
+from .compatibility import ccrs, gv, gf, has_cartopy, logger, has_crick_tdigest
 
 
 class Dashboard(SigSlot):
@@ -225,14 +226,13 @@ class Dashboard(SigSlot):
             # 0,1(min, max) to get a color balance graph
             c_lim_lower, c_lim_upper = (
                 (float(cmin), float(cmax)) if cmin and cmax
-                else ([q for q in sel_data_for_cmap.quantile([0.1, 0.9])])
-            )
+                else find_cmap_limits(sel_data_for_cmap))
 
             color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
             if not cmin:  # if user left blank or initial values are empty
-                self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
-                self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
+                self.control.style.lower_limit.value = str(round(c_lim_lower, 5))
+                self.control.style.upper_limit.value = str(round(c_lim_upper, 5))
 
             assign_opts = {dim: self.data[dim] for dim in sel_data.dims}
             # Following tasks are happening here:
@@ -296,6 +296,7 @@ class Dashboard(SigSlot):
         This is used when values selected in `x` and `y` are not data
         coordinates (i.e. one or both values are data dimensions).
         """
+        self.kwargs = self.control.kwargs
         selection = {}  # to collect the value of index selectors
         for i, dim in enumerate(list(self.var_selector_dims)):
             selection[dim] = self.index_selectors[i].value
@@ -339,14 +340,13 @@ class Dashboard(SigSlot):
         # 0,1(min, max) to get a color balance graph
         c_lim_lower, c_lim_upper = (
             (float(cmin), float(cmax)) if cmin and cmax
-            else ([q for q in sel_data.quantile([0.1, 0.9])])
-        )
+            else find_cmap_limits(sel_data))
 
         color_range = {sel_data.name: (c_lim_lower, c_lim_upper)}
 
         if not cmin:  # if user left blank or initial values are empty
-            self.control.style.lower_limit.value = str(c_lim_lower.values.round(5))
-            self.control.style.upper_limit.value = str(c_lim_upper.values.round(5))
+            self.control.style.lower_limit.value = str(round(c_lim_lower, 5))
+            self.control.style.upper_limit.value = str(round(c_lim_upper, 5))
 
         if use_all_data:  # do the selection later
             sel_data = sel_data.sel(**selection, drop=True)
@@ -574,6 +574,15 @@ class Dashboard(SigSlot):
         x_dims = self.data[self.kwargs['x']].dims
         y_dims = self.data[self.kwargs['y']].dims
         return len(x_dims) == len(y_dims) == 2 and sorted(x_dims) == sorted(y_dims)
+
+
+def find_cmap_limits(sel_data):
+    if isinstance(sel_data.data, dask.array.core.Array):
+        method = 'tdigest' if has_crick_tdigest else 'default'
+        return dask.array.percentile(sel_data.data.ravel(), (10, 90),
+                                     method=method).compute()
+    else:  # if sel_data.data is numpy.ndarray
+        return [float(q) for q in sel_data.quantile([0.1, 0.9])]
 
 
 def sel_val_from_dim(data, dim, x):
