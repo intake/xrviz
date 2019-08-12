@@ -27,8 +27,8 @@ except ImportError:
     mpcalc = None
 
 try:
-    import crick
-    has_crick = True
+    import crick.tdigest
+    has_crick_tdigest = True
 except ImportError:
     logger.debug("Install crick to use tdigest method for finding cmap limits.")
-    has_crick = False
+    has_crick_tdigest = False

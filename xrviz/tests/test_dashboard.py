@@ -4,7 +4,7 @@ from xrviz.dashboard import Dashboard, find_cmap_limits
 import pytest
 from . import data
 from ..utils import _is_coord
-from ..compatibility import has_cartopy, has_crick
+from ..compatibility import has_cartopy, has_crick_tdigest
 
 
 @pytest.fixture(scope='module')
@@ -213,8 +213,8 @@ def test_create_taps_and_series_graph_for_2d_coords(dashboard):
     assert isinstance(dashboard.series_graph[0], pn.pane.holoviews.HoloViews)
 
 
-@pytest.mark.skipif(not has_crick, reason='crick not present')
-def test_find_cmap_limits_with_crick():
+@pytest.mark.skipif(not has_crick_tdigest, reason='crick.tdigest not present')
+def test_find_cmap_limits_with_crick_tdigest():
     ds = xr.tutorial.open_dataset('air_temperature',
                                   chunks={'lat': 25, 'lon': 25, 'time': 10})
     a, b = find_cmap_limits(ds.air)
