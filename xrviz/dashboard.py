@@ -296,6 +296,7 @@ class Dashboard(SigSlot):
         This is used when values selected in `x` and `y` are not data
         coordinates (i.e. one or both values are data dimensions).
         """
+        self.kwargs = self.control.kwargs
         selection = {}  # to collect the value of index selectors
         for i, dim in enumerate(list(self.var_selector_dims)):
             selection[dim] = self.index_selectors[i].value
