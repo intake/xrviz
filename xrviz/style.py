@@ -28,6 +28,10 @@ class Style(SigSlot):
             - ``lower limit``: auto-filled value equals ``quantile(0.1)`` of values to be plotted.
             - ``upper limit``: auto-filled value equals ``quantile(0.9)`` of values to be plotted.
 
+            In case of dask array, `dask.array.percentile <https://docs.dask.org/en/latest/array-api.html#dask.array.percentile>`_
+            is use to compute the limits. ``tdigest`` method is used in case `crick <https://pypi.org/project/crick/>`_ is present.
+            The value of limits is rounded off to 5 decimal places, for simplicity.
+
             Note that these values are filled with respect to color scaled
             values. Also these limits clear upon change in variable or
             color scaling.
