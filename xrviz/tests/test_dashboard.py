@@ -218,4 +218,4 @@ def test_find_cmap_limits_with_crick_tdigest():
     ds = xr.tutorial.open_dataset('air_temperature',
                                   chunks={'lat': 25, 'lon': 25, 'time': 10})
     a, b = find_cmap_limits(ds.air)
-    assert (a, b) == (255.38780056044027, 298.5900340551101)
+    assert abs(a - 255.38780056044027) < 0.1 and abs(b - 298.5900340551101) < 0.1
