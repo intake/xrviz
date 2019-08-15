@@ -8,9 +8,8 @@ def example(show=True):
     Parameters
     ----------
     show: bool (True)
-        Whether to directly execute the interface. If True, a new browser tab
-        will be opened, and the function will block until interrupted. If
-        False, the Dashboard instance is returned without being executed.
+        ``True``: A new browser tab will be opened, and the function will block until interrupted.
+        ``False``: The Dashboard instance is returned without being executed.
     """
     from .sample_data import great_lakes
     initial_params = {'Variables': 'temp',  # Select Variable

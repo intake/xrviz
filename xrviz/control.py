@@ -11,21 +11,37 @@ from .compatibility import has_cartopy
 
 class Control(SigSlot):
     """
-    This section allows the user to control the other subsections,
-    such as displayer, fields.
+    The user input part of the interface
 
     Parameters
     ----------
-    data: `xarray` instance: `DataSet` or `DataArray`
-           datset is used to initialize.
+    data: xarray.DataSet
+        The data to be visualised. Here, we are mostly concerned with
+        displaying the variables, their attributes, and assigning coordinates
+        to roles upon plotting.
 
     Attributes
     ----------
-    panel: Displays the generated template.
-    displayer: Provides access to `Display` sub-section.
-    describer: Provides access to `Describe` sub-section.
-    fields: Provides access to `Fields` sub-section.
-    kwargs: Provides access to kwargs selected in different subsections.
+    1. panel:
+            A ``panel.Tabs`` instance containing the user input panes
+    2. displayer:
+            A ``Display`` instance, displays a list of data variables for selection.
+    3. describer:
+            A ``Describe`` instance, describes the properties of the variable
+            selected in the ``displayer``.
+    4. coord_setter:
+            A ``CoordSetter`` instance for choosing which variables are
+            considered coordinates.
+    5. fields:
+            A ``Fields`` instance to select the axes to plot with.
+    6. style:
+            A ``Style`` instance to customise styling of the graphs.
+    7. projection:
+            A ``Projection`` instance to customise the projection of
+            geographical data.
+    8. kwargs:
+            A dictionary gathered from the widgets of the input Panes,
+            of a form which can be passed to the plotting function as kwargs.
     """
 
     def __init__(self, data):
@@ -70,7 +86,7 @@ class Control(SigSlot):
 
     def set_coords(self, data):
         """
-        To set the data coords
+        Called after coordinates have been set, to update the other input panes.
         """
         try:  # Upon setting coords before selecting a variable
             var = self.kwargs['Variables']
@@ -83,6 +99,12 @@ class Control(SigSlot):
         self.fields.set_coords(self.data, var)
 
     def check_is_projectable(self, *args):
+        """
+        Check if the selected variable can be  projected geographically.
+
+        This is possible only when both `x` and `y` are present in selected
+        variable's coordinates.
+        """
         value = not self.fields.kwargs['are_var_coords']
         self.projection.disable_geo(value)
 
