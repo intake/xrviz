@@ -52,12 +52,16 @@ class Control(SigSlot):
         self.fields = Fields(self.data)
         self.style = Style()
         self.coord_setter = CoordSetter(self.data)
-        self.tabs = pn.Tabs(pn.Row(self.displayer.panel,
-                                   self.describer.panel, name='Variables'),
-                            self.coord_setter.panel,
-                            self.fields.panel,
-                            self.style.panel,
-                            background=(240, 240, 240), width=1160)
+        self.tabs = pn.Tabs(
+            pn.Row(self.displayer.panel, self.describer.panel,
+                   name='Variables', width_policy='max'),
+            self.coord_setter.panel,
+            self.fields.panel,
+            self.style.panel,
+            background='#f5f5f5',
+            width_policy='max',
+            margin=20
+        )
 
         if has_cartopy:
             from .projection import Projection
@@ -70,7 +74,7 @@ class Control(SigSlot):
         self.displayer.connect("variable_selected", self.fields.setup)
         self.displayer.connect("variable_selected", self.style.setup)
 
-        self.panel = pn.Column(self.tabs)
+        self.panel = pn.WidgetBox(self.tabs, width_policy='max')
 
     def setup_initial_values(self, initial_params={}):
         self.displayer.setup_initial_values(initial_params)

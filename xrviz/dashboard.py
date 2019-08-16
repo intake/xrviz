@@ -95,7 +95,7 @@ class Dashboard(SigSlot):
                                pn.Row(self.plot_button,
                                       self.clear_series_button),
                                self.output,
-                               self.series_graph)
+                               self.series_graph, width_policy='max')
 
         # To auto-select in case of single variable
         if len(list(self.data.variables)) == 1:

@@ -52,8 +52,12 @@ class Fields(SigSlot):
     def __init__(self, data):
         super().__init__()
         self.data = data
-        self.x = pn.widgets.Select(name='x', width=200)
-        self.y = pn.widgets.Select(name='y', width=200)
+
+        dim_header = pn.pane.Markdown('### Plot Dimensions', margin=(0, 20, 0, 20))
+        self.x = pn.widgets.Select(name='x', width=240, margin=(0, 20, 5, 20))
+        self.y = pn.widgets.Select(name='y', width=240, margin=(0, 20, 20, 20))
+
+        agg_header = pn.pane.Markdown('### Aggregations', margin=(0, 20, 0, 20))
         self.agg_selectors = pn.Column()
         self.agg_opts = ['select', 'animate', 'mean', 'max',
                          'min', 'median', 'std', 'count']
@@ -66,14 +70,16 @@ class Fields(SigSlot):
         self.connect('x', self.change_y)
         self.connect('y', self.change_dim_selectors)
 
-        self.panel = pn.Column(pn.Row(pn.Column('### Plot Dimensions',
-                                                self.x, self.y,
-                                                background='rgb(175,175,175)'),
-                                      pn.Spacer(),
-                                      pn.Column('### Aggregations',
-                                                self.agg_selectors,
-                                                background='rgb(175,175,175)')
-                                      ), self.series_col, name='Axes')
+        self.panel = pn.Column(
+            pn.Row(
+                pn.WidgetBox(dim_header, self.x, self.y,
+                             background=(240, 240, 240)),
+                pn.Spacer(),
+                pn.WidgetBox(agg_header, self.agg_selectors,
+                             background=(240, 240, 240))
+            ),
+            self.series_col,
+            name='Axes')
 
     def setup(self, var):
         """
@@ -148,16 +154,24 @@ class Fields(SigSlot):
             self.remaining_dims = [dim for dim in self.var_dims
                                    if dim not in dims_not_to_agg]
 
-        for dim in sorted(self.remaining_dims):
+        for i, dim in enumerate(sorted(self.remaining_dims)):
+            if i == 0 and i == (len(self.remaining_dims)-1):
+                margin = (0, 20, 20, 20)
+            elif i == 0:
+                margin = (0, 20, 5, 20)
+            elif i == (len(self.remaining_dims)-1):
+                margin = (5, 20, 20, 20)
+            else:
+                margin = (0, 20, 5, 20)
             agg_selector = pn.widgets.Select(name=dim,
                                              options=self.agg_opts,
-                                             width=200,)
+                                             width=240, margin=margin)
             self._register(agg_selector, agg_selector.name)
             self.agg_selectors.append(agg_selector)
 
         self.s_selector = pn.widgets.Select(name='extract along',
                                             options=[None]+sorted(self.remaining_dims),
-                                            width=200)
+                                            width=240)
         self._register(self.s_selector, 'extract_along')
         self.series_col.append(self.s_selector)
 
