@@ -22,4 +22,8 @@ setup(
     install_requires=requires,
     long_description=open('README.md').read(),
     zip_safe=False,
+    entry_points={
+        'console_scripts': [
+            'xrviz = xrviz.cli:main'
+        ]},
 )
