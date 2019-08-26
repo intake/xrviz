@@ -1,7 +1,7 @@
 import sys
 
 def main():
-    if len(sys.argv) > 1 and 'show' == sys.argv[1]:
+    if len(sys.argv) ==3 and 'show' == sys.argv[1]:
         import xarray as xr
         from .dashboard import Dashboard
 

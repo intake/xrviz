@@ -1,5 +1,5 @@
-Interface
-#########
+Graphical User Interface
+########################
 
 The following five panes are part of XrViz's interface:
 
