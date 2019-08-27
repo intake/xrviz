@@ -29,6 +29,7 @@ It offers the following functionality:
 
    quickstart.rst
    interface
+   cli
    set_initial_parameters
    api
 
