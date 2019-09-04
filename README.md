@@ -12,7 +12,7 @@ color maps, extract series, display geographic data on maps and much more.
 It is built on [Xarray](http://xarray.pydata.org),
 [HvPlot](https://hvplot.pyviz.org) and [Panel](https://panel.pyviz.org/).
 It can be used with [Intake](http://intake.readthedocs.io/)
-to smoothen the process of investigating and loading datasets.
+to ease the process of investigating and loading datasets.
 
 
 Documentation is available at [Read the Docs](https://xrviz.readthedocs.io).
