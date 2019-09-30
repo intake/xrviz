@@ -14,9 +14,8 @@ matrix:
         - conda update conda
 
         # Install dependencies
-        - conda create -n test python=3.7 pytest
+        - conda create -n test python=3.7 pytest --file requirements.txt
         - source activate test
-        - conda install xarray cartopy panel hvplot netcdf4 datashader
 
       script:
         - pip install . --no-deps

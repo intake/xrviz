@@ -1,101 +1,61 @@
 <div style="display: flex;">
-  
+
   <!-- Table 1 -->
-      <div class="table_div">
-        <table>
-            <th>Variable Attributes</th>
-            <th></th>
-            <tr>
-                <td>Name</td>
-                <td>{{ var_name }}</td>
-            </tr>
-            <tr>
-                <td>Dims</td>
-                <td>
-                  {% for var,dim in var_dim_shape %} 
-                    {{ var }}: {{ dim }},
-                  {% endfor %}  
-                </td>
-            </tr>
-            <tr>
-                <td>Coords</td>
-                <td>
-                  {% if var_coords|length >0 %}
-                      {% for coord in var_coords %}
-                        {{ coord }},
-                      {% endfor %}
-                  {% else %}
-                      Empty
-                  {% endif %}
-                </td>
-            </tr>
-            <tr>
-                <td>Dtype</td>
-                <td>{{ var_dtype }}</td>
-            </tr>
-            <tr>
-              <td>Points</td>
-              <td>{{ var_size }}</td>
-            </tr>
-            <tr>
-              <td>Bytes</td>
-              <td>{{ var_nbytes }}</td>
-            </tr>
-
-            {% if var_attrs %}            
-              {% for k,v in var_attrs %} 
-                <tr>
-                    <td>{{ k }}</td>
-                    <td>{{ v }}</td>
-                </tr>
-              {% endfor %}
-            {% endif %}
-            
-        </table>
-      </div>
-
-  
- <!-- Table 2  -->
   <div class="table_div">
-    
-      <table>
-        <th>Global Attributes</th>
+    <table>
+        <th>Variable Attributes</th>
         <th></th>
-        {% if data_dims %}            
-          <tr>
-              <td>Data Dims</td>
-              <td>
-                {% for var,dim in data_dims %} 
-                  {{ var }}: {{ dim }},
-                {% endfor %}  
-              </td>
-          </tr>
-        {% endif %}
-
-        {% if data_coords|length >0 %}
         <tr>
-            <td>Data Coords</td>
+            <td>Name</td>
+            <td>{{ var_name }}</td>
+        </tr>
+        <tr>
+            <td>Dims</td>
             <td>
-              
-                  {% for coord in data_coords %}
-                    {{ coord }},
-                  {% endfor %}
+              {% for var,dim in var_dim_shape %}
+                {{ var }}: {{ dim }},
+              {% endfor %}
             </td>
         </tr>
-        {% endif %}
+        <tr>
+            <td>Coords</td>
+            <td>
+              {% if var_coords|length >0 %}
+                  {% for coord in var_coords %}
+                    {{ coord }},
+                  {% endfor %}
+              {% else %}
+                  Empty
+              {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Dtype</td>
+            <td>{{ var_dtype }}</td>
+        </tr>
+        <tr>
+          <td>Points</td>
+          <td>{{ var_size }}</td>
+        </tr>
+        <tr>
+          <td>Bytes</td>
+          <td>{{ var_nbytes }}</td>
+        </tr>
 
-        
-        {% if data_attrs %}
-          {% for attr,desc in data_attrs %} 
+        {% if var_attrs %}
+          {% for k,v in var_attrs %}
             <tr>
-                <td>{{ attr }}</td><td> {{ desc }} </td>
+                <td>{{ k }}</td>
+                <td>{{ v }}</td>
             </tr>
           {% endfor %}
         {% endif %}
 
-      </table>
+    </table>
   </div>
 </div>
+
+
 
 <style>
         table {
@@ -104,7 +64,7 @@
           width: 100%;
           border: 1px solid #ddd;
         }
-        
+
         th, td {
           vertical-align: top;
           text-align: left;
@@ -118,9 +78,9 @@
             z-index: 5;
             background: #fff;
         }
-        
+
         tr:nth-child(even) {
-          background-color: #c2bfbf
+          background-color: #ddd
         }
 
         div.table_div {

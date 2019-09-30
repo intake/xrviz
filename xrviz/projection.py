@@ -82,13 +82,13 @@ class Projection(SigSlot):
         basemap_opts.update(gvts.tile_sources)
         self.basemap = pn.widgets.Select(name='basemap',
                                          options=basemap_opts,
-                                         value=None)
+                                         value=None, width=150)
         self.projection = pn.widgets.Select(name='projection',
                                             options=[None] + sorted(projections_list),
-                                            value=None)
+                                            value=None, width=150)
         self.crs = pn.widgets.Select(name='crs',
                                      options=sorted(projections_list),
-                                     value='PlateCarree')
+                                     value='PlateCarree', width=150)
         self.project = pn.widgets.Checkbox(name='project', value=False)
         self.global_extent = pn.widgets.Checkbox(name='global_extent',
                                                  value=False)
@@ -115,15 +115,14 @@ class Projection(SigSlot):
         self.connect('add_proj_params', self.add_proj_params)
         self.connect('show_basemap', self.show_basemap)
 
-        self.panel = pn.Column(pn.Row(self.is_geo),
-                               pn.Row(self.alpha, self.basemap),
-                               pn.Row(self.crs, self.crs_params, name='crs'),
-                               pn.Row(self.projection, self.proj_params,
-                                      name='proj'),
-                               pn.Row(self.project,
-                                      self.global_extent),
-                               pn.Row(self.features),
-                               name='Projection')
+        self.panel = pn.Column(
+            pn.Row(self.is_geo),
+            pn.Row(self.alpha, self.basemap, self.features),
+            pn.Row(self.crs, self.crs_params,
+                   self.global_extent, name='crs'),
+            pn.Row(self.projection, self.proj_params,
+                   self.project, name='proj'),
+            name='Projection')
         self.setup()
         self.add_crs_params(self.crs.value)
         self.add_proj_params(self.projection.value)
