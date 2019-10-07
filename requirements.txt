@@ -1,5 +1,5 @@
 panel
-holoviews
+holoviews==1.12.1
 hvplot
 xarray
 netcdf4
