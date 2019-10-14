@@ -508,7 +508,7 @@ class Dashboard(SigSlot):
                 self.output[0] = graph[0][0]
 
                 # link the generated slider with agg selector in fields
-                for slider in graph[0][1]:
+                for slider in graph[0][1][0]:
                     for dim in self.kwargs['dims_to_select_animate']:
                         long_name = self.data[dim].long_name if hasattr(
                             self.data[dim], 'long_name') else None
