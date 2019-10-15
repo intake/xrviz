@@ -258,7 +258,6 @@ class Dashboard(SigSlot):
                 )
                 if show_map:
                     graph = base_map * graph
-                    self.tap_stream.source = graph
 
             self.create_selectors_players(graph)
 
