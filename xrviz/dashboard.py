@@ -14,7 +14,7 @@ from itertools import cycle
 import numpy
 from .sigslot import SigSlot
 from .control import Control
-from .utils import convert_widget, player_with_name_and_value, is_float
+from .utils import convert_widget, player_with_name_and_value, is_float, look_for_class
 from .compatibility import ccrs, gv, gf, has_cartopy, logger, has_crick_tdigest
 
 
@@ -502,33 +502,26 @@ class Dashboard(SigSlot):
         else:
             self.clear_series_button.disabled = True
         graph = pn.Row(graph)
-        try:
-            if graph[0][1]:  # if sliders are generated
-                self.output[0] = graph[0][0]
 
-                # link the generated slider with agg selector in fields
-                for slider in graph[0][1]:
-                    for dim in self.kwargs['dims_to_select_animate']:
-                        long_name = self.data[dim].long_name if hasattr(
-                            self.data[dim], 'long_name') else None
-                        if slider.name == dim or slider.name == long_name:
-                            if self.kwargs[dim] == 'select':
-                                selector = convert_widget(slider,
-                                                          pn.widgets.Select())
-                            else:
-                                selector = convert_widget(
-                                    slider, pn.widgets.DiscretePlayer())
-                            self.index_selectors.append(selector)
-
-                for selector in self.index_selectors:
-                    if isinstance(selector, pn.widgets.Select):
-                        self.output[1].append(selector)
+        self.output[0] = look_for_class(graph, pn.pane.HoloViews)[0]
+        sliders = look_for_class(graph, pn.widgets.Widget)
+        for slider in sliders:
+            for dim in self.kwargs['dims_to_select_animate']:
+                long_name = self.data[dim].long_name if hasattr(
+                    self.data[dim], 'long_name') else None
+                if slider.name == dim or slider.name == long_name:
+                    if self.kwargs[dim] == 'select':
+                        selector = convert_widget(slider, pn.widgets.Select)
                     else:
-                        player = player_with_name_and_value(selector)
-                        self.output[1].append(player)
+                        selector = convert_widget(slider, pn.widgets.DiscretePlayer)
+                    self.index_selectors.append(selector)
 
-        except:  # else return simple graph
-            self.output[0] = graph
+        for selector in self.index_selectors:
+            if isinstance(selector, pn.widgets.Select):
+                self.output[1].append(selector)
+            else:
+                player = player_with_name_and_value(selector)
+                self.output[1].append(player)
 
     def set_data(self, data):
         self.data = (
