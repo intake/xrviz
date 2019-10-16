@@ -17,7 +17,7 @@ def test_convert_widget(source_widget, target_widget):
                            options=options,
                            value=value)
 
-    target = convert_widget(source, target_widget())
+    target = convert_widget(source, target_widget)
     assert isinstance(target, target_widget)
     assert target.name is source.name
     assert target.options is source.options
