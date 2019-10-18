@@ -58,7 +58,7 @@ class Style(SigSlot):
                                           end=1200)
         self.cmap = pn.widgets.Select(name='cmap', value='Inferno',
                                       options=list_cmaps())
-        self.colorbar = pn.widgets.Checkbox(name='colorbar', value=True)
+        self.colorbar = pn.widgets.Checkbox(name='colorbar', value=True, width=150)
         # colormap_limits
         self.lower_limit = pn.widgets.TextInput(name='cmap lower limit',
                                                 width=140)
@@ -70,7 +70,7 @@ class Style(SigSlot):
         self.color_scale = pn.widgets.Select(name='color_scale',
                                              value='linear',
                                              options=scaling_ops)
-        self.rasterize = pn.widgets.Checkbox(name='rasterize', value=True)
+        self.rasterize = pn.widgets.Checkbox(name='rasterize', value=True, width=150)
 
         self._register(self.use_all_data, 'clear_cmap_limits')
         self._register(self.color_scale, 'clear_cmap_limits')

@@ -74,9 +74,9 @@ class Projection(SigSlot):
         """Initializes the Projection pane."""
         super().__init__()
         self.is_geo = pn.widgets.Checkbox(name='is_geo', value=False,
-                                          disabled=True)
+                                          disabled=True, width=200)
         self.alpha = pn.widgets.FloatSlider(name='alpha', start=0, end=1,
-                                            step=0.01, value=0.7, width=180)
+                                            step=0.01, value=0.7, width=200)
 
         basemap_opts = {None: None}
         basemap_opts.update(gvts.tile_sources)
@@ -89,9 +89,9 @@ class Projection(SigSlot):
         self.crs = pn.widgets.Select(name='crs',
                                      options=sorted(projections_list),
                                      value='PlateCarree', width=150)
-        self.project = pn.widgets.Checkbox(name='project', value=False)
+        self.project = pn.widgets.Checkbox(name='project', value=False, width=150)
         self.global_extent = pn.widgets.Checkbox(name='global_extent',
-                                                 value=False)
+                                                 value=False, width=150)
         self.crs_params = pn.widgets.TextInput(name='crs params',
                                                value="{}", width=400)
         self.proj_params = pn.widgets.TextInput(name='projection params',
@@ -101,7 +101,7 @@ class Projection(SigSlot):
                             'lakes', 'ocean', 'rivers']
         self.features = pn.widgets.MultiSelect(name='features',
                                                options=self.feature_ops,
-                                               value=self.feature_ops[1:])
+                                               value=self.feature_ops[1:], width=150)
 
         self._register(self.is_geo, 'geo_changed')
         self._register(self.is_geo, 'geo_disabled', 'disabled')
@@ -116,12 +116,10 @@ class Projection(SigSlot):
         self.connect('show_basemap', self.show_basemap)
 
         self.panel = pn.Column(
-            pn.Row(self.is_geo),
+            pn.Row(self.is_geo,  self.project, self.global_extent),
             pn.Row(self.alpha, self.basemap, self.features),
-            pn.Row(self.crs, self.crs_params,
-                   self.global_extent, name='crs'),
-            pn.Row(self.projection, self.proj_params,
-                   self.project, name='proj'),
+            pn.Row(self.crs, self.crs_params, name='crs'),
+            pn.Row(self.projection, self.proj_params, name='proj'),
             name='Projection')
         self.setup()
         self.add_crs_params(self.crs.value)

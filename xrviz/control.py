@@ -55,6 +55,7 @@ class Control(SigSlot):
         self.tabs = pn.Tabs(
             pn.Row(self.displayer.panel, self.describer.panel,
                    name='Variables', width_policy='max'),
+            self.coord_setter.panel,
             self.fields.panel,
             self.style.panel,
             background='#f5f5f5',
