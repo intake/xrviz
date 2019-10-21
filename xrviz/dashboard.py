@@ -117,8 +117,8 @@ class Dashboard(SigSlot):
         """
         if not self.clear_series_button.disabled:
             self.series_graph[0] = pn.Spacer(name='Series Graph')
-            self.series = hv.Points([]).opts(height=self.kwargs['height'],
-                                             width=self.kwargs['width'])
+            self.series = hv.Points([]).opts(frame_height=self.kwargs['frame_height'],
+                                             frame_width=self.kwargs['frame_width'])
             self.taps.clear()
             self.clear_points.event(clear=True)
 
@@ -152,8 +152,8 @@ class Dashboard(SigSlot):
         self.index_selectors = []
         self.output[1].clear()  # clears Index_selectors
         self.series_graph[0] = pn.Spacer(name='Series Graph')
-        self.series = hv.Points([]).opts(height=self.kwargs['height'],
-                                         width=self.kwargs['width'])
+        self.series = hv.Points([]).opts(frame_height=self.kwargs['frame_height'],
+                                         frame_width=self.kwargs['frame_width'])
         self.taps.clear()
         self.control.fields.connect('extract_along', self.clear_series)
 
@@ -162,8 +162,8 @@ class Dashboard(SigSlot):
             graph_opts = {'x': self.kwargs['x'],
                           'y': self.kwargs['y'],
                           'title': self.var,
-                          'height': self.kwargs['height'],
-                          'width': self.kwargs['width'],
+                          'frame_height': self.kwargs['frame_height'],
+                          'frame_width': self.kwargs['frame_width'],
                           'cmap': self.kwargs['cmap'],
                           'colorbar': self.kwargs['colorbar'],
                           'rasterize': self.kwargs['rasterize']}
@@ -302,8 +302,8 @@ class Dashboard(SigSlot):
         graph_opts = {'x': self.kwargs['x'],
                       'y': self.kwargs['y'],
                       'title': self.var,
-                      'height': self.kwargs['height'],
-                      'width': self.kwargs['width'],
+                      'frame_height': self.kwargs['frame_height'],
+                      'frame_width': self.kwargs['frame_width'],
                       'cmap': self.kwargs['cmap'],
                       'colorbar': self.kwargs['colorbar'],
                       'rasterize': self.kwargs['rasterize']}
@@ -478,8 +478,8 @@ class Dashboard(SigSlot):
             hover = HoverTool(tooltips=tooltips)
 
             series_map = series_df.hvplot(x=extract_along, y=self.var,
-                                          height=self.kwargs['height'],
-                                          width=self.kwargs['width'],
+                                          frame_height=self.kwargs['frame_height'],
+                                          frame_width=self.kwargs['frame_width'],
                                           tools=[hover])
             self.series = series_map.opts(color=color) * self.series
 

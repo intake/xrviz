@@ -9,10 +9,10 @@ class Style(SigSlot):
 
     The following options are available in this pane:
 
-        1. ``height`` (default `300`):
-            To modify the height of main and series graph.
-        2. ``width`` (default `700`):
-            To modify the width of the main and series graph.
+        1. ``frame_height`` (default `300`):
+            To modify the frame_height of main and series graph.
+        2. ``frame_width`` (default `700`):
+            To modify the frame_width of the main and series graph.
         3. ``cmap`` (default `Inferno`):
             To select a colormap for the main graph.
         4. ``color_scale`` (default `linear`):
@@ -52,10 +52,10 @@ class Style(SigSlot):
 
     def __init__(self):
         super().__init__()
-        self.height = pn.widgets.IntSlider(name='height', value=300, start=100,
-                                           end=1200)
-        self.width = pn.widgets.IntSlider(name='width', value=700, start=100,
-                                          end=1200)
+        self.frame_height = pn.widgets.IntSlider(name='frame_height', value=300, start=100,
+                                                 end=1200)
+        self.frame_width = pn.widgets.IntSlider(name='frame_width', value=700, start=100,
+                                                end=1200)
         self.cmap = pn.widgets.Select(name='cmap', value='Inferno',
                                       options=list_cmaps())
         self.colorbar = pn.widgets.Checkbox(name='colorbar', value=True, width=150)
@@ -76,7 +76,7 @@ class Style(SigSlot):
         self._register(self.color_scale, 'clear_cmap_limits')
         self.connect('clear_cmap_limits', self.setup)
 
-        self.panel = pn.Column(pn.Row(self.height, self.width),
+        self.panel = pn.Column(pn.Row(self.frame_height, self.frame_width),
                                pn.Row(self.cmap, self.color_scale),
                                pn.Row(self.lower_limit, self.upper_limit),
                                pn.Row(self.use_all_data, self.colorbar,
