@@ -10,18 +10,18 @@ def style():
 
 
 def test_height(style):
-    h_widget = style.height
+    h_widget = style.frame_height
     assert isinstance(h_widget, pn.widgets.IntSlider)
-    assert h_widget.name == 'height'
+    assert h_widget.name == 'frame_height'
     assert h_widget.value == 300
     assert h_widget.start == 100
     assert h_widget.end == 1200
 
 
 def test_width(style):
-    w_widget = style.width
+    w_widget = style.frame_width
     assert isinstance(w_widget, pn.widgets.IntSlider)
-    assert w_widget.name == 'width'
+    assert w_widget.name == 'frame_width'
     assert w_widget.value == 700
     assert w_widget.start == 100
     assert w_widget.end == 1200
