@@ -60,6 +60,7 @@ class Control(SigSlot):
             self.style.panel,
             background='#f5f5f5',
             width_policy='max',
+            tabs_location='left',
             margin=20
         )
 

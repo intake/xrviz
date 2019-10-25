@@ -1,5 +1,5 @@
 <div style="display: flex;">
-  
+
   <!-- Table 1 -->
       <div class="table_div">
         <table>
@@ -12,9 +12,9 @@
             <tr>
                 <td>Dims</td>
                 <td>
-                  {% for var,dim in var_dim_shape %} 
+                  {% for var,dim in var_dim_shape %}
                     {{ var }}: {{ dim }},
-                  {% endfor %}  
+                  {% endfor %}
                 </td>
             </tr>
             <tr>
@@ -42,32 +42,32 @@
               <td>{{ var_nbytes }}</td>
             </tr>
 
-            {% if var_attrs %}            
-              {% for k,v in var_attrs %} 
+            {% if var_attrs %}
+              {% for k,v in var_attrs %}
                 <tr>
                     <td>{{ k }}</td>
                     <td>{{ v }}</td>
                 </tr>
               {% endfor %}
             {% endif %}
-            
+
         </table>
       </div>
 
-  
+
  <!-- Table 2  -->
   <div class="table_div">
-    
+
       <table>
         <th>Global Attributes</th>
         <th></th>
-        {% if data_dims %}            
+        {% if data_dims %}
           <tr>
               <td>Data Dims</td>
               <td>
-                {% for var,dim in data_dims %} 
+                {% for var,dim in data_dims %}
                   {{ var }}: {{ dim }},
-                {% endfor %}  
+                {% endfor %}
               </td>
           </tr>
         {% endif %}
@@ -76,7 +76,7 @@
         <tr>
             <td>Data Coords</td>
             <td>
-              
+
                   {% for coord in data_coords %}
                     {{ coord }},
                   {% endfor %}
@@ -84,9 +84,9 @@
         </tr>
         {% endif %}
 
-        
+
         {% if data_attrs %}
-          {% for attr,desc in data_attrs %} 
+          {% for attr,desc in data_attrs %}
             <tr>
                 <td>{{ attr }}</td><td> {{ desc }} </td>
             </tr>
@@ -104,7 +104,7 @@
           width: 100%;
           border: 1px solid #ddd;
         }
-        
+
         th, td {
           vertical-align: top;
           text-align: left;
@@ -118,9 +118,9 @@
             z-index: 5;
             background: #fff;
         }
-        
+
         tr:nth-child(even) {
-          background-color: #c2bfbf
+          background-color: #ddd;
         }
 
         div.table_div {

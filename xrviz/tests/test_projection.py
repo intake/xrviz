@@ -23,7 +23,7 @@ def projection():
                             ('disabled', True)]),
                           ('alpha', pn.widgets.FloatSlider,
                            [('name', 'alpha'), ('start', 0), ('end', 1),
-                            ('step', 0.01), ('value', 0.7), ('width', 180)]),
+                            ('step', 0.01), ('value', 0.7), ('width', 200)]),
                           ('basemap', pn.widgets.Select,
                            [('name', 'basemap'),
                             ('options', basemap_opts),

@@ -20,8 +20,8 @@ def example(show=True):
                       'sigma': 'animate',
 
                       # style
-                      'height': 300,
-                      'width': 650,
+                      'frame_height': 200,
+                      'frame_width': 500,
                       'colorbar': True,
                       'cmap': 'Viridis',
 
