@@ -33,13 +33,12 @@ class Describe(SigSlot):
         super().__init__()
         xr.set_options(display_style='html')
         self.data = data
-        self.panel = pn.pane.HTML(min_width=500, height=400, css_classes=['xrviz-scroll'])
+        self.panel = pn.pane.HTML(min_width=500, max_height=200, css_classes=['xrviz-scroll'])
         self.panel.object = "Description Section"
 
-    def setup(self, var):
+    def setup(self):
         self.panel.object = self.data
 
-    def set_coords(self, data, var):
+    def set_coords(self, data):
         self.data = data
-        if var is not None:
-            self.setup(var=[var])
+        self.setup()

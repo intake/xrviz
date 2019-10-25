@@ -1,6 +1,6 @@
 panel
 holoviews
 hvplot
-xarray
+xarray>0.14.0
 netcdf4
 datashader

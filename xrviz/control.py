@@ -79,7 +79,6 @@ class Control(SigSlot):
             self.fields.connect('x', self.check_is_projectable)
             self.fields.connect('y', self.check_is_projectable)
 
-        self.displayer.connect("variable_selected", self.describer.setup)
         self.displayer.connect("variable_selected", self.fields.setup)
         self.displayer.connect("variable_selected", self.style.setup)
 
@@ -104,7 +103,7 @@ class Control(SigSlot):
         self.data = data
         self.coord_setter.set_coords(self.data)
         self.displayer.set_coords(self.data)
-        self.describer.set_coords(self.data, var)
+        self.describer.set_coords(self.data)
         self.fields.set_coords(self.data, var)
 
     def check_is_projectable(self, *args):
