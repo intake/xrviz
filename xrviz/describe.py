@@ -5,6 +5,11 @@ import sys
 import xarray as xr
 from .sigslot import SigSlot
 
+CSS = """
+.xrviz-scroll {
+  overflow: scroll;
+}
+"""
 
 class Describe(SigSlot):
     """
@@ -32,6 +37,7 @@ class Describe(SigSlot):
     def __init__(self, data):
         super().__init__()
         xr.set_options(display_style='html')
+        pn.extension(raw_css=[CSS])
         self.data = data
         self.panel = pn.pane.HTML(min_width=500, max_height=200, css_classes=['xrviz-scroll'])
         self.panel.object = "Description Section"
