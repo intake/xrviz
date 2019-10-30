@@ -20,11 +20,8 @@ class Style(SigSlot):
             To modify the frame_width of the main and series graph.
         3. ``cmap`` (default `Inferno`):
             To select a colormap for the main graph.
-        4. ``color_scale`` (default `linear`):
-            To scale the values to be plotted.
-            The scaling options available are ``linear``, ``exp``, ``log``,
-            ``reciprocal``, ``square`` and ``sqrt``. Here ``linear`` implies
-            no scaling.
+        4. ``logz`` (default False):
+            Whether to use log scale on z axis.
         5. ``cmap limits``:
             To change the colormap limits. User can fill these limits before
             plotting a variable. In case not filled by user, automatic filling
@@ -71,24 +68,20 @@ class Style(SigSlot):
                                                 width=140)
         self.use_all_data = pn.widgets.Checkbox(name='compute min/max from all data', value=False)
 
-        scaling_ops = ['linear', 'exp', 'log', 'reciprocal', 'square', 'sqrt']
-        self.color_scale = pn.widgets.Select(name='color_scale',
-                                             value='linear',
-                                             options=scaling_ops)
+        self.logz = pn.widgets.Checkbox(name='logz', value=False, width=150)
         self.rasterize = pn.widgets.Checkbox(name='rasterize', value=True, width=150)
 
         self._register(self.use_all_data, 'clear_cmap_limits')
-        self._register(self.color_scale, 'clear_cmap_limits')
         self.connect('clear_cmap_limits', self.setup)
 
         self.panel = pn.Column(
             pn.pane.Markdown(TEXT, margin=(0, 10)),
             pn.Row(self.frame_height, self.frame_width),
-            pn.Row(self.cmap, self.color_scale),
+            pn.Row(self.cmap, pn.panel(self.logz,  align='end')),
             pn.Row(self.lower_limit, self.upper_limit),
-            pn.Row(self.use_all_data, self.colorbar, self.rasterize),
-            name='Style'
-        )
+            pn.Row(self.use_all_data, self.colorbar,
+                    self.rasterize),
+            name='Style')
 
     def setup(self, *args):
         #  Clears cmap limits

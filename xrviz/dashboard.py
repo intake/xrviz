@@ -53,8 +53,7 @@ class Dashboard(SigSlot):
         self.control = Control(self.data)
         self.plot_button = pn.widgets.Button(
             name='Plot', width=200, disabled=True)
-        self.clear_series_button = pn.widgets.Button(
-            name='Clear', width=200, disabled=True)
+
         self.output = Output()
 
         self._register(self.plot_button, 'plot_clicked', 'clicks')
@@ -62,9 +61,6 @@ class Dashboard(SigSlot):
 
         self._register(self.control.coord_setter.coord_selector, 'set_coords')
         self.connect("set_coords", self.set_coords)
-
-        self._register(self.clear_series_button, 'clear_series', 'clicks')
-        self.connect('clear_series', self.clear_series)
 
         self.control.displayer.connect('variable_selected',
                                        self.check_is_plottable)
@@ -75,7 +71,7 @@ class Dashboard(SigSlot):
         # self.control.fields.connect('extract_along', self.output.clear_series)
 
         self.panel = pn.Column(self.control.panel,
-                               pn.Row(self.plot_button, self.clear_series_button),
+                               pn.Row(self.plot_button, self.output.clear_series_button),
                                self.output.panel)
 
         # To auto-select in case of single variable
@@ -83,13 +79,6 @@ class Dashboard(SigSlot):
             self.control.displayer.select.value = self.data.variables[0]
 
         self.control.setup_initial_values(self.initial_params)
-
-    def clear_series(self, *args):
-        """
-        Clears the markers on the image, and the extracted series.
-        """
-        if not self.clear_series_button.disabled:
-            self.output.clear_series()
 
     def _link_aggregation_selectors(self, *args):
         for dim_selector in self.control.kwargs['remaining_dims']:
