@@ -77,6 +77,8 @@ class Control(SigSlot):
             from .projection import Projection
             self.projection = Projection()
             self.tabs.append(self.projection.panel)
+            self.fields.connect('x', self.check_is_projectable)
+            self.fields.connect('y', self.check_is_projectable)
 
         self.displayer.connect("variable_selected", self.describer.setup)
         self.displayer.connect("variable_selected", self.fields.setup)
@@ -106,6 +108,16 @@ class Control(SigSlot):
         self.displayer.set_coords(self.data)
         self.describer.set_coords(self.data, var)
         self.fields.set_coords(self.data, var)
+
+    def check_is_projectable(self, *args):
+        """
+        Check if the selected variable can be  projected geographically.
+
+        This is possible only when both `x` and `y` are present in selected
+        variable's coordinates.
+        """
+        value = not self.fields.kwargs['are_var_coords']
+        self.projection.disable_geo(value)
 
     @property
     def kwargs(self):
