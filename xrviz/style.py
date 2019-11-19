@@ -99,7 +99,7 @@ class Style(SigSlot):
         """
         To select initial values for the widgets in this pane.
         """
-        for row in self.panel:
+        for row in self.panel[1:]:
             for widget in row:
                 if widget.name in init_params:
                     widget.value = init_params[widget.name]
@@ -107,5 +107,5 @@ class Style(SigSlot):
     @property
     def kwargs(self):
         out = {widget.name: widget.value
-               for row in self.panel for widget in row}
+               for row in self.panel[1:] for widget in row}
         return out

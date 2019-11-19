@@ -138,7 +138,7 @@ class Projection(SigSlot):
             disabled = True
         else:
             disabled = False if self.is_geo.value else True
-        for row in self.panel[1:]:
+        for row in self.panel[2:]:
             for widget in row:
                 widget.disabled = disabled
         self.proj_params.disabled = disabled
@@ -150,7 +150,7 @@ class Projection(SigSlot):
         is_geo = init_params.get('is_geo')
         if is_geo:  # since we need to enable is_geo if True
             self.is_geo.disabled = False
-        for row in self.panel:
+        for row in self.panel[1:]:
             for widget in row:
                 w_name = widget.name
                 if w_name in init_params:
@@ -182,5 +182,5 @@ class Projection(SigSlot):
     @property
     def kwargs(self):
         out = {widget.name: widget.value
-               for row in self.panel for widget in row}
+               for row in self.panel[1:] for widget in row}
         return out
