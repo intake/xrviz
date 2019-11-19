@@ -5,6 +5,12 @@ from .sigslot import SigSlot
 from .utils import convert_widget
 from .compatibility import mpcalc
 
+TEXT = """
+Select which coordinates to use as the x- and y-dimensions and how to
+aggregate any other dimensions. For more information, please refer to the
+[documentation](https://xrviz.readthedocs.io/en/latest/interface.html#axes).
+"""
+
 
 class Fields(SigSlot):
     """
@@ -71,6 +77,7 @@ class Fields(SigSlot):
         self.connect('y', self.change_dim_selectors)
 
         self.panel = pn.Column(
+            pn.pane.Markdown(TEXT, margin=(0, 10)),
             pn.Row(
                 pn.WidgetBox(dim_header, self.x, self.y,
                              background=(240, 240, 240)),

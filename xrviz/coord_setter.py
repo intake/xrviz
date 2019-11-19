@@ -2,7 +2,10 @@ import panel as pn
 from .compatibility import logger
 from .sigslot import SigSlot
 
-INTRO_TEXT = "Use the following area to convert data variables to coordinates."
+TEXT = """
+Convert data variables to coordinates to use them as axes. For more information,
+please refer to the [documentation](https://xrviz.readthedocs.io/en/latest/interface.html#set-coords).
+"""
 
 
 class CoordSetter(SigSlot):
@@ -28,7 +31,7 @@ class CoordSetter(SigSlot):
         )
 
         self.panel = pn.Column(
-            pn.pane.Markdown(INTRO_TEXT, margin=(0, 20)),
+            pn.pane.Markdown(TEXT, margin=(0, 20)),
             self.coord_selector, name=self.name)
 
     def set_coords(self, data):

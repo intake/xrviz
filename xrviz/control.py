@@ -8,6 +8,11 @@ from .style import Style
 from .coord_setter import CoordSetter
 from .compatibility import has_cartopy
 
+TEXT = """
+Select a data variable to visualize. For more information,
+please refer to the [documentation](https://xrviz.readthedocs.io/en/latest/interface.html#variables).
+"""
+
 
 class Control(SigSlot):
     """
@@ -53,8 +58,11 @@ class Control(SigSlot):
         self.style = Style()
         self.coord_setter = CoordSetter(self.data)
         self.tabs = pn.Tabs(
-            pn.Row(self.displayer.panel, self.describer.panel,
-                   name='Variables', width_policy='max'),
+            pn.Column(
+                pn.pane.Markdown(TEXT, margin=(0, 10)),
+                pn.Row(self.displayer.panel, self.describer.panel, width_policy='max'),
+                name='Variables',
+            ),
             self.coord_setter.panel,
             self.fields.panel,
             self.style.panel,

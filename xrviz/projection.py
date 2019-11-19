@@ -7,6 +7,12 @@ from cartopy import crs as ccrs
 from .sigslot import SigSlot
 from .utils import proj_params
 
+TEXT = """
+Control the geographic features of the plot. Including target projection,
+source projection, basemaps and geographic features. For more information, please refer to the
+[documentation](https://xrviz.readthedocs.io/en/latest/interface.html#projection).
+"""
+
 projections = [p for p in dir(ccrs) if inspect.isclass(getattr(ccrs, p)) and
                issubclass(getattr(ccrs, p), ccrs.Projection) and
                not p.startswith('_')]
@@ -116,6 +122,7 @@ class Projection(SigSlot):
         self.connect('show_basemap', self.show_basemap)
 
         self.panel = pn.Column(
+            pn.pane.Markdown(TEXT, margin=(0, 10)),
             pn.Row(self.is_geo,  self.project, self.global_extent),
             pn.Row(self.alpha, self.basemap, self.features),
             pn.Row(self.crs, self.crs_params, name='crs'),
