@@ -11,3 +11,10 @@ jupyter labextension install @pyviz/jupyterlab_pyviz
 
 # Install the panel proxy
 pip install jupyter-panel-proxy
+
+# Get rid of source code
+rm -rf xrviz
+rm -rf docs
+
+# Get into examples
+cd examples
