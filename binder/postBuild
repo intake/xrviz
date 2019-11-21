@@ -6,12 +6,6 @@ conda install -c conda-forge -y python=3.7 geoviews metpy --file ./requirements.
 # Install xrviz from current branch
 pip install . --no-deps
 
-# Install the JupyterLab pyviz-labextension
-jupyter labextension install @pyviz/jupyterlab_pyviz
-
-# Install the panel proxy
-pip install jupyter-panel-proxy
-
 # Get rid of source code
 rm -rf xrviz
 rm -rf docs
