@@ -1,6 +1,7 @@
 import xarray as xr
 import panel as pn
-from xrviz.dashboard import Dashboard, find_cmap_limits
+from xrviz.output import find_cmap_limits
+from xrviz.dashboard import Dashboard
 import pytest
 from . import data
 from ..utils import _is_coord
