@@ -5,21 +5,20 @@ language: python
 matrix:
   include:
     - language: generic
-      install:
+      before_install:
         # Install conda
         - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
         - bash miniconda.sh -b -p $HOME/miniconda
         - export PATH="$HOME/miniconda/bin:$PATH"
         - conda config --set always_yes yes --set changeps1 no
         - conda update conda
-
-        # Install dependencies
-        - conda create -n test python=3.7 pytest --file requirements.txt
+      install:
+        - conda create -c conda-forge -n test python=3.7 pytest --file requirements.txt
         - source activate test
-
-      script:
         - pip install . --no-deps
+      script:
         - pytest
+
     - language: python
       sudo: required
       dist: xenial
