@@ -60,8 +60,8 @@ class Control(SigSlot):
         self.tabs = pn.Tabs(
             pn.Column(
                 pn.pane.Markdown(TEXT, margin=(0, 10)),
-                pn.Row(self.displayer.panel, self.describer.panel, width_policy='max'),
-                name='Variables',
+                pn.Row(self.displayer.panel, self.describer.panel,
+                    name='Variables', width_policy='max'),
             ),
             self.coord_setter.panel,
             self.fields.panel,
@@ -79,8 +79,10 @@ class Control(SigSlot):
             self.fields.connect('x', self.check_is_projectable)
             self.fields.connect('y', self.check_is_projectable)
 
+        self.displayer.connect("variable_selected", self.describer.setup)
         self.displayer.connect("variable_selected", self.fields.setup)
         self.displayer.connect("variable_selected", self.style.setup)
+        self.displayer.connect("unselect", self.describer.unselect_variable)
 
         self.panel = pn.WidgetBox(self.tabs, width_policy='max')
 
@@ -103,7 +105,7 @@ class Control(SigSlot):
         self.data = data
         self.coord_setter.set_coords(self.data)
         self.displayer.set_coords(self.data)
-        self.describer.set_coords(self.data)
+        self.describer.set_coords(self.data, var)
         self.fields.set_coords(self.data, var)
 
     def check_is_projectable(self, *args):
