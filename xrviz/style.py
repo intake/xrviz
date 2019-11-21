@@ -16,7 +16,7 @@ class Style(SigSlot):
 
         1. ``frame_height`` (default `300`):
             To modify the frame_height of main and series graph.
-        2. ``frame_width`` (default `700`):
+        2. ``frame_width`` (default `450`):
             To modify the frame_width of the main and series graph.
         3. ``cmap`` (default `Inferno`):
             To select a colormap for the main graph.
@@ -59,7 +59,7 @@ class Style(SigSlot):
         super().__init__()
         self.frame_height = pn.widgets.IntSlider(name='frame_height', value=300, start=100,
                                                  end=1200)
-        self.frame_width = pn.widgets.IntSlider(name='frame_width', value=700, start=100,
+        self.frame_width = pn.widgets.IntSlider(name='frame_width', value=450, start=100,
                                                 end=1200)
         self.cmap = pn.widgets.Select(name='cmap', value='Inferno',
                                       options=list_cmaps())

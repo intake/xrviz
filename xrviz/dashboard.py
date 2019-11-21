@@ -257,7 +257,7 @@ class Dashboard(SigSlot):
                     if self.kwargs['features'] != ['None'] else graph
                 )
                 if show_map:
-                    graph = base_map * graph
+                    graph = getattr(gv.tile_sources, base_map) * graph
 
             self.create_selectors_players(graph)
 
