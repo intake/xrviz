@@ -174,7 +174,7 @@ class Dashboard(SigSlot):
 
             if has_cartopy:
                 is_geo = self.kwargs['is_geo']
-                base_map = self.kwargs['basemap']
+                base_map = getattr(gv.tile_sources, self.kwargs['basemap'])
                 show_map = True if base_map != None else False
 
                 if is_geo:

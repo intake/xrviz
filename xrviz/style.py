@@ -59,7 +59,7 @@ class Style(SigSlot):
         super().__init__()
         self.frame_height = pn.widgets.IntSlider(name='frame_height', value=300, start=100,
                                                  end=1200)
-        self.frame_width = pn.widgets.IntSlider(name='frame_width', value=700, start=100,
+        self.frame_width = pn.widgets.IntSlider(name='frame_width', value=450, start=100,
                                                 end=1200)
         self.cmap = pn.widgets.Select(name='cmap', value='Inferno',
                                       options=list_cmaps())
