@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# Install the JupyterLab pyviz-labextension
-jupyter labextension install @pyviz/jupyterlab_pyviz
-
-conda install -c conda-forge geoviews metpy jupyter-panel-proxy

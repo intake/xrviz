@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Install the dependencies
+conda install -c conda-forge -y python=3.7 geoviews metpy --file ../requirements.txt
+
+# Install xrviz from current branch
+pip install .. --no-deps
+
+# Install the JupyterLab pyviz-labextension
+jupyter labextension install @pyviz/jupyterlab_pyviz
+
+# Install the panel proxy
+pip install jupyter-panel-proxy
