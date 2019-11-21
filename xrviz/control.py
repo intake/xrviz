@@ -9,8 +9,8 @@ from .coord_setter import CoordSetter
 from .compatibility import has_cartopy
 
 TEXT = """
-Select a data variable to visualize. For more information,
-please refer to the [documentation](https://xrviz.readthedocs.io/en/latest/interface.html#variables).
+Select a data variable to visualize. For more information, please refer to the
+[documentation](https://xrviz.readthedocs.io/en/latest/interface.html#variables).
 """
 
 
@@ -60,7 +60,8 @@ class Control(SigSlot):
         self.tabs = pn.Tabs(
             pn.Column(
                 pn.pane.Markdown(TEXT, margin=(0, 10)),
-                pn.Row(self.displayer.panel, self.describer.panel, width_policy='max'),
+                pn.Row(self.displayer.panel, self.describer.panel,
+                       width_policy='max'),
                 name='Variables',
             ),
             self.coord_setter.panel,
@@ -82,6 +83,7 @@ class Control(SigSlot):
         self.displayer.connect("variable_selected", self.describer.setup)
         self.displayer.connect("variable_selected", self.fields.setup)
         self.displayer.connect("variable_selected", self.style.setup)
+        self.displayer.connect("unselect", self.describer.unselect_variable)
 
         self.panel = pn.WidgetBox(self.tabs, width_policy='max')
 

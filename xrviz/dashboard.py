@@ -99,7 +99,7 @@ class Dashboard(SigSlot):
 
         # To auto-select in case of single variable
         if len(list(self.data.variables)) == 1:
-            self.control.displayer.select.value = list(self.data.variables)
+            self.control.displayer.select.value = self.data.variables[0]
 
         self.control.setup_initial_values(self.initial_params)
         self.taps = []
@@ -545,7 +545,7 @@ class Dashboard(SigSlot):
         If a variable is 1-d, disable plot_button for it.
         """
         self.plot_button.disabled = False  # important to enable button once disabled
-        data = self.data[var[0]]
+        data = self.data[var]
         self.plot_button.disabled = len(data.dims) <= 1
 
     def correct_val(self, dim, x):

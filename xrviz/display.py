@@ -26,43 +26,44 @@ class Display(SigSlot):
     def __init__(self, data):
         super().__init__()
         self.data = data
-        self.select = pn.widgets.MultiSelect(size=8,
-                                             min_width=100,
-                                             max_width=300,
-                                             height=210,
-                                             width_policy='max',
-                                             name='Variables')
+        self.name = 'Variables'
+        self.select = pn.widgets.AutocompleteInput(
+            min_width=100, max_width=200, width_policy='max',
+            name=self.name, min_characters=1, margin=[10, 0, 10, 10]
+        )
+        self.unset = pn.widgets.Button(
+            width_policy='min', name='X', align='end', margin=[10, 10, 10, 0])
         self.set_variables()
 
         self._register(self.select, "variable_selected")
+        self._register(self.unset, "unselect", 'clicks')
+        self.connect('unselect', self.unselect)
 
-        self.panel = pn.Row(self.select)
+        self.panel = pn.Row(self.select, self.unset)
 
     def set_variables(self,):
-        self.select.options = {
-            _is_coord(self.data, name): name
-            for name in list(self.data.variables)
-        }
+        self.select.options = list(self.data.variables)
 
     def select_variable(self, variable):
         """
         Select a data variable from the available options.
         """
         if isinstance(variable, str):
-            if variable in self.select.options.values():
-                self.select.value = [variable]
+            if variable in self.select.options:
+                self.select.value = variable
             else:
                 print(f"Variable {variable} not present in displayer.")
 
+    def unselect(self, *args):
+        self.select.value = None
+
     def setup_initial_values(self, init_params={}):
-        if 'Variables' in init_params:
-            self.select_variable(init_params['Variables'])
+        if self.name in init_params:
+            self.select_variable(init_params[self.name])
 
     @property
     def kwargs(self):
-        # Select only the first value from the selected variables.
-        out = {p.name: p.value[0] for p in self.panel}
-        return out
+        return {self.name: self.select.value}
 
     def set_coords(self, data):
         self.data = data
