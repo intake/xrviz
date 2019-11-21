@@ -2,6 +2,11 @@ import panel as pn
 from .compatibility import logger
 from .sigslot import SigSlot
 
+TEXT = """
+Convert data variables to coordinates to use them as axes. For more information,
+please refer to the [documentation](https://xrviz.readthedocs.io/en/latest/interface.html#set-coords).
+"""
+
 
 class CoordSetter(SigSlot):
     """
@@ -19,13 +24,15 @@ class CoordSetter(SigSlot):
     def __init__(self, data):
         super().__init__()
         self.data = data
+        self.name = 'Set Coords'
         self.coord_selector = pn.widgets.CrossSelector(
-            name='Set Coords',
             value=list(self.data.coords),
             options=list(self.data.variables)
         )
 
-        self.panel = self.coord_selector
+        self.panel = pn.Column(
+            pn.pane.Markdown(TEXT, margin=(0, 20)),
+            self.coord_selector, name=self.name)
 
     def set_coords(self, data):
         """
@@ -39,5 +46,5 @@ class CoordSetter(SigSlot):
         """
         To set the variables, whose names have been passed, as coordinates.
         """
-        if 'Set Coords' in init_params:
-            self.coord_selector.value = init_params['Set Coords']
+        if self.name in init_params:
+            self.coord_selector.value = init_params[self.name]

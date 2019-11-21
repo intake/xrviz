@@ -2,6 +2,11 @@ import panel as pn
 from holoviews.plotting import list_cmaps
 from .sigslot import SigSlot
 
+TEXT = """
+Control the style of the plot. For more information, please refer to the
+[documentation](https://xrviz.readthedocs.io/en/latest/interface.html#style).
+"""
+
 
 class Style(SigSlot):
     """
@@ -76,12 +81,14 @@ class Style(SigSlot):
         self._register(self.color_scale, 'clear_cmap_limits')
         self.connect('clear_cmap_limits', self.setup)
 
-        self.panel = pn.Column(pn.Row(self.frame_height, self.frame_width),
-                               pn.Row(self.cmap, self.color_scale),
-                               pn.Row(self.lower_limit, self.upper_limit),
-                               pn.Row(self.use_all_data, self.colorbar,
-                                      self.rasterize),
-                               name='Style')
+        self.panel = pn.Column(
+            pn.pane.Markdown(TEXT, margin=(0, 10)),
+            pn.Row(self.frame_height, self.frame_width),
+            pn.Row(self.cmap, self.color_scale),
+            pn.Row(self.lower_limit, self.upper_limit),
+            pn.Row(self.use_all_data, self.colorbar, self.rasterize),
+            name='Style'
+        )
 
     def setup(self, *args):
         #  Clears cmap limits
@@ -92,7 +99,7 @@ class Style(SigSlot):
         """
         To select initial values for the widgets in this pane.
         """
-        for row in self.panel:
+        for row in self.panel[1:]:
             for widget in row:
                 if widget.name in init_params:
                     widget.value = init_params[widget.name]
@@ -100,5 +107,5 @@ class Style(SigSlot):
     @property
     def kwargs(self):
         out = {widget.name: widget.value
-               for row in self.panel for widget in row}
+               for row in self.panel[1:] for widget in row}
         return out

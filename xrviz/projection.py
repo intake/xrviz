@@ -7,6 +7,12 @@ from cartopy import crs as ccrs
 from .sigslot import SigSlot
 from .utils import proj_params
 
+TEXT = """
+Control the geographic features of the plot. Including target projection,
+source projection, basemaps and geographic features. For more information, please refer to the
+[documentation](https://xrviz.readthedocs.io/en/latest/interface.html#projection).
+"""
+
 projections = [p for p in dir(ccrs) if inspect.isclass(getattr(ccrs, p)) and
                issubclass(getattr(ccrs, p), ccrs.Projection) and
                not p.startswith('_')]
@@ -116,6 +122,7 @@ class Projection(SigSlot):
         self.connect('show_basemap', self.show_basemap)
 
         self.panel = pn.Column(
+            pn.pane.Markdown(TEXT, margin=(0, 10)),
             pn.Row(self.is_geo,  self.project, self.global_extent),
             pn.Row(self.alpha, self.basemap, self.features),
             pn.Row(self.crs, self.crs_params, name='crs'),
@@ -131,7 +138,7 @@ class Projection(SigSlot):
             disabled = True
         else:
             disabled = False if self.is_geo.value else True
-        for row in self.panel[1:]:
+        for row in self.panel[2:]:
             for widget in row:
                 widget.disabled = disabled
         self.proj_params.disabled = disabled
@@ -143,7 +150,7 @@ class Projection(SigSlot):
         is_geo = init_params.get('is_geo')
         if is_geo:  # since we need to enable is_geo if True
             self.is_geo.disabled = False
-        for row in self.panel:
+        for row in self.panel[1:]:
             for widget in row:
                 w_name = widget.name
                 if w_name in init_params:
@@ -175,5 +182,5 @@ class Projection(SigSlot):
     @property
     def kwargs(self):
         out = {widget.name: widget.value
-               for row in self.panel for widget in row}
+               for row in self.panel[1:] for widget in row}
         return out

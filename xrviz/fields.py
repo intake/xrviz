@@ -5,6 +5,12 @@ from .sigslot import SigSlot
 from .utils import convert_widget
 from .compatibility import mpcalc
 
+TEXT = """
+Select which coordinates to use as the x- and y-dimensions and how to
+aggregate any other dimensions. For more information, please refer to the
+[documentation](https://xrviz.readthedocs.io/en/latest/interface.html#axes).
+"""
+
 
 class Fields(SigSlot):
     """
@@ -71,6 +77,7 @@ class Fields(SigSlot):
         self.connect('y', self.change_dim_selectors)
 
         self.panel = pn.Column(
+            pn.pane.Markdown(TEXT, margin=(0, 10)),
             pn.Row(
                 pn.WidgetBox(dim_header, self.x, self.y,
                              background=(240, 240, 240)),
@@ -194,8 +201,8 @@ class Fields(SigSlot):
         #             [1] Column()
         #     [1] Column
         #         [0] Select()
-        out = {p.name: p.value for p in self.panel[0][0][1:]}  # since panel[0][0][1] is Markdown
-        selectors = {p.name: p.value for p in self.panel[0][2][1]}  # remaining_dims
+        out = {p.name: p.value for p in self.panel[1][0][1:]}  # since panel[0][0][1] is Markdown
+        selectors = {p.name: p.value for p in self.panel[1][2][1]}  # remaining_dims
         out.update(selectors)
         dims_to_select_animate = [dim for dim, agg in selectors.items() if agg in ['select', 'animate']]
         dims_to_agg = [dim for dim in selectors
