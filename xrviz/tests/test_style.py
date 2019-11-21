@@ -22,7 +22,7 @@ def test_width(style):
     w_widget = style.frame_width
     assert isinstance(w_widget, pn.widgets.IntSlider)
     assert w_widget.name == 'frame_width'
-    assert w_widget.value == 700
+    assert w_widget.value == 450
     assert w_widget.start == 100
     assert w_widget.end == 1200
 

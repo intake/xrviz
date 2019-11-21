@@ -174,7 +174,7 @@ class Dashboard(SigSlot):
 
             if has_cartopy:
                 is_geo = self.kwargs['is_geo']
-                base_map = getattr(gv.tile_sources, self.kwargs['basemap'])
+                base_map = self.kwargs['basemap']
                 show_map = True if base_map != None else False
 
                 if is_geo:
@@ -257,7 +257,7 @@ class Dashboard(SigSlot):
                     if self.kwargs['features'] != ['None'] else graph
                 )
                 if show_map:
-                    graph = base_map * graph
+                    graph = getattr(gv.tile_sources, base_map) * graph
 
             self.create_selectors_players(graph)
 

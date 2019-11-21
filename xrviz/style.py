@@ -16,7 +16,7 @@ class Style(SigSlot):
 
         1. ``frame_height`` (default `300`):
             To modify the frame_height of main and series graph.
-        2. ``frame_width`` (default `700`):
+        2. ``frame_width`` (default `450`):
             To modify the frame_width of the main and series graph.
         3. ``cmap`` (default `Inferno`):
             To select a colormap for the main graph.

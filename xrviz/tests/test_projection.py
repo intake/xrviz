@@ -8,8 +8,7 @@ else:
     from geoviews import tile_sources as gvts
     from xrviz.projection import Projection, projections_list
     from xrviz.utils import proj_params
-    basemap_opts = {None: None}
-    basemap_opts.update(gvts.tile_sources)
+    basemap_opts = [None] + list(gvts.tile_sources.keys())
 
 
 @pytest.fixture()
