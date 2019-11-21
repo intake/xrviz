@@ -60,7 +60,7 @@ def test_setup_geo_disabled(projection):
     disabled_val = True
     projection.is_geo.disabled = True
     projection._emit('geo_disabled', '')
-    for row in projection.panel[1:]:
+    for row in projection.panel[2:]:
         for widget in row:
             assert widget.disabled is True
     assert projection.basemap.disabled is True
@@ -69,7 +69,7 @@ def test_setup_geo_disabled(projection):
 def test_setup_geo_changed_to_False(projection):
     projection.is_geo.disabled = False
     projection.is_geo.value = False
-    for row in projection.panel[1:]:
+    for row in projection.panel[2:]:
         for widget in row:
             assert widget.disabled is True
     assert projection.basemap.disabled is True

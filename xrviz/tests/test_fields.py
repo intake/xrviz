@@ -23,9 +23,9 @@ def test_fields_initial(fields):
     assert fields.x.value is None
     assert fields.y.value is None
     assert fields.panel.name == 'Axes'
-    assert fields.panel[0][0][0].object == '### Plot Dimensions'
-    assert isinstance(fields.panel[0][1], pn.Spacer)
-    assert fields.panel[0][2][0].object == '### Aggregations'
+    assert fields.panel[1][0][0].object == '### Plot Dimensions'
+    assert isinstance(fields.panel[1][1], pn.Spacer)
+    assert fields.panel[1][2][0].object == '### Aggregations'
 
 
 def test_x_y_var_without_coords(dashboard):
