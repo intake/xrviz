@@ -5,7 +5,7 @@ import geoviews as gv
 from geoviews import tile_sources as gvts
 from cartopy import crs as ccrs
 from .sigslot import SigSlot
-from .utils import proj_params
+from .utils import proj_params, look_for_class
 
 TEXT = """
 Control the geographic features of the plot. Including target projection,
@@ -80,7 +80,7 @@ class Projection(SigSlot):
         """Initializes the Projection pane."""
         super().__init__()
         self.is_geo = pn.widgets.Checkbox(name='is_geo', value=False,
-                                          disabled=True, width=200)
+                                          disabled=False, width=200)
         self.alpha = pn.widgets.FloatSlider(name='alpha', start=0, end=1,
                                             step=0.01, value=0.7, width=200)
 
@@ -133,15 +133,11 @@ class Projection(SigSlot):
         self.add_proj_params(self.projection.value)
 
     def setup(self, *args):
-        # disable the widgets if is_geo is disabled or if is_geo is False
-        if self.is_geo.disabled:
-            disabled = True
-        else:
-            disabled = False if self.is_geo.value else True
-        for row in self.panel[2:]:
-            for widget in row:
+        # disable all the widgets if is_geo is disabled or if is_geo is False
+        disabled = self.is_geo.disabled or not self.is_geo.value
+        for widget in look_for_class(self.panel, pn.widgets.Widget):
+            if widget != self.is_geo:
                 widget.disabled = disabled
-        self.proj_params.disabled = disabled
 
     def setup_initial_values(self, init_params={}):
         """
@@ -178,6 +174,8 @@ class Projection(SigSlot):
 
     def disable_geo(self, value):
         self.is_geo.disabled = value
+        if self.is_geo.disabled:
+            self.is_geo.value = False
 
     @property
     def kwargs(self):
