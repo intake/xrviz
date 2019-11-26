@@ -29,8 +29,7 @@ class Display(SigSlot):
         self.name = 'Variables'
         self.select = pn.widgets.Select(
             min_width=100, max_width=200, width_policy='max',
-            name=self.name, margin=[10, 0, 10, 10]
-        )
+            name=self.name)
         self.set_variables()
 
         self._register(self.select, "variable_selected")

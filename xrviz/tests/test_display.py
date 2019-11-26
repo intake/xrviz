@@ -26,14 +26,14 @@ def displayer_array_single_var(data):
 
 def test_fill_items(displayer):
     assert displayer.select.options == [
-        'validtime', 'time', 'lon', 'lat', 'mask', 'depth',
+        None, 'validtime', 'time', 'lon', 'lat', 'mask', 'depth',
         'sigma', 'zeta', 'air_u', 'air_v', 'u', 'v', 'temp']
 
 
 def test_fill_items_array(displayer_array):
     assert displayer_array.select.options == [
-        'time', 'sigma', 'temp']
+        None, 'time', 'sigma', 'temp']
 
 
 def test_fill_items_single_var(displayer_array_single_var):
-    assert displayer_array_single_var.select.options == ['lon']
+    assert displayer_array_single_var.select.options == [None, 'lon']
