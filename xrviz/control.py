@@ -83,7 +83,6 @@ class Control(SigSlot):
         self.displayer.connect("variable_selected", self.describer.setup)
         self.displayer.connect("variable_selected", self.fields.setup)
         self.displayer.connect("variable_selected", self.style.setup)
-        self.displayer.connect("unselect", self.describer.unselect_variable)
 
         self.panel = pn.WidgetBox(self.tabs, width_policy='max')
 

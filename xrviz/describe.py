@@ -46,9 +46,6 @@ class Describe(SigSlot):
     def setup(self, var=None):
         self.panel.object = self.data[[var]] if var is not None else self.data
 
-    def unselect_variable(self, *args):
-        self.setup()
-
     def set_coords(self, data, var):
         self.data = data
         self.setup(var)

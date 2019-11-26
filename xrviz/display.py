@@ -27,22 +27,18 @@ class Display(SigSlot):
         super().__init__()
         self.data = data
         self.name = 'Variables'
-        self.select = pn.widgets.AutocompleteInput(
+        self.select = pn.widgets.Select(
             min_width=100, max_width=200, width_policy='max',
-            name=self.name, min_characters=1, margin=[10, 0, 10, 10]
+            name=self.name, margin=[10, 0, 10, 10]
         )
-        self.unset = pn.widgets.Button(
-            width_policy='min', name='X', align='end', margin=[10, 10, 10, 0])
         self.set_variables()
 
         self._register(self.select, "variable_selected")
-        self._register(self.unset, "unselect", 'clicks')
-        self.connect('unselect', self.unselect)
 
-        self.panel = pn.Row(self.select, self.unset)
+        self.panel = pn.Row(self.select)
 
     def set_variables(self,):
-        self.select.options = list(self.data.variables)
+        self.select.options = [None] + list(self.data.variables)
 
     def select_variable(self, variable):
         """
@@ -53,9 +49,6 @@ class Display(SigSlot):
                 self.select.value = variable
             else:
                 print(f"Variable {variable} not present in displayer.")
-
-    def unselect(self, *args):
-        self.select.value = None
 
     def setup_initial_values(self, init_params={}):
         if self.name in init_params:
