@@ -153,11 +153,7 @@ class Projection(SigSlot):
             for widget in row:
                 w_name = widget.name
                 if w_name in init_params:
-                    if w_name == 'basemap':
-                        tile = init_params[w_name]
-                        widget.value = getattr(gvts, tile) if tile is not None else None
-                    else:
-                        widget.value = init_params[w_name]
+                    widget.value = init_params[w_name]
 
     def show_basemap(self, *args):
         value = False if self.basemap.value is None else True
