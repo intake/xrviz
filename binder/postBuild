@@ -1,10 +1,7 @@
 #!/bin/bash
 
 # Install the dependencies
-conda install -c conda-forge -y python=3.7 geoviews metpy --file ./requirements.txt
-
-# Install xrviz from current branch
-pip install . --no-deps
+conda install -c conda-forge -y python=3.7 geoviews metpy xrviz --file ./requirements.txt
 
 # Get rid of source code
 rm -rf xrviz
