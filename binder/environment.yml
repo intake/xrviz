@@ -13,3 +13,4 @@ dependencies:
   - netcdf4=1.4.2=py37h808af73_0
   - panel=0.7.0=0
   - xarray=0.14.1=py_0
+  - xrviz
