@@ -4,4 +4,3 @@ set -euo pipefail
 # labextensions
 jupyter labextension install @pyviz/jupyterlab_pyviz
 jupyter serverextension enable --py nbgitpuller --sys-prefix
-cd examples
