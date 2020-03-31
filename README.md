@@ -18,7 +18,7 @@ to ease the process of investigating and loading datasets.
 Documentation is available at [Read the Docs](https://xrviz.readthedocs.io).
 Try it out on binder: 
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/intake/xrviz/master?urlpath=git-pull?repo=https://github.com/intake/xrviz)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/intake/xrviz/oldenv?urlpath=git-pull?repo=https://github.com/intake/xrviz)
 
 <img src="https://raw.githubusercontent.com/intake/xrviz/master/docs/source/_static/images/dashboard.png" data-canonical-src="https://raw.githubusercontent.com/intake/xrviz/master/docs/source/_static/images/dashboard.png" width="800"/><br>
 
