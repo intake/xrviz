@@ -1,6 +1,7 @@
 channels:
   - conda-forge
 dependencies:
+  - nbgitpuller
   - _libgcc_mutex=0.1=main
   - alembic=1.1.0=py_0
   - appdirs=1.4.3=py_1
@@ -138,7 +139,6 @@ dependencies:
   - olefile=0.46=py_0
   - openjpeg=2.3.1=h981e76c_3
   - openssl=1.1.1d=h516909a_0
-  - owslib
   - packaging=19.2=py_0
   - pamela=1.0.0=py_0
   - pandas=0.25.3=py37hb3f55d8_0
