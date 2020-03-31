@@ -23,6 +23,7 @@ Try it out on binder:
 <img src="https://raw.githubusercontent.com/intake/xrviz/master/docs/source/_static/images/dashboard.png" data-canonical-src="https://raw.githubusercontent.com/intake/xrviz/master/docs/source/_static/images/dashboard.png" width="800"/><br>
 
 
+
 ### Installation
 
 Recommended method using conda:
