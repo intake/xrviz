@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install the dependencies
-conda install -c conda-forge -y python=3.7 geoviews metpy xrviz --file ./requirements.txt
+conda install -c conda-forge --file ./requirements.txt
 jupyter serverextension enable --py nbgitpuller --sys-prefix
 
 # Get rid of source code
