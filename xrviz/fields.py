@@ -1,4 +1,6 @@
+import metpy
 import panel as pn
+from packaging.version import Version
 import xarray as xr
 import warnings
 from .sigslot import SigSlot
@@ -242,7 +244,10 @@ class Fields(SigSlot):
         """
         try:
             parsed_var = self.data.metpy.parse_cf(var)
-            x, y = parsed_var.metpy.coordinates('x', 'y')
+            if(Version(metpy.__version__)) > Version("0.12"):
+                x, y = parsed_var.metpy.longitude, parsed_var.metpy.latitude 
+            else:
+                x, y = parsed_var.metpy.coordinates('x', 'y') 
             return [coord.name for coord in (x, y)]
         except:  # fails when coords have not been set or available.
             return [None, None]
