@@ -1,4 +1,3 @@
-import metpy
 import panel as pn
 from packaging.version import Version
 import xarray as xr
@@ -243,6 +242,7 @@ class Fields(SigSlot):
         .. _`metpy.parse_cf`: https://github.com/Unidata/MetPy/blob/master/metpy/xarray.py#L335
         """
         try:
+            import metpy
             parsed_var = self.data.metpy.parse_cf(var)
             if(Version(metpy.__version__)) > Version("0.12"):
                 x, y = parsed_var.metpy.longitude, parsed_var.metpy.latitude 
