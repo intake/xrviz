@@ -1,5 +1,5 @@
 import panel as pn
-from packaging.version import Version
+from distutils.version import LooseVersion
 import xarray as xr
 import warnings
 from .sigslot import SigSlot
@@ -244,10 +244,12 @@ class Fields(SigSlot):
         try:
             import metpy
             parsed_var = self.data.metpy.parse_cf(var)
-            if(Version(metpy.__version__)) > Version("0.12"):
+            if(LooseVersion(metpy.__version__) > LooseVersion("0.12.9")):
                 x, y = parsed_var.metpy.longitude, parsed_var.metpy.latitude 
             else:
-                x, y = parsed_var.metpy.coordinates('x', 'y') 
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", category = DeprecationWarning)
+                    x, y = parsed_var.metpy.coordinates('x', 'y')
             return [coord.name for coord in (x, y)]
         except:  # fails when coords have not been set or available.
             return [None, None]
