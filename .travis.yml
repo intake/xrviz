@@ -27,7 +27,8 @@ matrix:
       install:
         - pip install pytest
         - pip install .
-        - pip install Cython==0.29.13
+        - pip install Cython==0.29.14
+        - pip install netCDF4==1.5.2
       script:
         - pytest
 
