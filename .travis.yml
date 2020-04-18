@@ -16,7 +16,6 @@ matrix:
         - conda create -c conda-forge -n test python=3.7 pytest --file requirements.txt
         - source activate test
         - pip install . --no-deps
-        - pip install Cython==0.29.14
       script:
         - pytest
 
@@ -28,6 +27,7 @@ matrix:
       install:
         - pip install pytest
         - pip install .
+        - pip install Cython==0.29.14
       script:
         - pytest
 
