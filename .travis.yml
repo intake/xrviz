@@ -27,7 +27,7 @@ matrix:
       install:
         - pip install pytest
         - pip install .
-        - pip install Cython==0.25.2
+        - pip install Cython==0.29.13
       script:
         - pytest
 
