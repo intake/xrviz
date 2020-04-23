@@ -26,8 +26,8 @@ matrix:
         - "3.7"
       install:
         - pip install pytest
+        - pip install Cython==0.29.13 cftime==1.0.4
         - pip install .
-        - pip install Cython==0.29.13
       script:
         - pytest
 
