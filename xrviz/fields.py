@@ -1,4 +1,5 @@
 import panel as pn
+from distutils.version import LooseVersion
 import xarray as xr
 import warnings
 from .sigslot import SigSlot
@@ -241,8 +242,14 @@ class Fields(SigSlot):
         .. _`metpy.parse_cf`: https://github.com/Unidata/MetPy/blob/master/metpy/xarray.py#L335
         """
         try:
+            import metpy
             parsed_var = self.data.metpy.parse_cf(var)
-            x, y = parsed_var.metpy.coordinates('x', 'y')
+            if(LooseVersion(metpy.__version__) > LooseVersion("0.12.9")):
+                x, y = parsed_var.metpy.longitude, parsed_var.metpy.latitude 
+            else:
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", category = DeprecationWarning)
+                    x, y = parsed_var.metpy.coordinates('x', 'y')
             return [coord.name for coord in (x, y)]
         except:  # fails when coords have not been set or available.
             return [None, None]
