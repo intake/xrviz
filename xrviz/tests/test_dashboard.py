@@ -94,8 +94,8 @@ def test_link_aggregation_selectors(dashboard):
     ulim.value = '20'
     agg_sel = dashboard.control.fields.agg_selectors[0]
     agg_sel.value = 'mean'
-    assert llim.value is None
-    assert ulim.value is None
+    assert llim.value is ''
+    assert ulim.value is ''
 
 
 def test_set_coords(dashboard):

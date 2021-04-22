@@ -92,8 +92,8 @@ class Style(SigSlot):
 
     def setup(self, *args):
         #  Clears cmap limits
-        self.lower_limit.value = None
-        self.upper_limit.value = None
+        self.lower_limit.value = ""
+        self.upper_limit.value = ""
 
     def setup_initial_values(self, init_params={}):
         """
