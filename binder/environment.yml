@@ -1,0 +1,19 @@
+name: xrviz
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.7
+  - panel
+  - holoviews
+  - hvplot
+  - xarray
+  - netcdf4
+  - datashader
+  - metpy
+  - geoviews
+  - dask
+  - pip
+  - pip:
+    - git+https://github.com/intake/xrviz.git
